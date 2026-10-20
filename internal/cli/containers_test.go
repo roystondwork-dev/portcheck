@@ -42,7 +42,7 @@ func TestKillContainerPort(t *testing.T) {
 			},
 			wantCode: ExitNegative,
 			wantErr: []string{
-				"Port 18080, 18443 is published by docker container \"web\" (nginx:alpine). Stop the container instead:\n  docker stop web",
+				"Port 18080, 18443 is published by docker container \"web\" (nginx:alpine). Stop it there instead:\n  docker stop web",
 				"published by podman container \"abc\" (coredns)", "podman stop abc",
 			},
 			notErr: []string{"Nothing is listening"},

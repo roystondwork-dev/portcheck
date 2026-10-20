@@ -106,7 +106,11 @@ type Container struct {
 	ID      string
 	Name    string
 	Image   string
-	Runtime string // e.g. "docker"
+	Runtime string // e.g. "docker", "podman", "wsl"
+	// Process and ProcessPID identify the process inside the container or
+	// distro that listens on the port, when known.
+	Process    string
+	ProcessPID int32
 }
 
 // Socket is a RawSocket enriched with information about its owning process
@@ -305,13 +309,23 @@ func (in *Inspector) List(ctx context.Context, f Filter) (*Result, error) {
 	return res, nil
 }
 
+// EnrichTimeouter can be implemented by an Enricher that needs more than the
+// default 500ms budget, e.g. because it runs external commands.
+type EnrichTimeouter interface {
+	EnrichTimeout() time.Duration
+}
+
 // enrich runs every enricher with a bounded time budget, ignoring failures.
 func (in *Inspector) enrich(ctx context.Context, sockets []Socket) {
 	if len(sockets) == 0 {
 		return
 	}
 	for _, e := range in.enrichers {
-		ectx, cancel := context.WithTimeout(ctx, in.enrichTimeout)
+		budget := in.enrichTimeout
+		if t, ok := e.(EnrichTimeouter); ok {
+			budget = t.EnrichTimeout()
+		}
+		ectx, cancel := context.WithTimeout(ctx, budget)
 		_ = e.Enrich(ectx, sockets) // best effort by design
 		cancel()
 	}

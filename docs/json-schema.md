@@ -38,7 +38,7 @@ present, and empty arrays are `[]`, never `null`.
 | `state` | string | e.g. `LISTEN`, `ESTABLISHED`, `TIME_WAIT`; `NONE` for UDP |
 | `pid` | number, optional | omitted when the owner is not visible (permissions) |
 | `process` | Process, optional | |
-| `container` | Container, optional | the container publishing this port, when a container engine is reachable |
+| `container` | Container, optional | the container (or WSL distro) behind this port, when it can be determined |
 
 ### Process
 
@@ -56,10 +56,12 @@ present, and empty arrays are `[]`, never `null`.
 
 | Field | Type | Notes |
 |---|---|---|
-| `id` | string | short (12-character) container ID |
-| `name` | string, optional | container name |
+| `id` | string, optional | short (12-character) container ID (not set for WSL) |
+| `name` | string, optional | container name, or the WSL distro name |
 | `image` | string, optional | image reference, e.g. `nginx:alpine` |
-| `runtime` | string | `docker` or `podman` |
+| `runtime` | string | `docker`, `podman` or `wsl` |
+| `process` | string, optional | process inside the container or distro, when known |
+| `processPid` | number, optional | its PID inside the container or distro |
 
 ## `list`
 

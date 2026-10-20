@@ -31,7 +31,7 @@ func TestContainerRow(t *testing.T) {
 	if m.mode != modeNormal || k.pid != 0 {
 		t.Fatalf("mode=%v killed=%d", m.mode, k.pid)
 	}
-	if !strings.Contains(screen(m), `port 18080 is published by docker container "web"; stop it with: docker stop web`) {
+	if !strings.Contains(screen(m), `port 18080 is published by docker container "web" (nginx:alpine); stop it with: docker stop web`) {
 		t.Errorf("hint missing:\n%s", screen(m))
 	}
 }

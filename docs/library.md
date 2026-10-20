@@ -15,6 +15,7 @@ go get github.com/roystondwork-dev/portcheck@latest
 | [`pkg/scan`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck/pkg/scan) | rate-limited TCP connect scanning |
 | [`pkg/waitfor`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck/pkg/waitfor) | poll until a port opens (or any condition holds) |
 | [`pkg/containers`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck/pkg/containers) | attribute published ports to Docker/Podman containers |
+| [`pkg/wsl`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck/pkg/wsl) | attribute WSL-forwarded ports to distros (Windows) |
 
 The packages have no dependency on the CLI or TUI libraries (enforced by a linter rule),
 and use only the standard library plus gopsutil and `golang.org/x/{sync,sys,time}`.

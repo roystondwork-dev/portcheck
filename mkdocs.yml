@@ -88,7 +88,7 @@ nav:
       - Wait for ports (wait): guide/wait.md
       - Run on a free port (run): guide/run.md
       - Interactive view (tui): guide/tui.md
-      - Containers (Docker & Podman): guide/containers.md
+      - Containers & WSL: guide/containers.md
       - Scripting & CI: guide/scripting.md
   - Reference:
       - Commands:

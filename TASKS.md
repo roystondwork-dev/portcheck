@@ -24,7 +24,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M8 | Docker attribution | 7 / 7 | ✅ |
 | M9 | `portcheck run` | 6 / 6 | ✅ (released in v0.3.0) |
 | M10 | Parent process ("started by") | 5 / 5 | ✅ |
-| M11 | WSL distro attribution | 0 / 4 | ⬜ |
+| M11 | WSL distro attribution | 3 / 4 | 🟨 (needs a test on a Windows machine with WSL) |
 | M12 | `.portcheck.yaml` + `portcheck doctor` | 0 / 5 | ⬜ |
 | M13 | Native macOS provider (no `lsof`) | 0 / 4 | ⬜ |
 
@@ -184,6 +184,18 @@ Goal: show who started a process (`node ← npm ← zsh`) where it helps decide 
 | M10-03 | TUI: selected row's ancestry + command in the status line; in the kill confirmation | `internal/tui` | golden | ✅ | Hidden-owner rows still show the privilege hint |
 | M10-04 | `list --wide` (PARENT, COMMAND) and JSON `process.ancestors` | `internal/output`, `internal/cli/list.go` | golden | ✅ | `-w/--wide`; command truncated to 60 runes in tables |
 | M10-05 | Docs | `docs/` | strict docs build | ✅ | list, kill, TUI, JSON schema, library |
+
+## M11 — WSL distro attribution
+
+Goal: on Windows, ports forwarded from WSL show the distro and the Linux process
+(`wsl:Ubuntu/node`) instead of `wslrelay.exe`, and `kill` explains how to stop it inside WSL.
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M11-01 | Generic groundwork: `Container.Process`/`ProcessPID`, per-enricher time budget, runtime-specific stop hints | `pkg/inspect`, `internal/output`, `internal/cli`, `internal/tui` | unit + golden | ✅ | Hints now come from `output.DescribeContainer`/`StopHint`; enrichers can request a longer budget (`EnrichTimeouter`) |
+| M11-02 | `pkg/wsl` enricher: running distros (UTF-8/UTF-16), per-distro listeners (`ss -Hltnp`, `/proc/net/tcp` fallback), matching | `pkg/wsl` | unit with captured formats, 100% | ✅ | UTF-16LE (with/without BOM) and UTF-8 output; `ss` + `/proc/net/tcp{,6}`; failing distros skipped; 3s budget |
+| M11-03 | Enable on Windows | `internal/cli/app.go` | unit | ✅ | Windows only; zero cost without relay sockets |
+| M11-04 | Docs + manual verification on a Windows machine with WSL | `docs/` | strict docs build; maintainer test | 🟨 | Docs done ("Containers & WSL"). Manual check on a Windows machine with a running distro pending |
 
 ## What's next (candidates, not yet scheduled)
 

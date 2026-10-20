@@ -12,6 +12,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 
 	"golang.org/x/term"
@@ -25,6 +26,7 @@ import (
 	"github.com/roystondwork-dev/portcheck/pkg/portspec"
 	"github.com/roystondwork-dev/portcheck/pkg/scan"
 	"github.com/roystondwork-dev/portcheck/pkg/waitfor"
+	"github.com/roystondwork-dev/portcheck/pkg/wsl"
 )
 
 // SocketLister lists sockets; implemented by *inspect.Inspector.
@@ -78,6 +80,10 @@ func NewApp() *App {
 	var opts []inspect.Option
 	if engine, ok := containers.Discover(os.Getenv); ok {
 		opts = append(opts, inspect.WithEnricher(engine))
+	}
+	if runtime.GOOS == "windows" {
+		// Only runs wsl.exe when a port is held by a WSL relay process.
+		opts = append(opts, inspect.WithEnricher(wsl.New()))
 	}
 	lister := inspect.NewSystem(opts...)
 	return &App{
