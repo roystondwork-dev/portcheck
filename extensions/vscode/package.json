@@ -1,5 +1,5 @@
 {
-  "name": "portcheck",
+  "name": "portcheck-vscode",
   "displayName": "portcheck: ports, processes & fixes",
   "description": "See what's using your ports — process, who started it, container or WSL distro — and free them safely.",
   "version": "0.5.0",
