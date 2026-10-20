@@ -7,10 +7,11 @@
   "type": "commonjs",
   "scripts": {
     "build": "node esbuild.mjs",
+    "build:store": "node esbuild.mjs --store",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test:unit": "vitest run --coverage",
-    "test:e2e": "npm run build && playwright test",
+    "test:e2e": "npm run build && npm run build:store && playwright test",
     "check": "npm run typecheck && npm run lint && npm run test:unit && npm run build"
   },
   "devDependencies": {
