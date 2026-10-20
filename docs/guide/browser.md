@@ -7,9 +7,8 @@ refuses to connect.
 ![The portcheck popup for localhost:3000: a green Running chip, node with its pid, a card with who started it, its command and user, Stop process and Copy PID buttons, and a filterable list of the ports listening on this machine](../assets/browser-popup.png){ width="380" }
 
 !!! note "Status"
-    The extension isn't in the Chrome Web Store or Edge Add-ons yet (M17 in
-    [TASKS.md](https://github.com/roystondwork-dev/portcheck/blob/main/TASKS.md)). Until
-    then, install it from a release as below.
+    The extension has been submitted to **Microsoft Edge Add-ons** and is in review; it
+    isn't in the Chrome Web Store yet. Until then, install it from a release as below.
 
 ## What it does
 

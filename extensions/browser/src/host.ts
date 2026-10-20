@@ -12,6 +12,12 @@ export const HOST = "io.github.roystondwork_dev.portcheck";
  */
 export const PINNED_ID = "fmocabgaaihiflefcdafnhoihcibgnhl";
 
+/**
+ * Extension IDs portcheck allows by default (nativehost.ExtensionIDs in Go):
+ * the release zip's, then the stores'.
+ */
+export const KNOWN_IDS: readonly string[] = [PINNED_ID, "jenlahoamefdpfmpodhidkgcceikheee"];
+
 export type Request =
   | { op: "version" }
   | { op: "list" }
