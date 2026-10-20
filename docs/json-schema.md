@@ -50,6 +50,7 @@ present, and empty arrays are `[]`, never `null`.
 | `cmdline` | string, optional | |
 | `exe` | string, optional | |
 | `startTime` | string, optional | RFC 3339, UTC |
+| `ancestors` | array, optional | processes that started this one, nearest first (up to 3): `[{ "pid": 4200, "name": "npm" }, …]`; stops before PID 1 |
 
 ### Container
 

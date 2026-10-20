@@ -1,0 +1,9 @@
+[1mPROTO[m  [1mLOCAL ADDRESS[m   [1mREMOTE ADDRESS[m   [1mSTATE[m        [1mPID[m    [1mPROCESS[m     [1mUSER[m   [1mPARENT[m      [1mCOMMAND[m
+[90m───────[m[90m────────────────[m[90m─────────────────[m[90m─────────────[m[90m───────[m[90m────────────[m[90m───────[m[90m────────────[m[90m────────────────────────────────────────────────────────────[m
+tcp    0.0.0.0:22      [90m-[m                [32mLISTEN[m       [90m-[m      [90m?[m           [90m?[m      [90m-[m           [90m-[m
+tcp    127.0.0.1:3000  [90m-[m                [32mLISTEN[m       4242   node        alice  npm (4200)  node --max-old-space-size=4096 ./node_modules/.bin/next dev…
+tcp    127.0.0.1:3000  127.0.0.1:51234  ESTABLISHED  4242   node        alice  npm (4200)  node --max-old-space-size=4096 ./node_modules/.bin/next dev…
+tcp    [::]:5432       [90m-[m                [32mLISTEN[m       88     postgres    -      [90m-[m           [90m-[m
+udp    0.0.0.0:5353    [90m-[m                [90mNONE[m         300    [90m?[m           [90m?[m      [90m-[m           [90m-[m
+tcp    10.0.0.2:50000  1.1.1.1:443      [90mTIME_WAIT[m    [90m-[m      [90m?[m           [90m?[m      [90m-[m           [90m-[m
+tcp    [::]:18080      [90m-[m                [32mLISTEN[m       79156  [36mdocker:web[m  alice  [90m-[m           [90m-[m

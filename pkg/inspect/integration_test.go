@@ -42,6 +42,10 @@ func TestIntegrationFindsOwnListeners(t *testing.T) {
 		if s.Process == nil || s.Process.PID != self || s.Process.Name == "" {
 			t.Errorf("socket %+v not attributed to self (pid %d): %+v", s.RawSocket, self, s.Process)
 		}
+		// `go test` starts this binary, so its parent is known and is not init.
+		if parent := s.Process.Parent(); parent == nil || parent.PID != int32(os.Getppid()) || parent.Name == "" {
+			t.Errorf("parent = %+v, want pid %d", parent, os.Getppid())
+		}
 		switch {
 		case s.Proto == TCP && s.Port() == tcpPort:
 			gotTCP = true

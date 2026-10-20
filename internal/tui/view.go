@@ -10,6 +10,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/roystondwork-dev/portcheck/internal/output"
 	"github.com/roystondwork-dev/portcheck/pkg/inspect"
 )
 
@@ -121,7 +122,11 @@ func (m Model) statusLine() string {
 		if m.confirm.force {
 			verb = "Force-kill"
 		}
-		return warnStyle.Render(fmt.Sprintf("%s %s (pid %d) listening on %d? [y/N]", verb, m.confirm.name, m.confirm.pid, m.confirm.port))
+		started := ""
+		if m.confirm.ancestry != "" {
+			started = ", started by " + m.confirm.ancestry
+		}
+		return warnStyle.Render(fmt.Sprintf("%s %s (pid %d) listening on %d%s? [y/N]", verb, m.confirm.name, m.confirm.pid, m.confirm.port, started))
 	case m.status != "":
 		switch m.statusTone {
 		case toneGood:
@@ -133,11 +138,30 @@ func (m Model) statusLine() string {
 		}
 	case m.err != nil:
 		return badStyle.Render("refresh failed: " + m.err.Error())
+	case m.selectedDetail() != "":
+		return mutedStyle.Render(m.selectedDetail())
 	case m.partial && m.deps.Hint != "":
 		return mutedStyle.Render("some owners are hidden. " + m.deps.Hint)
 	default:
 		return ""
 	}
+}
+
+// selectedDetail describes the selected row's process: who started it and its
+// command line, e.g. "started by npm (4200) ← zsh (900) · node server.js".
+func (m Model) selectedDetail() string {
+	s, ok := m.selected()
+	if !ok || s.Process == nil {
+		return ""
+	}
+	var parts []string
+	if a := output.Ancestry(s.Process); a != "" {
+		parts = append(parts, "started by "+a)
+	}
+	if s.Process.Cmdline != "" {
+		parts = append(parts, s.Process.Cmdline)
+	}
+	return strings.Join(parts, " · ")
 }
 
 func (m Model) footerLine() string {

@@ -19,6 +19,7 @@ type listFlags struct {
 	name      string
 	states    []string
 	watch     time.Duration
+	wide      bool
 }
 
 func (c *cli) newListCmd() *cobra.Command {
@@ -34,7 +35,8 @@ when that happens.`,
 		Example: `  portcheck list --listening
   portcheck list --port 3000-3999 --proto tcp
   portcheck list --name 'node*' --json
-  portcheck list -l --watch 2s`,
+  portcheck list -l --watch 2s
+  portcheck list -l --wide        # who started each process, and its command line`,
 		Args: usageArgs(cobra.NoArgs),
 		RunE: func(cmd *cobra.Command, _ []string) error { return c.runList(cmd, f) },
 	}
@@ -46,6 +48,7 @@ when that happens.`,
 	fl.StringVar(&f.name, "name", "", "only processes whose name matches this glob (case-insensitive)")
 	fl.StringSliceVar(&f.states, "state", nil, "only these states, e.g. LISTEN,ESTABLISHED")
 	fl.DurationVar(&f.watch, "watch", 0, "refresh every interval until interrupted, e.g. 2s")
+	fl.BoolVarP(&f.wide, "wide", "w", false, "also show the parent process and command line")
 	return cmd
 }
 
@@ -89,7 +92,7 @@ func (c *cli) runList(cmd *cobra.Command, f listFlags) error {
 		if f.watch > 0 && c.app.StdoutTTY {
 			_, _ = cmd.OutOrStdout().Write([]byte("\x1b[H\x1b[2J")) // clear screen
 		}
-		if err := c.printer.Print(output.ListDoc(res)); err != nil {
+		if err := c.printer.Print(output.ListDoc(res, f.wide)); err != nil {
 			return err
 		}
 		if res.Partial && !hinted {

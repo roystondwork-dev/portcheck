@@ -33,6 +33,21 @@ portcheck list --name 'java*' --state established     # who is java talking to?
 portcheck list --port well-known -l                   # privileged listeners
 ```
 
+## Who started it? (`--wide`)
+
+`-w`/`--wide` adds a **PARENT** column (the process that started it) and the
+**COMMAND** line (shortened to 60 characters; the full value is in `--json`):
+
+```console
+$ portcheck list -l --port 3000 --wide
+PROTO  LOCAL ADDRESS   REMOTE ADDRESS  STATE   PID    PROCESS  USER   PARENT      COMMAND
+tcp    127.0.0.1:3000  -               LISTEN  42379  node     alice  npm (4200)  node ./node_modules/.bin/next dev
+```
+
+JSON output includes up to three ancestors, nearest first, in `process.ancestors`. The
+chain stops before PID 1 (`init`, `launchd`): a process whose parent has exited is
+re-parented there and shows no parent.
+
 ## Containers
 
 Ports published by Docker or Podman containers show the container (e.g.

@@ -3,6 +3,7 @@ package output
 import (
 	"cmp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/roystondwork-dev/portcheck/internal/buildinfo"
@@ -37,12 +38,19 @@ type ContainerJSON struct {
 
 // ProcessJSON is a socket's owning process.
 type ProcessJSON struct {
-	PID       int32      `json:"pid"`
-	Name      string     `json:"name"`
-	User      string     `json:"user,omitempty"`
-	Cmdline   string     `json:"cmdline,omitempty"`
-	Exe       string     `json:"exe,omitempty"`
-	StartTime *time.Time `json:"startTime,omitempty"`
+	PID       int32            `json:"pid"`
+	Name      string           `json:"name"`
+	User      string           `json:"user,omitempty"`
+	Cmdline   string           `json:"cmdline,omitempty"`
+	Exe       string           `json:"exe,omitempty"`
+	StartTime *time.Time       `json:"startTime,omitempty"`
+	Ancestors []ProcessRefJSON `json:"ancestors,omitempty"`
+}
+
+// ProcessRefJSON identifies an ancestor process.
+type ProcessRefJSON struct {
+	PID  int32  `json:"pid"`
+	Name string `json:"name"`
 }
 
 // ListJSON is the payload of `portcheck list`.
@@ -97,6 +105,9 @@ func socketJSON(s inspect.Socket) SocketJSON {
 	}
 	if p := s.Process; p != nil {
 		pj := &ProcessJSON{PID: p.PID, Name: p.Name, User: p.User, Cmdline: p.Cmdline, Exe: p.Exe}
+		for _, a := range p.Ancestors {
+			pj.Ancestors = append(pj.Ancestors, ProcessRefJSON{PID: a.PID, Name: a.Name})
+		}
 		if !p.CreateTime.IsZero() {
 			t := p.CreateTime.UTC()
 			pj.StartTime = &t
@@ -157,13 +168,42 @@ func stateTone(s inspect.State) Tone {
 	}
 }
 
-// ListDoc renders the result of `portcheck list`.
-func ListDoc(res *inspect.Result) Document {
+// Ancestry describes who started p, nearest first, e.g. "npm (4200) ← zsh (900)".
+// It returns "" when unknown.
+func Ancestry(p *inspect.ProcessInfo) string {
+	if p == nil {
+		return ""
+	}
+	parts := make([]string, len(p.Ancestors))
+	for i, a := range p.Ancestors {
+		parts[i] = a.Name + " (" + strconv.Itoa(int(a.PID)) + ")"
+	}
+	return strings.Join(parts, " ← ")
+}
+
+// maxCommandWidth bounds the COMMAND column of `list --wide`.
+const maxCommandWidth = 60
+
+// Truncate shortens s to at most n runes, ending with "…" if it was cut.
+func Truncate(s string, n int) string {
+	r := []rune(s)
+	if len(r) <= n {
+		return s
+	}
+	return string(r[:n-1]) + "…"
+}
+
+// ListDoc renders the result of `portcheck list`. wide adds the PARENT and
+// COMMAND columns.
+func ListDoc(res *inspect.Result, wide bool) Document {
 	d := Document{
 		Kind:    "list",
 		Data:    ListJSON{Sockets: socketsJSON(res.Sockets), Partial: res.Partial},
 		Headers: []string{"PROTO", "LOCAL ADDRESS", "REMOTE ADDRESS", "STATE", "PID", "PROCESS", "USER"},
 		Empty:   "No matching sockets.",
+	}
+	if wide {
+		d.Headers = append(d.Headers, "PARENT", "COMMAND")
 	}
 	for _, s := range res.Sockets {
 		remote := T("-", ToneMuted)
@@ -171,10 +211,21 @@ func ListDoc(res *inspect.Result) Document {
 			remote = C(s.Remote.String())
 		}
 		name, user := processCells(s)
-		d.Rows = append(d.Rows, []Cell{
+		row := []Cell{
 			C(string(s.Proto)), C(s.Local.String()), remote,
 			T(string(s.State), stateTone(s.State)), pidCell(s.PID), name, user,
-		})
+		}
+		if wide {
+			parent, command := T("-", ToneMuted), T("-", ToneMuted)
+			if p := s.Process.Parent(); p != nil {
+				parent = C(p.Name + " (" + strconv.Itoa(int(p.PID)) + ")")
+			}
+			if s.Process != nil && s.Process.Cmdline != "" {
+				command = C(Truncate(s.Process.Cmdline, maxCommandWidth))
+			}
+			row = append(row, parent, command)
+		}
+		d.Rows = append(d.Rows, row)
 	}
 	return d
 }

@@ -3,9 +3,9 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M9 — `portcheck run` (ready for release); winget review pending (M7-06)
+**Current milestone:** M11 — WSL distro attribution; then M12–M13. winget review pending (M7-06)
 **Last updated:** 2026-10-20
-**Latest release:** [v0.2.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.2.0)
+**Latest release:** [v0.3.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.3.0)
 
 Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 
@@ -22,7 +22,11 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M6 | Release & distribution | 10 / 10 | ✅ |
 | M7 | Post-release hardening & distribution (v0.1.1 → v0.2.0) | 8 / 9 | 🟨 (winget awaiting Microsoft review) |
 | M8 | Docker attribution | 7 / 7 | ✅ |
-| M9 | `portcheck run` | 6 / 6 | ✅ |
+| M9 | `portcheck run` | 6 / 6 | ✅ (released in v0.3.0) |
+| M10 | Parent process ("started by") | 5 / 5 | ✅ |
+| M11 | WSL distro attribution | 0 / 4 | ⬜ |
+| M12 | `.portcheck.yaml` + `portcheck doctor` | 0 / 5 | ⬜ |
+| M13 | Native macOS provider (no `lsof`) | 0 / 4 | ⬜ |
 
 ---
 
@@ -169,15 +173,23 @@ then run the command with `$PORT` set and its exit code passed through.
 | M9-05 | End-to-end scenarios against the built binary | `testdata/script/run.txtar` | testscript (3 OS) | ✅ | Auto port, busy, `--next`, `--kill`, exit-code passthrough, not found |
 | M9-06 | Docs: guide, scripting recipes, exit codes, README | `docs/` | strict docs build | ✅ | New `run` guide; quickstart, scripting, exit codes, README, home page |
 
+## M10 — Parent process
+
+Goal: show who started a process (`node ← npm ← zsh`) where it helps decide whether to stop it.
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M10-01 | `ProcessInfo.Ancestors` (nearest first, ≤ 3, stops at init/launchd) from the system provider | `pkg/inspect` | unit with fake handles, integration | ✅ | Verified on macOS: Python ← bash ← zsh; reparented processes correctly show none; no measurable overhead |
+| M10-02 | `kill` confirmation shows "started by …" | `internal/cli/kill.go` | unit | ✅ | `PID 99087 Python (port 8794), started by bash (99085) ← zsh (99084) ← …` |
+| M10-03 | TUI: selected row's ancestry + command in the status line; in the kill confirmation | `internal/tui` | golden | ✅ | Hidden-owner rows still show the privilege hint |
+| M10-04 | `list --wide` (PARENT, COMMAND) and JSON `process.ancestors` | `internal/output`, `internal/cli/list.go` | golden | ✅ | `-w/--wide`; command truncated to 60 runes in tables |
+| M10-05 | Docs | `docs/` | strict docs build | ✅ | list, kill, TUI, JSON schema, library |
+
 ## What's next (candidates, not yet scheduled)
 
 | Candidate | Notes |
 |---|---|
 | Announce v0.2.0 (r/golang) | Draft prepared; maintainer posts |
-| Parent process in `list`/TUI | "started by VS Code / npm run dev" |
-| WSL distro attribution | `wsl:Ubuntu` instead of `wslrelay.exe` |
-| `.portcheck.yaml` + `doctor` | Project port manifest |
-| Native macOS provider | No `lsof` dependency |
 | Community setup | Labels, Project board, OpenSSF badge |
 | More channels | AUR, Nix, Docker image |
 

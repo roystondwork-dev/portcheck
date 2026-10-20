@@ -21,6 +21,7 @@ type processHandle interface {
 	CmdlineWithContext(ctx context.Context) (string, error)
 	ExeWithContext(ctx context.Context) (string, error)
 	CreateTimeWithContext(ctx context.Context) (int64, error)
+	PpidWithContext(ctx context.Context) (int32, error)
 }
 
 // systemProvider implements Provider using gopsutil. See ADR-0001.
@@ -81,7 +82,30 @@ func (p *systemProvider) Process(ctx context.Context, pid int32) (*ProcessInfo, 
 	if ms, err := h.CreateTimeWithContext(ctx); err == nil && ms > 0 {
 		info.CreateTime = time.UnixMilli(ms)
 	}
+	info.Ancestors = p.ancestors(ctx, pid, h)
 	return info, nil
+}
+
+// ancestors walks up the process tree from h, best effort.
+func (p *systemProvider) ancestors(ctx context.Context, pid int32, h processHandle) []ProcessRef {
+	var out []ProcessRef
+	for range MaxAncestors {
+		ppid, err := h.PpidWithContext(ctx)
+		if err != nil || ppid <= 1 || ppid == pid {
+			break // unknown, reached init/launchd, or a self-reference
+		}
+		parent, err := p.newProcess(ctx, ppid)
+		if err != nil {
+			break
+		}
+		name, err := parent.NameWithContext(ctx)
+		if err != nil {
+			break
+		}
+		out = append(out, ProcessRef{PID: ppid, Name: name})
+		pid, h = ppid, parent
+	}
+	return out
 }
 
 // classify maps OS/gopsutil errors to this package's sentinel errors while

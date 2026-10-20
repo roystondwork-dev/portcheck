@@ -117,7 +117,7 @@ func newHarness() *harness {
 		provider: &inspect.FakeProvider{
 			SocketList: []inspect.RawSocket{nodeSock, nodeSock6, javaSock, hiddenSock, ghostSock},
 			Processes: map[int32]*inspect.ProcessInfo{
-				100: {PID: 100, Name: "node", User: "alice"},
+				100: {PID: 100, Name: "node", User: "alice", Cmdline: "node server.js", Ancestors: []inspect.ProcessRef{{PID: 90, Name: "npm"}, {PID: 80, Name: "zsh"}}},
 				200: {PID: 200, Name: "java", User: "bob"},
 			},
 		},
@@ -260,6 +260,7 @@ func TestList(t *testing.T) {
 		{name: "filters", args: []string{"list", "-l", "--proto", "TCP", "--port", "3000", "--pid", "100", "--name", "NO*", "--state", "listen"}, wantOut: []string{"[::1]:3000", "127.0.0.1:3000"}, notOut: []string{"java"}, notErr: []string{"hint"}},
 		{name: "no match", args: []string{"list", "--port", "1"}, wantOut: []string{"No matching sockets."}},
 		{name: "csv", args: []string{"list", "--port", "8080", "-o", "csv"}, wantOut: []string{"PROTO,LOCAL ADDRESS", "tcp,0.0.0.0:8080,-,LISTEN,200,java,bob"}},
+		{name: "wide", args: []string{"list", "--port", "3000", "-w", "-o", "csv"}, wantOut: []string{"PARENT,COMMAND", "node,alice,npm (90),node server.js"}},
 		{name: "json", args: []string{"list", "--port", "8080", "--json"}, wantOut: []string{`"kind": "list"`, `"localPort": 8080`, `"partial": false`}},
 		{name: "bad proto", args: []string{"list", "--proto", "sctp"}, wantCode: ExitUsage, wantErr: []string{`unknown protocol "sctp"`}},
 		{name: "bad port", args: []string{"list", "--port", "0"}, wantCode: ExitUsage, wantErr: []string{"out of range"}},
@@ -449,7 +450,7 @@ func TestKill(t *testing.T) {
 func TestKillConfirmation(t *testing.T) {
 	t.Parallel()
 	runCases(t, []runCase{
-		{name: "yes", args: []string{"kill", "3000"}, setup: func(h *harness) { h.app.StdinTTY, h.app.Stdin = true, strings.NewReader("y\n") }, wantErr: []string{"About to terminate:", "PID 100  node  (port 3000)", "Proceed? [y/N]"}, wantOut: []string{"terminated"}},
+		{name: "yes", args: []string{"kill", "3000"}, setup: func(h *harness) { h.app.StdinTTY, h.app.Stdin = true, strings.NewReader("y\n") }, wantErr: []string{"About to terminate:", "PID 100  node  (port 3000), started by npm (90) ← zsh (80)\n", "Proceed? [y/N]"}, wantOut: []string{"terminated"}},
 		{name: "YES word", args: []string{"kill", "3000"}, setup: func(h *harness) { h.app.StdinTTY, h.app.Stdin = true, strings.NewReader(" Yes \n") }, wantOut: []string{"terminated"}},
 		{name: "no", args: []string{"kill", "3000"}, setup: func(h *harness) { h.app.StdinTTY, h.app.Stdin = true, strings.NewReader("n\n") }, wantCode: ExitNegative, wantErr: []string{"Aborted."}, check: func(t *testing.T, h *harness) {
 			if len(h.killer.killed) != 0 {

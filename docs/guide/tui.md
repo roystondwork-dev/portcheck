@@ -33,6 +33,10 @@ with status 2.
 The filter matches port, protocol, local and remote address, state, PID, process
 name and user, case-insensitively.
 
+The status line at the bottom describes the selected row: who started the process and
+its command line, e.g. `started by npm (4200) ← zsh (900) · node server.js`. The kill
+confirmation shows the same "started by" chain.
+
 ## Colors
 
 - **Green** rows are TCP listeners.
