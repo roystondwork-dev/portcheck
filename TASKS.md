@@ -3,9 +3,9 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** ✅ v0.1.0 released, all milestones complete
+**Current milestone:** M8 — Docker attribution
 **Last updated:** 2026-10-20
-**Target release:** v0.1.0
+**Latest release:** [v0.1.1](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.1.1) · **Next release:** v0.2.0
 
 Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 
@@ -20,6 +20,8 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M4 | Interactive TUI | 7 / 7 | ✅ |
 | M5 | Documentation | 9 / 9 | ✅ |
 | M6 | Release & distribution | 10 / 10 | ✅ |
+| M7 | Post-release hardening & distribution (v0.1.1 → v0.2.0) | 7 / 8 | 🟨 (winget awaiting Microsoft review) |
+| M8 | Docker attribution | 0 / 7 | 🟨 |
 
 ---
 
@@ -121,6 +123,35 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M6-09 | `CHANGELOG.md` | root | — | ✅ | Seeded; release-please fills it from Conventional Commits |
 | M6-10 | Tag & publish **v0.1.0** | GitHub | install via brew works | ✅ | [v0.1.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.1.0): 20 assets; cosign bundle, checksums and provenance verified; tampered/unattested files rejected; brew install verified |
 
+## M7 — Post-release hardening & distribution
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M7-01 | Fix initial version (release-please defaulted to 1.0.0) | `release-please-config.json` | — | ✅ | `initial-version: 0.1.0` (#6) |
+| M7-02 | Correct macOS low-port binding docs; tidy changelog | `docs/` | strict docs build | ✅ | Verified: macOS allows wildcard-only unprivileged low-port binds (#7); released as v0.1.1 |
+| M7-03 | Codecov upload, config and badges | `codecov.yml`, `README.md` | upload verified | ✅ | Targets mirror `.testcoverage.yml` (#9) |
+| M7-04 | Enforce branch protection for admins | GitHub settings | — | ✅ | All changes via PR with 6 required checks |
+| M7-05 | winget publishing | `.goreleaser.yaml`, `release.yml` | snapshot manifest | ✅ | Package ID `roystondwork-dev.portcheck`; fork `roystondwork-dev/winget-pkgs` (#10) |
+| M7-06 | First winget submission accepted | microsoft/winget-pkgs#456630 | Microsoft validation | 🟨 | CLA signed; validation stages 1–7 passed; awaiting install validation + moderator |
+| M7-07 | `portcheck wait` + `pkg/waitfor` | `internal/cli/wait.go`, `pkg/waitfor` | unit + testscript, 100% | ✅ | Open or `--free`; parallel targets; replaces scan loops in CI docs (#11) |
+| M7-08 | Independent accuracy audit of README, docs site and contributor docs against code and binary | `docs/`, `README.md`, `CONTRIBUTING.md`, `SECURITY.md` | strict docs build | ✅ | 27 findings fixed (5 factual errors incl. package filenames, check output order, unsafe README snippet, signing scope); `--no-color` now reaches the TUI (#13) |
+
+## M8 — Docker attribution
+
+Goal: ports published by containers show the **container** (name, image), not the
+proxy process holding them (`docker-proxy`, `com.docker.backend`, …), and `kill`
+never stops Docker's infrastructure by accident.
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M8-01 | Docker Engine API client: unix socket / named pipe / tcp, `DOCKER_HOST`, per-OS defaults; Podman-compatible | `pkg/containers` | unit with fake API server, 100% | ⬜ | No Docker SDK dependency |
+| M8-02 | Enrichment hook in `inspect` + `Socket.Container` | `pkg/inspect` | unit | ⬜ | Docker unavailable ⇒ silently skipped, never slows listing |
+| M8-03 | Show containers in `list`/`check` tables, JSON and TUI | `internal/output`, `internal/tui` | golden | ⬜ | Additive JSON field (`container`), schema stays v1 |
+| M8-04 | `kill` and TUI refuse container ports with a `docker stop` hint | `internal/cli/kill.go`, `internal/tui` | unit + golden | ⬜ | |
+| M8-05 | Protect Docker/WSL infrastructure processes in `killer` | `pkg/killer` | unit | ⬜ | e.g. `com.docker.backend`, `dockerd`, `wslrelay.exe` |
+| M8-06 | Integration test against a real Docker daemon | CI (Linux) | integration | ⬜ | |
+| M8-07 | Docs: guide section, permissions/troubleshooting, JSON schema | `docs/` | strict docs build | ⬜ | |
+
 ---
 
 ## Decisions log
@@ -130,5 +161,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | 2026-10-20 | Go CLI + Bubble Tea TUI; MIT license; name `portcheck` | plan |
 | 2026-10-20 | gopsutil behind `inspect.Provider` | [ADR-0001](docs/adr/0001-gopsutil-provider.md) |
 | 2026-10-20 | Scanner is TCP-connect only, no stealth features | [ADR-0002](docs/adr/0002-tcp-connect-only-scanning.md) |
+| 2026-10-20 | winget package ID `roystondwork-dev.portcheck` (chosen by maintainer; permanent once accepted) | #10 |
+| 2026-10-20 | `wait` checks TCP accept, not application health; documented | #11 |
 | 2026-10-20 | First release is 0.1.0 (`initial-version`), not release-please's default 1.0.0 | #6 |
 | 2026-10-20 | TUI uses a custom table + golden screen snapshots instead of bubbles/table + teatest | M4 notes |
