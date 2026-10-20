@@ -54,6 +54,10 @@ tidy: ## Tidy go.mod files.
 lint: ## Run golangci-lint.
 	golangci-lint run ./...
 
+.PHONY: actionlint
+actionlint: ## Lint GitHub Actions workflows.
+	$(TOOL) actionlint
+
 .PHONY: vuln
 vuln: ## Scan dependencies for known vulnerabilities.
 	$(TOOL) govulncheck ./...
@@ -95,7 +99,7 @@ bench: ## Run benchmarks.
 	go test -run=^$$ -bench=. -benchmem ./...
 
 .PHONY: check
-check: lint vuln cover-check ## Everything CI runs: lint, vuln, tests, coverage gate.
+check: lint actionlint vuln cover-check ## Everything CI runs: lint, workflows, vuln, tests, coverage gate.
 
 ##@ Docs & release
 
@@ -120,8 +124,8 @@ demo: build ## Render docs/assets/demo.gif with vhs.
 	PATH="$(CURDIR)/bin:$$PATH" vhs docs/assets/demo.tape
 
 .PHONY: snapshot
-snapshot: ## Build a local, unpublished release with GoReleaser.
-	goreleaser release --snapshot --clean
+snapshot: ## Build a local, unpublished release with GoReleaser (needs syft for SBOMs).
+	goreleaser release --snapshot --clean --skip=sign
 
 .PHONY: clean
 clean: ## Remove build and test artifacts.

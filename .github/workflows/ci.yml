@@ -31,6 +31,8 @@ jobs:
           version: v2.15.0
       - name: govulncheck
         run: go tool -modfile=tools/go.mod govulncheck ./...
+      - name: actionlint
+        run: go tool -modfile=tools/go.mod actionlint
       - name: CLI reference is up to date
         run: |
           go run ./internal/cli/gendocs -out docs/commands
@@ -95,7 +97,14 @@ jobs:
         with:
           go-version-file: go.mod
       - uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
-        if: hashFiles('.goreleaser.yaml') != ''
         with:
           version: "~> v2"
-          args: build --snapshot --clean
+          args: check
+      - uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        with:
+          version: "~> v2"
+          args: release --snapshot --clean --skip=sign,sbom
+      - name: Built binary runs
+        run: |
+          ./dist/portcheck_linux_amd64_v1/portcheck version
+          ls dist/*.tar.gz dist/*.zip dist/*.deb dist/*.rpm dist/*.apk dist/checksums.txt

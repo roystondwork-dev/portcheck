@@ -9,6 +9,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 
 	"github.com/roystondwork-dev/portcheck/internal/buildinfo"
@@ -16,7 +17,7 @@ import (
 )
 
 func main() {
-	out := flag.String("out", "docs/commands", "directory for Markdown files")
+	out := flag.String("out", "docs/commands", "directory for Markdown files (skipped if empty)")
 	man := flag.String("man", "", "directory for man pages (skipped if empty)")
 	flag.Parse()
 
@@ -30,6 +31,24 @@ func run(mdDir, manDir string) error {
 	root := cli.NewRootCmd(&cli.App{Build: buildinfo.Info{Version: "latest"}})
 	root.InitDefaultCompletionCmd() // cobra otherwise adds it lazily at Execute time
 
+	if mdDir != "" {
+		if err := genMarkdown(root, mdDir); err != nil {
+			return err
+		}
+	}
+	if manDir == "" {
+		return nil
+	}
+	if err := os.MkdirAll(manDir, 0o750); err != nil {
+		return fmt.Errorf("create %s: %w", manDir, err)
+	}
+	if err := doc.GenManTree(root, &doc.GenManHeader{Title: "PORTCHECK", Section: "1", Source: "portcheck"}, manDir); err != nil {
+		return fmt.Errorf("generate man pages: %w", err)
+	}
+	return nil
+}
+
+func genMarkdown(root *cobra.Command, mdDir string) error {
 	if err := os.MkdirAll(mdDir, 0o750); err != nil {
 		return fmt.Errorf("create %s: %w", mdDir, err)
 	}
@@ -41,16 +60,6 @@ func run(mdDir, manDir string) error {
 	link := func(name string) string { return name }
 	if err := doc.GenMarkdownTreeCustom(root, mdDir, prepend, link); err != nil {
 		return fmt.Errorf("generate markdown: %w", err)
-	}
-
-	if manDir == "" {
-		return nil
-	}
-	if err := os.MkdirAll(manDir, 0o750); err != nil {
-		return fmt.Errorf("create %s: %w", manDir, err)
-	}
-	if err := doc.GenManTree(root, &doc.GenManHeader{Title: "PORTCHECK", Section: "1", Source: "portcheck"}, manDir); err != nil {
-		return fmt.Errorf("generate man pages: %w", err)
 	}
 	return nil
 }
