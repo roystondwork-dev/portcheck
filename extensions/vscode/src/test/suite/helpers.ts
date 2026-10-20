@@ -1,6 +1,6 @@
 import { type ChildProcess, spawn } from "node:child_process";
 import * as net from "node:net";
-import type * as vscode from "vscode";
+import * as vscode from "vscode";
 import type { UI } from "../../commands";
 import type { PortcheckApi } from "../../extension";
 import type { PortRow } from "../../model";
@@ -110,8 +110,7 @@ export function waitFor(cond: () => boolean, what: string, ms = 15_000): Promise
 }
 
 export async function activateExtension(): Promise<PortcheckApi> {
-  const vs = await import("vscode");
-  const ext = vs.extensions.getExtension<PortcheckApi>("roystondwork-dev.portcheck");
+  const ext = vscode.extensions.getExtension<PortcheckApi>("roystondwork-dev.portcheck");
   if (!ext) {
     throw new Error("extension not found");
   }

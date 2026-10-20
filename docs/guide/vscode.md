@@ -56,7 +56,8 @@ If yours isn't recognised, please
     Noticing errors as they're printed, and re-running commands, use VS Code's
     [shell integration](https://code.visualstudio.com/docs/terminal/shell-integration),
     which is on by default for bash, zsh, fish and PowerShell. Without it, errors are
-    still links, and fixes that re-run a command are not offered.
+    still links, and fixes that re-run a command are not offered. The extension needs
+    VS Code 1.98 or later.
 
 ## Project ports (`.portcheck.yaml`)
 
