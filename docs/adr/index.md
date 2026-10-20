@@ -11,6 +11,7 @@ feedback for at least 5 days; see
 | [0002](0002-tcp-connect-only-scanning.md) | Remote scanning uses TCP connect only | Accepted |
 | [0003](0003-native-macos-sockets.md) | Read macOS sockets through libproc instead of running lsof | Accepted |
 | [0004](0004-vscode-extension.md) | A VS Code extension as a thin client of the portcheck CLI | Accepted |
+| [0005](0005-browser-extension.md) | A browser extension that talks to portcheck through native messaging | Accepted |
 
 To propose a new one, copy the latest ADR, number it sequentially, set **Status:
 Proposed**, and open a pull request.
