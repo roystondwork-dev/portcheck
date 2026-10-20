@@ -3,9 +3,9 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** v0.2.0 release (M7 winget review pending)
+**Current milestone:** next feature (see "What's next"); winget review pending (M7-06)
 **Last updated:** 2026-10-20
-**Latest release:** [v0.1.1](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.1.1) · **Next release:** v0.2.0
+**Latest release:** [v0.2.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.2.0)
 
 Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 
@@ -20,7 +20,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M4 | Interactive TUI | 7 / 7 | ✅ |
 | M5 | Documentation | 9 / 9 | ✅ |
 | M6 | Release & distribution | 10 / 10 | ✅ |
-| M7 | Post-release hardening & distribution (v0.1.1 → v0.2.0) | 7 / 8 | 🟨 (winget awaiting Microsoft review) |
+| M7 | Post-release hardening & distribution (v0.1.1 → v0.2.0) | 8 / 9 | 🟨 (winget awaiting Microsoft review) |
 | M8 | Docker attribution | 7 / 7 | ✅ |
 
 ---
@@ -132,7 +132,8 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M7-03 | Codecov upload, config and badges | `codecov.yml`, `README.md` | upload verified | ✅ | Targets mirror `.testcoverage.yml` (#9) |
 | M7-04 | Enforce branch protection for admins | GitHub settings | — | ✅ | All changes via PR with 6 required checks |
 | M7-05 | winget publishing | `.goreleaser.yaml`, `release.yml` | snapshot manifest | ✅ | Package ID `roystondwork-dev.portcheck`; fork `roystondwork-dev/winget-pkgs` (#10) |
-| M7-06 | First winget submission accepted | microsoft/winget-pkgs#456630 | Microsoft validation | 🟨 | CLA signed; validation stages 1–7 passed; awaiting install validation + moderator |
+| M7-06 | First winget submission accepted | microsoft/winget-pkgs#456630 (0.1.1), #456654 (0.2.0) | Microsoft validation | 🟨 | CLA signed; 0.1.1 passed stages 1–7, install validation running; 0.2.0 submitted automatically by the release |
+| M7-09 | Release **v0.2.0** (`wait`, container attribution, kill safety fix, docs audit) | GitHub | signatures + brew install | ✅ | [v0.2.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.2.0): 20 assets; cosign, checksums, provenance verified; Homebrew upgrade verified against a real container |
 | M7-07 | `portcheck wait` + `pkg/waitfor` | `internal/cli/wait.go`, `pkg/waitfor` | unit + testscript, 100% | ✅ | Open or `--free`; parallel targets; replaces scan loops in CI docs (#11) |
 | M7-08 | Independent accuracy audit of README, docs site and contributor docs against code and binary | `docs/`, `README.md`, `CONTRIBUTING.md`, `SECURITY.md` | strict docs build | ✅ | 27 findings fixed (5 factual errors incl. package filenames, check output order, unsafe README snippet, signing scope); `--no-color` now reaches the TUI (#13) |
 
@@ -151,6 +152,19 @@ never stops Docker's infrastructure by accident.
 | M8-05 | Protect Docker/WSL infrastructure processes in `killer` | `pkg/killer` | unit | ✅ | Docker, containerd, rootlesskit, slirp4netns, vpnkit, WSL relay/service, vmmem |
 | M8-06 | Integration test against a real Docker daemon | CI (Linux) | integration | ✅ | Real busybox container on a random port; passes on Docker Desktop (macOS) and runs on GitHub's Ubuntu runner |
 | M8-07 | Docs: guide section, permissions/troubleshooting, JSON schema | `docs/` | strict docs build | ✅ | New Containers guide incl. limitations (no-userland-proxy, socket permissions, WSL) |
+
+## What's next (candidates, not yet scheduled)
+
+| Candidate | Notes |
+|---|---|
+| Announce v0.2.0 (r/golang) | Draft prepared; maintainer posts |
+| `portcheck run --port N -- <cmd>` | Free or pick a port, then exec with `$PORT` |
+| Parent process in `list`/TUI | "started by VS Code / npm run dev" |
+| WSL distro attribution | `wsl:Ubuntu` instead of `wslrelay.exe` |
+| `.portcheck.yaml` + `doctor` | Project port manifest |
+| Native macOS provider | No `lsof` dependency |
+| Community setup | Labels, Project board, OpenSSF badge |
+| More channels | AUR, Nix, Docker image |
 
 ---
 
