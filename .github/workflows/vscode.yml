@@ -1,0 +1,66 @@
+name: VS Code extension
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: extensions/vscode
+
+jobs:
+  extension:
+    name: Extension (${{ matrix.os }}, VS Code ${{ matrix.vscode }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        vscode: [stable]
+        include:
+          # The oldest VS Code the extension supports (engines.vscode).
+          - os: ubuntu-latest
+            vscode: 1.95.0
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: Build portcheck
+        working-directory: .
+        shell: bash
+        run: go build -o "bin/portcheck$( [ "$RUNNER_OS" = Windows ] && echo .exe )" ./cmd/portcheck
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: extensions/vscode/package-lock.json
+      - run: npm ci
+      - name: Typecheck, lint, unit tests (100% coverage gate), bundle
+        run: npm run check
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: extensions/vscode/.vscode-test
+          key: vscode-test-${{ runner.os }}-${{ matrix.vscode }}
+      - name: Integration tests in VS Code
+        shell: bash
+        env:
+          VSCODE_TEST_VERSION: ${{ matrix.vscode }}
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            xvfb-run -a npm run test:integration
+          else
+            npm run test:integration
+          fi
+      - name: Package (smoke test)
+        if: matrix.vscode == 'stable'
+        run: npx vsce package --no-dependencies --out portcheck.vsix

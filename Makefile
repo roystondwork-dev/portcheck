@@ -103,6 +103,10 @@ check: lint actionlint vuln cover-check ## Everything CI runs: lint, workflows, 
 
 ##@ Docs & release
 
+.PHONY: vscode-check
+vscode-check: build ## Check the VS Code extension: types, lint, unit + integration tests.
+	cd extensions/vscode && npm ci && npm run check && npm run test:integration
+
 .PHONY: docs-cli
 docs-cli: ## Regenerate CLI reference markdown + man pages.
 	go run ./internal/cli/gendocs -out docs/commands -man man
