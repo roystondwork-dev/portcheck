@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M6 — Release & distribution
+**Current milestone:** ✅ v0.1.0 released, all milestones complete
 **Last updated:** 2026-10-20
 **Target release:** v0.1.0
 
@@ -19,7 +19,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M3 | Remote scanner | 6 / 6 | ✅ |
 | M4 | Interactive TUI | 7 / 7 | ✅ |
 | M5 | Documentation | 9 / 9 | ✅ |
-| M6 | Release & distribution | 7 / 10 | 🟨 (needs maintainer: tap/bucket repos, secrets, release) |
+| M6 | Release & distribution | 10 / 10 | ✅ |
 
 ---
 
@@ -112,14 +112,14 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 |---|---|---|---|---|---|
 | M6-01 | GoReleaser: 6 OS/arch binaries, archives, checksums | `.goreleaser.yaml` | `make snapshot` | ✅ | darwin/linux/windows × amd64/arm64; tar.gz (zip on Windows) with completions + man pages; reproducible (`-trimpath`, commit timestamps) |
 | M6-02 | nfpm packages: deb / rpm / apk | `.goreleaser.yaml` | snapshot | ✅ | deb/rpm/apk with binary, bash/zsh/fish completions, man pages, license; contents verified |
-| M6-03 | Homebrew tap | `roystondwork-dev/homebrew-tap` | — | ⛔ | Config ready (`homebrew_casks`, macOS + Linux). Needs repo `roystondwork-dev/homebrew-tap` + `HOMEBREW_TAP_GITHUB_TOKEN` |
-| M6-04 | Scoop bucket | `roystondwork-dev/scoop-bucket` | — | ⛔ | Config ready. Needs repo `roystondwork-dev/scoop-bucket` (same token) |
+| M6-03 | Homebrew tap | `roystondwork-dev/homebrew-tap` | — | ✅ | [homebrew-tap](https://github.com/roystondwork-dev/homebrew-tap) (cask, macOS + Linux); `brew install roystondwork-dev/tap/portcheck` verified on macOS |
+| M6-04 | Scoop bucket | `roystondwork-dev/scoop-bucket` | — | ✅ | [scoop-bucket](https://github.com/roystondwork-dev/scoop-bucket) updated by the v0.1.0 release |
 | M6-05 | SBOM (syft) + cosign keyless signing | `.goreleaser.yaml` | verify in docs | ✅ | SPDX SBOM per archive (syft, verified locally); keyless cosign bundle for `checksums.txt`; identity documented |
 | M6-06 | SLSA build provenance attestation | `release.yml` | — | ✅ | `actions/attest-build-provenance` over all archives, packages and checksums |
 | M6-07 | release-please (changelog + version PRs) | `release.yml` | — | ✅ | Merged into `release.yml`; minor bumps pre-1.0; `RELEASE_PLEASE_TOKEN` recommended so CI runs on release PRs |
 | M6-08 | Release workflow | `.github/workflows/release.yml` | — | ✅ | `release.yml` (release-please → GoReleaser → provenance); manual re-run for an existing tag; CI runs `goreleaser check` + full snapshot; actionlint added |
 | M6-09 | `CHANGELOG.md` | root | — | ✅ | Seeded; release-please fills it from Conventional Commits |
-| M6-10 | Tag & publish **v0.1.0** | GitHub | install via brew works | ⬜ | Merge the release-please PR once M6-03/04 are done |
+| M6-10 | Tag & publish **v0.1.0** | GitHub | install via brew works | ✅ | [v0.1.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.1.0): 20 assets; cosign bundle, checksums and provenance verified; tampered/unattested files rejected; brew install verified |
 
 ---
 
@@ -130,4 +130,5 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | 2026-10-20 | Go CLI + Bubble Tea TUI; MIT license; name `portcheck` | plan |
 | 2026-10-20 | gopsutil behind `inspect.Provider` | [ADR-0001](docs/adr/0001-gopsutil-provider.md) |
 | 2026-10-20 | Scanner is TCP-connect only, no stealth features | [ADR-0002](docs/adr/0002-tcp-connect-only-scanning.md) |
+| 2026-10-20 | First release is 0.1.0 (`initial-version`), not release-please's default 1.0.0 | #6 |
 | 2026-10-20 | TUI uses a custom table + golden screen snapshots instead of bubbles/table + teatest | M4 notes |

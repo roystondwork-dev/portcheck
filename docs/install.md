@@ -40,9 +40,6 @@ portcheck is a single static binary with no runtime dependencies.
     go install github.com/roystondwork-dev/portcheck/cmd/portcheck@latest
     ```
 
-!!! note "Before the first release"
-    Until `v0.1.0` is published, only the **Go** method is available.
-
 Check the installation:
 
 ```sh

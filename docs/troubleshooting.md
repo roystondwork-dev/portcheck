@@ -9,10 +9,14 @@ The owner belongs to another user and your user can't see it. Re-run with
 the socket may not appear in `list` at all, but `check` still reports the port as
 `in-use` because binding it fails.
 
-## `check` says `denied` on Linux
+## `check` says `denied` for a port below 1024
 
-Ports below 1024 can only be bound by root (or with `CAP_NET_BIND_SERVICE`). The port
-may be free, but **you** can't use it. Pick a port ≥ 1024 or run as root.
+The port may be free, but **you** can't bind it on every address:
+
+- **Linux:** ports below 1024 need root (or `CAP_NET_BIND_SERVICE`).
+- **macOS:** any user may bind them on `0.0.0.0`/`::`, but not on `127.0.0.1`/`::1`.
+
+Pick a port ≥ 1024, or run as root.
 
 ## Windows says a port is `denied` but nothing uses it
 

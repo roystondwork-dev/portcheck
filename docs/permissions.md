@@ -10,10 +10,11 @@ is printed to stderr.
 | Sockets of other users | **hidden** | listed | listed |
 | PID / process of other users' sockets | hidden | **hidden** | PID listed; name/user may be hidden |
 | Stop other users' processes | needs `sudo` | needs `sudo` | needs Administrator |
-| Bind ports below 1024 (`check`/`free`) | allowed | needs root¹ | allowed |
+| Bind ports below 1024 (`check`/`free`) | wildcard only² | needs root¹ | allowed |
 | `scan` | no privileges needed | no privileges needed | no privileges needed |
 
-¹ Unless `net.ipv4.ip_unprivileged_port_start` has been lowered, or the binary has `CAP_NET_BIND_SERVICE`.
+¹ Unless `net.ipv4.ip_unprivileged_port_start` has been lowered, or the binary has `CAP_NET_BIND_SERVICE`.  
+² macOS lets any user bind low ports on `0.0.0.0` and `::`, but binding a specific address such as `127.0.0.1` needs root.
 
 ## macOS
 
@@ -25,6 +26,10 @@ it also tries to bind it, but cannot name the owner.
 ```sh
 sudo "$(command -v portcheck)" list -l
 ```
+
+Ports below 1024 can be bound by any user on the wildcard addresses (`0.0.0.0`,
+`::`), but not on specific addresses like `127.0.0.1`. Because `check` and `free`
+test every address, they report such ports as `denied` without root.
 
 ## Linux
 
