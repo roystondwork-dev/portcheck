@@ -107,6 +107,10 @@ check: lint actionlint vuln cover-check ## Everything CI runs: lint, workflows, 
 vscode-check: build ## Check the VS Code extension: types, lint, unit + integration tests.
 	cd extensions/vscode && npm ci && npm run check && npm run test:integration
 
+.PHONY: browser-check
+browser-check: build ## Check the browser extension: types, lint, unit + end-to-end tests.
+	cd extensions/browser && npm ci && npm run check && npx playwright install chromium && npx playwright test
+
 .PHONY: docs-cli
 docs-cli: ## Regenerate CLI reference markdown + man pages.
 	go run ./internal/cli/gendocs -out docs/commands -man man
