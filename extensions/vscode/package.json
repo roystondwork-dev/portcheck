@@ -4,6 +4,11 @@
   "description": "See what's using your ports — process, who started it, container or WSL distro — and free them safely.",
   "version": "0.5.0",
   "publisher": "portcheck-vscode",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#283593",
+    "theme": "dark"
+  },
   "license": "MIT",
   "homepage": "https://roystondwork-dev.github.io/portcheck/guide/vscode/",
   "repository": {
