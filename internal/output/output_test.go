@@ -13,6 +13,7 @@ import (
 	"github.com/roystondwork-dev/portcheck/internal/testutil"
 	"github.com/roystondwork-dev/portcheck/pkg/freeport"
 	"github.com/roystondwork-dev/portcheck/pkg/inspect"
+	"github.com/roystondwork-dev/portcheck/pkg/scan"
 )
 
 var (
@@ -43,6 +44,14 @@ var (
 		{PID: 5, Name: "x", Outcome: "dry-run"},
 	}
 
+	scanResults = []scan.Result{
+		{Target: scan.Target{Host: "db.internal", Addr: netip.MustParseAddr("10.0.0.5")}, Port: 5432, State: scan.Open, Service: "postgresql", Latency: 1234 * time.Microsecond},
+		{Target: scan.Target{Host: "db.internal", Addr: netip.MustParseAddr("10.0.0.5")}, Port: 6379, State: scan.Closed, Service: "redis", Latency: 800 * time.Microsecond},
+		{Target: scan.Target{Host: "10.0.0.6", Addr: netip.MustParseAddr("10.0.0.6")}, Port: 22, State: scan.Filtered, Service: "ssh", Latency: time.Second},
+		{Target: scan.Target{Host: "10.0.0.7", Addr: netip.MustParseAddr("10.0.0.7")}, Port: 4, State: scan.Error, Latency: 2 * time.Millisecond, Err: errors.New("no route to host")},
+	}
+	scanSummary = scan.Summary{Hosts: 3, Ports: 4, Open: 1, Closed: 1, Filtered: 1, Errored: 1}
+
 	version = buildinfo.Info{Version: "v0.1.0", Commit: "abc123", Date: "2026-10-20T00:00:00Z", GoVersion: "go1.27.3", Platform: "darwin/arm64"}
 )
 
@@ -57,6 +66,8 @@ func docs() map[string]Document {
 		"free-empty": FreeDoc(nil),
 		"kill":       KillDoc(killResults),
 		"version":    VersionDoc(version),
+		"scan":       ScanDoc(scanResults, scanSummary, 1500*time.Millisecond),
+		"scan-empty": ScanDoc(nil, scan.Summary{}, 0),
 	}
 }
 
@@ -129,6 +140,9 @@ func TestJSONEnvelope(t *testing.T) {
 	}
 	if out := render(t, FreeDoc(nil), JSON, Options{}); !bytes.Contains(out, []byte(`"ports": []`)) {
 		t.Errorf("empty free must encode ports as [], got %s", out)
+	}
+	if out := render(t, ScanDoc(nil, scan.Summary{}, 0), JSON, Options{}); !bytes.Contains(out, []byte(`"results": []`)) {
+		t.Errorf("empty scan must encode results as [], got %s", out)
 	}
 	if out := render(t, KillDoc(nil), JSON, Options{}); !bytes.Contains(out, []byte(`"results": []`)) {
 		t.Errorf("empty kill must encode results as [], got %s", out)

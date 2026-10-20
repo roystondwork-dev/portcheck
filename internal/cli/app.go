@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -20,6 +21,7 @@ import (
 	"github.com/roystondwork-dev/portcheck/pkg/inspect"
 	"github.com/roystondwork-dev/portcheck/pkg/killer"
 	"github.com/roystondwork-dev/portcheck/pkg/portspec"
+	"github.com/roystondwork-dev/portcheck/pkg/scan"
 )
 
 // SocketLister lists sockets; implemented by *inspect.Inspector.
@@ -40,18 +42,23 @@ type ProcessKiller interface {
 	Kill(ctx context.Context, pid int32, opts killer.Options) (killer.Result, error)
 }
 
+// ScanFunc runs a port scan; scan.Scan implements it.
+type ScanFunc func(ctx context.Context, targets []scan.Target, ports portspec.Spec, opts scan.Options) <-chan scan.Result
+
 // App bundles everything a command needs from the outside world.
 type App struct {
 	Stdin          io.Reader
 	Stdout, Stderr io.Writer
 	Environ        []string
-	// StdinTTY and StdoutTTY report whether the streams are terminals.
-	StdinTTY, StdoutTTY bool
+	// StdinTTY, StdoutTTY and StderrTTY report whether the streams are terminals.
+	StdinTTY, StdoutTTY, StderrTTY bool
 
 	Lister        SocketLister
 	Ports         PortFinder
 	Killer        ProcessKiller
 	PrivilegeHint func() string
+	Resolver      scan.Resolver
+	Scan          ScanFunc
 	Build         buildinfo.Info
 }
 
@@ -65,10 +72,13 @@ func NewApp() *App {
 		Environ:       os.Environ(),
 		StdinTTY:      term.IsTerminal(int(os.Stdin.Fd())),
 		StdoutTTY:     term.IsTerminal(int(os.Stdout.Fd())),
+		StderrTTY:     term.IsTerminal(int(os.Stderr.Fd())),
 		Lister:        lister,
 		Ports:         freeport.New(freeport.WithLister(lister)),
 		Killer:        killer.New(),
 		PrivilegeHint: inspect.PrivilegeHint,
+		Resolver:      net.DefaultResolver,
+		Scan:          scan.Scan,
 		Build:         buildinfo.Get(),
 	}
 }
