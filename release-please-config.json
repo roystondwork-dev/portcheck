@@ -51,7 +51,12 @@
     ".": {
       "package-name": "portcheck",
       "changelog-path": "CHANGELOG.md",
-      "initial-version": "0.1.0"
+      "initial-version": "0.1.0",
+      "extra-files": [
+        { "type": "json", "path": "extensions/vscode/package.json", "jsonpath": "$.version" },
+        { "type": "json", "path": "extensions/vscode/package-lock.json", "jsonpath": "$.version" },
+        { "type": "json", "path": "extensions/vscode/package-lock.json", "jsonpath": "$.packages[''].version" }
+      ]
     }
   }
 }
