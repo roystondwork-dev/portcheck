@@ -519,3 +519,45 @@ func DoctorDoc(config string, checks []DoctorCheckJSON) Document {
 	d.Data = data
 	return d
 }
+
+// BrowserJSON is one browser in `portcheck browser status`.
+type BrowserJSON struct {
+	Browser string `json:"browser"` // chrome | edge | chromium | brave
+	Name    string `json:"name"`
+	// Detected reports whether the browser seems to be installed for this user.
+	Detected bool `json:"detected"`
+	// Registered reports whether portcheck is registered as its native host.
+	Registered bool   `json:"registered"`
+	Manifest   string `json:"manifest"`
+	// Path is the portcheck binary the registration starts.
+	Path string `json:"path,omitempty"`
+	// Extensions are the extension IDs allowed to start it.
+	Extensions []string `json:"extensions,omitempty"`
+}
+
+// BrowsersJSON is the payload of `portcheck browser status|install|uninstall`.
+type BrowsersJSON struct {
+	Host     string        `json:"host"`
+	Browsers []BrowserJSON `json:"browsers"`
+}
+
+// BrowserDoc renders the browser registrations.
+func BrowserDoc(host string, browsers []BrowserJSON) Document {
+	d := Document{
+		Kind:    "browser",
+		Headers: []string{"BROWSER", "INSTALLED", "PORTCHECK", "MANIFEST"},
+		Data:    BrowsersJSON{Host: host, Browsers: append([]BrowserJSON{}, browsers...)},
+	}
+	for _, b := range browsers {
+		installed := T("no", ToneMuted)
+		if b.Detected {
+			installed = C("yes")
+		}
+		registered := T("not registered", ToneMuted)
+		if b.Registered {
+			registered = T("registered", ToneGood)
+		}
+		d.Rows = append(d.Rows, []Cell{C(b.Name), installed, registered, C(b.Manifest)})
+	}
+	return d
+}

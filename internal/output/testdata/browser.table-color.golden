@@ -1,0 +1,4 @@
+[1mBROWSER[m         [1mINSTALLED[m  [1mPORTCHECK[m       [1mMANIFEST[m
+[90m────────────────[m[90m───────────[m[90m────────────────[m[90m─────────────────────────────────────────────────────────────────────────────────────────────────[m
+Google Chrome   yes        [32mregistered[m      /home/alice/.config/google-chrome/NativeMessagingHosts/io.github.roystondwork_dev.portcheck.json
+Microsoft Edge  [90mno[m         [90mnot registered[m  /home/alice/.config/microsoft-edge/NativeMessagingHosts/io.github.roystondwork_dev.portcheck.json
