@@ -15,7 +15,7 @@
     "url": "https://github.com/roystondwork-dev/portcheck/issues"
   },
   "engines": {
-    "vscode": "^1.95.0"
+    "vscode": "^1.98.0"
   },
   "categories": [
     "Other"
@@ -213,7 +213,7 @@
     "@eslint/js": "10.0.1",
     "@types/mocha": "10.0.10",
     "@types/node": "22.20.5",
-    "@types/vscode": "1.95.0",
+    "@types/vscode": "1.98.0",
     "@vitest/coverage-v8": "5.0.5",
     "@vscode/test-electron": "3.1.0",
     "@vscode/vsce": "4.0.0",
