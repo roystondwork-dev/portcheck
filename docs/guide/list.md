@@ -25,13 +25,19 @@ Filters combine with AND.
 | `--port` | `--port 3000-3999,8080` | local port ([port spec](../port-specs.md)) |
 | `--proto` | `--proto tcp` | `tcp` and/or `udp` |
 | `--pid` | `--pid 4242 --pid 4243` | owning process IDs |
-| `--name` | `--name 'node*'` | process name, case-insensitive [glob](https://pkg.go.dev/path#Match) |
+| `--name` | `--name 'node*'` | process or container name, case-insensitive [glob](https://pkg.go.dev/path#Match) |
 | `--state` | `--state ESTABLISHED,TIME_WAIT` | socket state (case-insensitive) |
 
 ```sh
 portcheck list --name 'java*' --state established     # who is java talking to?
 portcheck list --port well-known -l                   # privileged listeners
 ```
+
+## Containers
+
+Ports published by Docker or Podman containers show the container (e.g.
+`docker:web`) instead of the proxy process holding them. See
+[Containers](containers.md).
 
 ## Watching
 

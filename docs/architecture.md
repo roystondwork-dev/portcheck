@@ -15,12 +15,14 @@ flowchart TD
     killer["pkg/killer"]
     scan["pkg/scan"]
     waitfor["pkg/waitfor"]
+    containers["pkg/containers"]
     os[("OS: lsof · /proc · IP Helper API<br/>signals · sockets · DNS")]
 
     main --> cli
     cli --> out & tui & bi
     out --> bi
-    cli --> portspec & inspect & freeport & killer & scan & waitfor
+    cli --> portspec & inspect & freeport & killer & scan & waitfor & containers
+    containers --> inspect
     tui --> inspect & killer
     out --> inspect & freeport & scan
     freeport --> inspect & portspec
@@ -31,6 +33,7 @@ flowchart TD
     freeport -. "bind" .-> os
     scan -. "Dialer / Resolver" .-> os
     waitfor -. "Dialer" .-> os
+    containers -. "Engine API (socket / pipe)" .-> os
 ```
 
 **Dependencies point down only.** `pkg/*` is the public library and must not import
@@ -46,6 +49,7 @@ flowchart TD
 | `pkg/killer` | Guards → SIGTERM → wait → SIGKILL | `ops` interface |
 | `pkg/scan` | Target expansion, worker pool, rate limit, classification | `Dialer`, `Resolver` |
 | `pkg/waitfor` | Poll a condition until it holds or the context ends | `Check`, `Dialer` |
+| `pkg/containers` | Map published ports to containers; implements `inspect.Enricher` | Engine API over a socket (faked with an HTTP server in tests) |
 | `internal/output` | Render a `Document` (JSON payload + toned rows) in 4 formats | writer |
 | `internal/buildinfo` | Version, commit and date from `-ldflags` or Go's embedded build info | `debug.ReadBuildInfo` |
 | `internal/tui` | Pure model; I/O happens in `tea.Cmd`s | `Lister`, `Killer` |

@@ -36,6 +36,8 @@ name and user, case-insensitively.
 ## Colors
 
 - **Green** rows are TCP listeners.
+- **Container** ports show e.g. `docker:web`; pressing ++x++ on one shows the
+  `docker stop` command instead of stopping the proxy (see [Containers](containers.md)).
 - **Dimmed** rows have an owner hidden from your user. Stopping one shows the
   privilege hint; see [Permissions by OS](../permissions.md).
 

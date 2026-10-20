@@ -87,6 +87,7 @@ nav:
       - Scan remote hosts (scan): guide/scan.md
       - Wait for ports (wait): guide/wait.md
       - Interactive view (tui): guide/tui.md
+      - Containers (Docker & Podman): guide/containers.md
       - Scripting & CI: guide/scripting.md
   - Reference:
       - Commands:
