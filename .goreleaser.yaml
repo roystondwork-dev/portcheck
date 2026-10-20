@@ -129,6 +129,43 @@ scoops:
       name: portcheck-release-bot
       email: roystondwork-dev@users.noreply.github.com
 
+# winget: GoReleaser writes the manifest to our fork of microsoft/winget-pkgs
+# and opens a pull request upstream, where Microsoft validates and merges it.
+winget:
+  - name: portcheck
+    package_identifier: RoystonD.portcheck
+    publisher: Royston D
+    publisher_url: https://github.com/roystondwork-dev
+    publisher_support_url: https://github.com/roystondwork-dev/portcheck/issues
+    author: Royston D and portcheck contributors
+    homepage: https://roystondwork-dev.github.io/portcheck/
+    short_description: See what's using your ports, find free ones, free them up, and check remote hosts.
+    description: |-
+      portcheck shows which processes own local TCP and UDP ports, checks whether ports
+      are free, finds free ports, safely stops the process holding a port, and checks
+      ports on remote hosts. It has script-friendly JSON output and exit codes, and an
+      interactive terminal UI.
+    license: MIT
+    license_url: https://github.com/roystondwork-dev/portcheck/blob/main/LICENSE
+    copyright: Copyright (c) 2026 Royston D and portcheck contributors
+    release_notes_url: "https://github.com/roystondwork-dev/portcheck/releases/tag/{{ .Tag }}"
+    tags: [ports, network, netstat, lsof, cli, tui, developer-tools]
+    commit_author:
+      name: portcheck-release-bot
+      email: roystondwork-dev@users.noreply.github.com
+    repository:
+      owner: roystondwork-dev
+      name: winget-pkgs
+      branch: "portcheck-{{ .Version }}"
+      token: "{{ .Env.WINGET_GITHUB_TOKEN }}"
+      pull_request:
+        enabled: true
+        draft: false
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master
+
 release:
   github:
     owner: roystondwork-dev
