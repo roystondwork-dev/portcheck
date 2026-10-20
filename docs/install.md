@@ -71,7 +71,7 @@ using GitHub's OIDC identity (no long-lived keys). It also publishes SPDX SBOMs 
     ```sh
     cosign verify-blob \
       --bundle checksums.txt.sigstore.json \
-      --certificate-identity-regexp '^https://github.com/roystondwork-dev/portcheck/\.github/workflows/release\.yml@refs/tags/v' \
+      --certificate-identity 'https://github.com/roystondwork-dev/portcheck/.github/workflows/release.yml@refs/heads/main' \
       --certificate-oidc-issuer https://token.actions.githubusercontent.com \
       checksums.txt
     ```

@@ -113,6 +113,7 @@ nav:
   - Project:
       - Architecture: architecture.md
       - Development & testing: development.md
+      - Releasing: releasing.md
       - Decision records:
           - Overview: adr/index.md
           - "0001: gopsutil provider": adr/0001-gopsutil-provider.md

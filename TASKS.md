@@ -19,7 +19,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M3 | Remote scanner | 6 / 6 | ✅ |
 | M4 | Interactive TUI | 7 / 7 | ✅ |
 | M5 | Documentation | 9 / 9 | ✅ |
-| M6 | Release & distribution | 0 / 10 | ⬜ |
+| M6 | Release & distribution | 7 / 10 | 🟨 (needs maintainer: tap/bucket repos, secrets, release) |
 
 ---
 
@@ -110,16 +110,16 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 
 | ID | Task | Component / files | Tests required | Status | Notes |
 |---|---|---|---|---|---|
-| M6-01 | GoReleaser: 6 OS/arch binaries, archives, checksums | `.goreleaser.yaml` | `make snapshot` | ⬜ | |
-| M6-02 | nfpm packages: deb / rpm / apk | `.goreleaser.yaml` | snapshot | ⬜ | |
-| M6-03 | Homebrew tap | `roystondwork-dev/homebrew-tap` | — | ⬜ | Needs repo creation (approval) |
-| M6-04 | Scoop bucket | `roystondwork-dev/scoop-bucket` | — | ⬜ | Needs repo creation (approval) |
-| M6-05 | SBOM (syft) + cosign keyless signing | `.goreleaser.yaml` | verify in docs | ⬜ | |
-| M6-06 | SLSA build provenance attestation | `release.yml` | — | ⬜ | |
-| M6-07 | release-please (changelog + version PRs) | `release-please.yml` | — | ⬜ | |
-| M6-08 | Release workflow | `.github/workflows/release.yml` | — | ⬜ | |
-| M6-09 | `CHANGELOG.md` | root | — | ⬜ | managed by release-please |
-| M6-10 | Tag & publish **v0.1.0** | GitHub | install via brew works | ⬜ | Needs approval |
+| M6-01 | GoReleaser: 6 OS/arch binaries, archives, checksums | `.goreleaser.yaml` | `make snapshot` | ✅ | darwin/linux/windows × amd64/arm64; tar.gz (zip on Windows) with completions + man pages; reproducible (`-trimpath`, commit timestamps) |
+| M6-02 | nfpm packages: deb / rpm / apk | `.goreleaser.yaml` | snapshot | ✅ | deb/rpm/apk with binary, bash/zsh/fish completions, man pages, license; contents verified |
+| M6-03 | Homebrew tap | `roystondwork-dev/homebrew-tap` | — | ⛔ | Config ready (`homebrew_casks`, macOS + Linux). Needs repo `roystondwork-dev/homebrew-tap` + `HOMEBREW_TAP_GITHUB_TOKEN` |
+| M6-04 | Scoop bucket | `roystondwork-dev/scoop-bucket` | — | ⛔ | Config ready. Needs repo `roystondwork-dev/scoop-bucket` (same token) |
+| M6-05 | SBOM (syft) + cosign keyless signing | `.goreleaser.yaml` | verify in docs | ✅ | SPDX SBOM per archive (syft, verified locally); keyless cosign bundle for `checksums.txt`; identity documented |
+| M6-06 | SLSA build provenance attestation | `release.yml` | — | ✅ | `actions/attest-build-provenance` over all archives, packages and checksums |
+| M6-07 | release-please (changelog + version PRs) | `release.yml` | — | ✅ | Merged into `release.yml`; minor bumps pre-1.0; `RELEASE_PLEASE_TOKEN` recommended so CI runs on release PRs |
+| M6-08 | Release workflow | `.github/workflows/release.yml` | — | ✅ | `release.yml` (release-please → GoReleaser → provenance); manual re-run for an existing tag; CI runs `goreleaser check` + full snapshot; actionlint added |
+| M6-09 | `CHANGELOG.md` | root | — | ✅ | Seeded; release-please fills it from Conventional Commits |
+| M6-10 | Tag & publish **v0.1.0** | GitHub | install via brew works | ⬜ | Merge the release-please PR once M6-03/04 are done |
 
 ---
 
