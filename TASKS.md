@@ -13,7 +13,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 
 | Milestone | Scope | Done | Status |
 |---|---|---|---|
-| M0 | Bootstrap & project hygiene | 12 / 13 | 🟨 (repo creation pending approval) |
+| M0 | Bootstrap & project hygiene | 13 / 13 | ✅ |
 | M1 | Core library (`pkg/*` except scan) | 7 / 7 | ✅ |
 | M2 | CLI | 11 / 11 | ✅ |
 | M3 | Remote scanner | 0 / 6 | ⬜ |
@@ -35,11 +35,11 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M0-06 | Strict lint config incl. layering rules | `.golangci.yml` | `make lint` passes | ✅ | depguard blocks `pkg → internal/cobra/charm` |
 | M0-07 | Coverage gate config | `.testcoverage.yml` | — | ✅ | pkg 100%, package 95%, total 95% |
 | M0-08 | Git hooks | `lefthook.yml` | — | ✅ | fmt, conventional commit msg, lint+test on push |
-| M0-09 | CI: lint, vuln, 3-OS tests, merged coverage gate, CodeQL, Scorecard, mutation, Dependabot | `.github/` | first CI run green | ✅ | actions pinned by SHA; verified once repo is pushed |
+| M0-09 | CI: lint, vuln, 3-OS tests, merged coverage gate, CodeQL, Scorecard, mutation, Dependabot | `.github/` | first CI run green | ✅ | Actions pinned by SHA; green on Linux, macOS, Windows |
 | M0-10 | Community files | CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, GOVERNANCE, SUPPORT, templates, CODEOWNERS | — | ✅ | |
 | M0-11 | ADR-0001 (gopsutil provider), ADR-0002 (TCP-connect-only scanning) | `docs/adr/` | — | ✅ | |
 | M0-12 | `internal/buildinfo` | `internal/buildinfo` | unit, 100% | ✅ | |
-| M0-13 | Create GitHub repo + push + branch protection | GitHub | CI green on `main` | ⛔ | Needs maintainer approval (outward-facing) |
+| M0-13 | Create GitHub repo + push + branch protection | GitHub | CI green on `main` | ✅ | [roystondwork-dev/portcheck](https://github.com/roystondwork-dev/portcheck); first CI run caught a Linux/Windows bug (remote `0.0.0.0:0`), fixed; `main` requires all CI checks + linear history |
 
 ## M1 — Core library
 
