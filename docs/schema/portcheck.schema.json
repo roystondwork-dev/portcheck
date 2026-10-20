@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://roystondwork-dev.github.io/portcheck/schema/portcheck.schema.json",
+  "title": "portcheck project configuration (.portcheck.yaml)",
+  "description": "Ports a project needs and the state each should be in. Checked by `portcheck doctor`; names can be used with `portcheck run --port <name>`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "ports"],
+  "properties": {
+    "version": {
+      "description": "Configuration format version.",
+      "const": 1
+    },
+    "ports": {
+      "description": "The project's ports.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "port"],
+        "properties": {
+          "name": {
+            "description": "Identifies the entry, e.g. \"web\". Usable with `portcheck run --port <name>`.",
+            "type": "string",
+            "pattern": "^(?![0-9]+$)[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "port": {
+            "description": "Port number.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "proto": {
+            "description": "Protocol (default tcp).",
+            "enum": ["tcp", "udp"],
+            "default": "tcp"
+          },
+          "expect": {
+            "description": "free (default): nothing may listen, so the project can use the port. open: a service must accept connections.",
+            "enum": ["free", "open"],
+            "default": "free"
+          },
+          "host": {
+            "description": "Where an `expect: open` port is checked (default localhost).",
+            "type": "string"
+          },
+          "description": {
+            "description": "Shown in `portcheck doctor` output.",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

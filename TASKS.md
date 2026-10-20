@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M11 — WSL distro attribution; then M12–M13. winget review pending (M7-06)
+**Current milestone:** M13 — native macOS provider. M11 needs a manual WSL check. winget review pending (M7-06)
 **Last updated:** 2026-10-20
 **Latest release:** [v0.3.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.3.0)
 
@@ -25,7 +25,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M9 | `portcheck run` | 6 / 6 | ✅ (released in v0.3.0) |
 | M10 | Parent process ("started by") | 5 / 5 | ✅ |
 | M11 | WSL distro attribution | 3 / 4 | 🟨 (needs a test on a Windows machine with WSL) |
-| M12 | `.portcheck.yaml` + `portcheck doctor` | 0 / 5 | ⬜ |
+| M12 | `.portcheck.yaml` + `portcheck doctor` | 5 / 5 | ✅ |
 | M13 | Native macOS provider (no `lsof`) | 0 / 4 | ⬜ |
 
 ---
@@ -197,6 +197,16 @@ Goal: on Windows, ports forwarded from WSL show the distro and the Linux process
 | M11-03 | Enable on Windows | `internal/cli/app.go` | unit | ✅ | Windows only; zero cost without relay sockets |
 | M11-04 | Docs + manual verification on a Windows machine with WSL | `docs/` | strict docs build; maintainer test | 🟨 | Docs done ("Containers & WSL"). Manual check on a Windows machine with a running distro pending |
 
+## M12 — `.portcheck.yaml` + `portcheck doctor`
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M12-01 | Config file: find upward, strict YAML (unknown keys rejected with line numbers), validation, defaults | `internal/project` | unit, 100% | ✅ | `go.yaml.in/yaml/v3` (maintained successor of gopkg.in/yaml.v3) |
+| M12-02 | Published JSON Schema for editors, kept in sync with the struct by a test | `docs/schema/portcheck.schema.json` | unit | ✅ | Served at the docs site URL in `$id` |
+| M12-03 | `portcheck doctor`: parallel checks, holder-specific fixes (kill / docker / wsl / sudo), exit 0/1/2 | `internal/cli/doctor.go`, `internal/output` | unit + golden + testscript | ✅ | Verified on macOS against real processes |
+| M12-04 | `run --port <name>` | `internal/cli/run.go` | unit + testscript | ✅ | Unknown names list the known ones |
+| M12-05 | Docs | `docs/guide/doctor.md` + schema, exit codes, run, README | strict docs build | ✅ | |
+
 ## What's next (candidates, not yet scheduled)
 
 | Candidate | Notes |
@@ -214,6 +224,7 @@ Goal: on Windows, ports forwarded from WSL show the distro and the Linux process
 | 2026-10-20 | Go CLI + Bubble Tea TUI; MIT license; name `portcheck` | plan |
 | 2026-10-20 | gopsutil behind `inspect.Provider` | [ADR-0001](docs/adr/0001-gopsutil-provider.md) |
 | 2026-10-20 | Scanner is TCP-connect only, no stealth features | [ADR-0002](docs/adr/0002-tcp-connect-only-scanning.md) |
+| 2026-10-20 | Project config is `.portcheck.yaml` (found upward), strict, with a published JSON Schema | M12 |
 | 2026-10-20 | `run` exits with the child's status; Ctrl+C is not relayed (the terminal delivers it), SIGTERM/SIGHUP are | M9 |
 | 2026-10-20 | Container attribution via the Engine API (no Docker SDK); `kill` never stops container proxies | M8 |
 | 2026-10-20 | winget package ID `roystondwork-dev.portcheck` (chosen by maintainer; permanent once accepted) | #10 |

@@ -47,6 +47,7 @@ internal/cli/gendocs  CLI reference + man page generator
 internal/output     table/json/csv/plain renderers
 internal/tui        Bubble Tea interactive UI
 internal/buildinfo  version/commit/date of the binary
+internal/project    .portcheck.yaml loading and validation
 internal/testutil   shared test helpers (golden files)
 pkg/portspec        port list/range parsing          (public library)
 pkg/inspect         local socket → process lookup    (public library)

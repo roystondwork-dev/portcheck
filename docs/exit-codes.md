@@ -4,9 +4,9 @@ portcheck's exit codes are stable and safe to use in scripts.
 
 | Code | Name | Meaning | Examples |
 |---|---|---|---|
-| `0` | OK | Success, and the answer is "yes" | all checked ports are free; free ports found; processes stopped; `scan` found an open port; `wait`: every target ready |
-| `1` | Negative | The command worked, but the answer is "no" | `check`: a port is in use or denied · `free`: not enough free ports · `kill`: nothing listening, PID not found, user declined, protected process refused, port belongs to a container · `scan`: no open ports · `wait`: timed out |
-| `2` | Usage | Invalid arguments or flags | unknown flag, bad port spec, `kill` without `--yes` in a non-interactive shell, `scan` target too large or malformed, `tui` without a terminal |
+| `0` | OK | Success, and the answer is "yes" | all checked ports are free; free ports found; processes stopped; `scan` found an open port; `wait`: every target ready; `doctor`: every check passed |
+| `1` | Negative | The command worked, but the answer is "no" | `check`: a port is in use or denied · `free`: not enough free ports · `kill`: nothing listening, PID not found, user declined, protected process refused, port belongs to a container · `scan`: no open ports · `wait`: timed out · `doctor`: a check needs attention |
+| `2` | Usage | Invalid arguments or flags | unknown flag, bad port spec, `kill` without `--yes` in a non-interactive shell, `scan` target too large or malformed, `tui` without a terminal, missing or invalid `.portcheck.yaml` (`doctor`, `run --port <name>`) |
 | `3` | Runtime | Unexpected error | the OS query failed; the process survived `kill`; a `scan` hostname did not resolve |
 | `4` | Permission | More privileges needed | owner of a port is hidden; not allowed to signal the process |
 | `130` | Interrupted | Cancelled with Ctrl-C | `scan` and `wait` still print the results gathered so far |

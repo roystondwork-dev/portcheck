@@ -9,6 +9,7 @@ flowchart TD
     out["internal/output<br/><small>table · plain · csv · json</small>"]
     tui["internal/tui<br/><small>Bubble Tea model</small>"]
     bi["internal/buildinfo<br/><small>version · commit · date</small>"]
+    proj["internal/project<br/><small>.portcheck.yaml</small>"]
     portspec["pkg/portspec"]
     inspect["pkg/inspect"]
     freeport["pkg/freeport"]
@@ -20,7 +21,7 @@ flowchart TD
     os[("OS: lsof · /proc · IP Helper API<br/>signals · sockets · DNS")]
 
     main --> cli
-    cli --> out & tui & bi
+    cli --> out & tui & bi & proj
     out --> bi
     cli --> portspec & inspect & freeport & killer & scan & waitfor & containers
     containers --> inspect
@@ -56,6 +57,7 @@ flowchart TD
 | `pkg/containers` | Map published ports to containers; implements `inspect.Enricher` | Engine API over a socket (faked with an HTTP server in tests) |
 | `pkg/wsl` | Map WSL-relayed ports to distros and Linux processes; implements `inspect.Enricher` | `wsl.exe` (faked with captured output in tests) |
 | `internal/output` | Render a `Document` (JSON payload + toned rows) in 4 formats | writer |
+| `internal/project` | Find, parse (strict) and validate `.portcheck.yaml` | filesystem |
 | `internal/buildinfo` | Version, commit and date from `-ldflags` or Go's embedded build info | `debug.ReadBuildInfo` |
 | `internal/tui` | Pure model; I/O happens in `tea.Cmd`s | `Lister`, `Killer` |
 | `internal/cli` | Arguments → library calls → `Document` → exit code | `App` struct |

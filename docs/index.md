@@ -54,6 +54,10 @@ PID    PROCESS  RESULT      DETAIL
 
     `portcheck run --port 3000 --next -- npm run dev`: start your dev server on a usable port, with `$PORT` set.
 
+-   :material-stethoscope: **[Project ports](guide/doctor.md)**
+
+    `portcheck doctor`: list your project's ports in `.portcheck.yaml`; get a fix for every problem.
+
 -   :material-monitor-dashboard: **[Interactive view](guide/tui.md)**
 
     `portcheck`: a live, sortable, filterable table. Stop processes without leaving it.
