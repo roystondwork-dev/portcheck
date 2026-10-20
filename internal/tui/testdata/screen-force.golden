@@ -1,0 +1,14 @@
+portcheck  5 listening · tcp+udp · sort: port ↑
+PORT  PROTO  LOCAL ADDRESS   REMOTE ADDRESS  STATE   PID  PROCESS        USER
+22    tcp    0.0.0.0:22      -               LISTEN  -    ?              ?
+3000  tcp    127.0.0.1:3000  -               LISTEN  100  node           alice
+5353  udp    0.0.0.0:5353    -               NONE    300  mDNSResponder  _mdns
+5432  tcp    [::]:5432       -               LISTEN  200  postgres       postgres
+6379  tcp    127.0.0.1:6379  -               LISTEN  400  redis-server   -
+
+
+
+
+
+Force-kill redis-server (pid 400) listening on 6379? [y/N]
+↑↓ move · / filter · tab proto · l listening · s sort · x kill · ? help · q quit

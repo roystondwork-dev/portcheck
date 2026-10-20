@@ -1,0 +1,14 @@
+portcheck  0 listening · tcp+udp · sort: port ↑
+PORT  PROTO  LOCAL ADDRESS  REMOTE ADDRESS  STATE  PID  PROCESS  USER
+no matching sockets — press l to include non-listening sockets, esc to clear the filter
+
+
+
+
+
+
+
+
+
+/zzz 
+↑↓ move · / filter · tab proto · l listening · s sort · x kill · ? help · q quit
