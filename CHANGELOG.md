@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/roystondwork-dev/portcheck/compare/v0.2.0...v0.3.0) (2026-10-20)
+
+
+### Features
+
+* **cli:** add run command ([1f54993](https://github.com/roystondwork-dev/portcheck/commit/1f549934fd3ea6512391fd88661e78eeeeffb916))
+
+
+### Documentation
+
+* document portcheck run ([ef7dd76](https://github.com/roystondwork-dev/portcheck/commit/ef7dd76260ea6284c69ff341eef2ae6421d47da3))
+
 ## [0.2.0](https://github.com/roystondwork-dev/portcheck/compare/v0.1.1...v0.2.0) (2026-10-20)
 
 
