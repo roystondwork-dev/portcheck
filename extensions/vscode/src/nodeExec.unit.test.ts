@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import * as path from "node:path";
 import { describe, expect, it } from "vitest";
 import { PortcheckError } from "./cli";
-import { nodeExec } from "./nodeExec";
+import { nodeExec, settle } from "./nodeExec";
 
 const node = process.execPath;
 
@@ -27,7 +27,15 @@ describe("nodeExec", () => {
     expect((err as Error).message).toBe("portcheck timed out after 200 ms");
   });
 
-  it.skipIf(process.platform === "win32")("reports other start failures", async () => {
+  it("maps every execFile outcome (all platforms)", () => {
+    expect(settle(null, "o", "e", "pc", 1)).toEqual({ stdout: "o", stderr: "e", code: 0 });
+    expect(settle(Object.assign(new Error("exit"), { code: 4 }), "o", "e", "pc", 1)).toEqual({ stdout: "o", stderr: "e", code: 4 });
+    expect((settle(Object.assign(new Error("x"), { code: "ENOENT" }), "", "", "pc", 1) as Error).message).toMatch(/not found \("pc"\)/);
+    expect((settle(Object.assign(new Error("x"), { killed: true }), "", "", "pc", 50) as Error).message).toBe("portcheck timed out after 50 ms");
+    expect((settle(Object.assign(new Error("spawn EACCES"), { code: "EACCES" }), "", "", "pc", 1) as Error).message).toBe("spawn EACCES");
+  });
+
+  it.skipIf(process.platform === "win32")("reports other start failures from the OS", async () => {
     const dir = mkdtempSync(path.join(tmpdir(), "pc-"));
     const f = path.join(dir, "not-executable");
     writeFileSync(f, "#!/bin/sh\n");
