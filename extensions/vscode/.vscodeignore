@@ -3,7 +3,8 @@
 !dist/extension.js
 !dist/portcheck.schema.json
 !bin/**
-!media/**
+!media/icon.png
+!media/ports.svg
 !package.json
 !README.md
 !CHANGELOG.md
