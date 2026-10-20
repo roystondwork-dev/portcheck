@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.1](https://github.com/roystondwork-dev/portcheck/compare/v0.1.0...v0.1.1) (2026-10-20)
+
+
+### Documentation
+
+* correct macOS low-port binding and tidy post-release notes ([b1239dd](https://github.com/roystondwork-dev/portcheck/commit/b1239dd41fbf62188e96f1de5c297971f342572f))
+
+
+### Build & Release
+
+* **release:** publish to winget ([eda703b](https://github.com/roystondwork-dev/portcheck/commit/eda703b2a680c2238a5d7cca0687b57b7c89f994))
+* **release:** use roystondwork-dev.portcheck as the winget package ID ([0bfacee](https://github.com/roystondwork-dev/portcheck/commit/0bfaceefd04d6cdd1daae93e2e833edd3897643e))
+
 ## 0.1.0 (2026-10-20)
 
 
