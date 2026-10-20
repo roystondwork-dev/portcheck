@@ -146,6 +146,27 @@ detected on the wire. With `--open`, `results` contains only open ports, but
 `detail` and `fix` are human-readable and may change between releases; match on `ok`
 and `status` in scripts.
 
+## `browser`
+
+`portcheck browser status`, `install` and `uninstall` print the browsers they looked at:
+
+```json
+{
+  "host": "io.github.roystondwork_dev.portcheck",
+  "browsers": [
+    { "browser": "chrome", "name": "Google Chrome", "detected": true, "registered": true,
+      "manifest": "/home/alice/.config/google-chrome/NativeMessagingHosts/io.github.roystondwork_dev.portcheck.json",
+      "path": "/usr/local/bin/portcheck", "extensions": ["fmocabgaaihiflefcdafnhoihcibgnhl"] },
+    { "browser": "edge", "name": "Microsoft Edge", "detected": false, "registered": false,
+      "manifest": "/home/alice/.config/microsoft-edge/NativeMessagingHosts/io.github.roystondwork_dev.portcheck.json" }
+  ]
+}
+```
+
+`detected` means the browser seems to be installed for this user; `registered` means
+portcheck is its native messaging host, starting `path` for the extension IDs in
+`extensions`.
+
 ## `version`
 
 ```json

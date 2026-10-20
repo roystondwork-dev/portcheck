@@ -98,6 +98,10 @@ nav:
           - check: commands/portcheck_check.md
           - completion: commands/portcheck_completion.md
           - doctor: commands/portcheck_doctor.md
+          - browser: commands/portcheck_browser.md
+          - browser install: commands/portcheck_browser_install.md
+          - browser status: commands/portcheck_browser_status.md
+          - browser uninstall: commands/portcheck_browser_uninstall.md
           - completion bash: commands/portcheck_completion_bash.md
           - completion fish: commands/portcheck_completion_fish.md
           - completion powershell: commands/portcheck_completion_powershell.md
@@ -128,3 +132,4 @@ nav:
           - "0002: TCP connect scanning": adr/0002-tcp-connect-only-scanning.md
           - "0003: Native macOS sockets": adr/0003-native-macos-sockets.md
           - "0004: VS Code extension": adr/0004-vscode-extension.md
+          - "0005: Browser extension": adr/0005-browser-extension.md

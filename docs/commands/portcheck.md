@@ -47,6 +47,7 @@ portcheck [port...] [flags]
 
 ### SEE ALSO
 
+* [portcheck browser](portcheck_browser.md)	 - Connect portcheck to the browser extension
 * [portcheck check](portcheck_check.md)	 - Check whether ports are free and show who holds them
 * [portcheck completion](portcheck_completion.md)	 - Generate the autocompletion script for the specified shell
 * [portcheck doctor](portcheck_doctor.md)	 - Check a project's ports against .portcheck.yaml
