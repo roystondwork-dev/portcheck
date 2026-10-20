@@ -17,6 +17,8 @@ export interface PortcheckApi {
   project: ProjectPorts;
   /** Replaces how the extension asks the user things (tests script the answers). */
   setUI: (ui: UI) => void;
+  /** The extension's own notifications and menus, for wrapping in setUI. */
+  defaultUI: UI;
 }
 
 export function activate(ctx: vscode.ExtensionContext): PortcheckApi {
@@ -93,6 +95,7 @@ export function activate(ctx: vscode.ExtensionContext): PortcheckApi {
     setUI: (u) => {
       ui = u;
     },
+    defaultUI: vscodeUI,
   };
 }
 
