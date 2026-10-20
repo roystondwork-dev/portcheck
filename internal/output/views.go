@@ -37,6 +37,9 @@ type ContainerJSON struct {
 	Runtime    string `json:"runtime"`
 	Process    string `json:"process,omitempty"`
 	ProcessPID int32  `json:"processPid,omitempty"`
+	// StopHint is the command that stops what holds the port without touching
+	// the host proxy, e.g. "docker stop web".
+	StopHint string `json:"stopHint"`
 }
 
 // ProcessJSON is a socket's owning process.
@@ -118,7 +121,10 @@ func socketJSON(s inspect.Socket) SocketJSON {
 		out.Process = pj
 	}
 	if c := s.Container; c != nil {
-		out.Container = &ContainerJSON{ID: c.ID, Name: c.Name, Image: c.Image, Runtime: c.Runtime, Process: c.Process, ProcessPID: c.ProcessPID}
+		out.Container = &ContainerJSON{
+			ID: c.ID, Name: c.Name, Image: c.Image, Runtime: c.Runtime,
+			Process: c.Process, ProcessPID: c.ProcessPID, StopHint: StopHint(c),
+		}
 	}
 	return out
 }

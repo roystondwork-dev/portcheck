@@ -62,6 +62,7 @@ present, and empty arrays are `[]`, never `null`.
 | `runtime` | string | `docker`, `podman` or `wsl` |
 | `process` | string, optional | process inside the container or distro, when known |
 | `processPid` | number, optional | its PID inside the container or distro |
+| `stopHint` | string | command that stops it without touching the host proxy, e.g. `docker stop web` or `wsl -d Ubuntu --exec kill 1234` |
 
 ## `list`
 
