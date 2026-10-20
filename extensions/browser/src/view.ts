@@ -123,16 +123,21 @@ export interface SetupHelp {
   steps: { text: string; command?: string }[];
 }
 
-/** What to tell the user when portcheck can't be reached. */
-export function setupHelp(problem: HostProblem, message: string): SetupHelp {
+/**
+ * What to tell the user when portcheck can't be reached. extensionId is this
+ * extension's ID: if portcheck doesn't know it yet (a store build), the
+ * connect command names it.
+ */
+export function setupHelp(problem: HostProblem, message: string, extensionId: string, knownIds: readonly string[]): SetupHelp {
   if (problem === "failed") {
     return { headline: "portcheck reported a problem", intro: message, steps: [] };
   }
+  const connect = knownIds.includes(extensionId) ? "portcheck browser install" : `portcheck browser install --extension-id ${extensionId}`;
   if (problem === "forbidden") {
     return {
       headline: "Reconnect portcheck",
       intro: "portcheck is installed but doesn't allow this extension yet.",
-      steps: [{ text: "Update portcheck, then run:", command: "portcheck browser install" }],
+      steps: [{ text: "Update portcheck, then run:", command: connect }],
     };
   }
   return {
@@ -144,7 +149,7 @@ export function setupHelp(problem: HostProblem, message: string): SetupHelp {
         text: "or on Windows",
         command: "scoop bucket add portcheck https://github.com/roystondwork-dev/scoop-bucket; scoop install portcheck",
       },
-      { text: "Connect it to this browser", command: "portcheck browser install" },
+      { text: "Connect it to this browser", command: connect },
     ],
   };
 }

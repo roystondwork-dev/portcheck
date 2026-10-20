@@ -80,15 +80,21 @@ describe("portView", () => {
 
 describe("setupHelp", () => {
   it("guides installing and connecting portcheck", () => {
-    const h = setupHelp("not-installed", "");
+    const h = setupHelp("not-installed", "", "fmocabgaaihiflefcdafnhoihcibgnhl", ["fmocabgaaihiflefcdafnhoihcibgnhl"]);
     expect(h.headline).toBe("Connect portcheck");
     expect(h.steps.map((s) => s.command)).toEqual([
       "brew install roystondwork-dev/tap/portcheck",
       "scoop bucket add portcheck https://github.com/roystondwork-dev/scoop-bucket; scoop install portcheck",
       "portcheck browser install",
     ]);
-    expect(setupHelp("forbidden", "").steps).toEqual([{ text: "Update portcheck, then run:", command: "portcheck browser install" }]);
-    expect(setupHelp("failed", "boom")).toEqual({ headline: "portcheck reported a problem", intro: "boom", steps: [] });
+    expect(setupHelp("forbidden", "", "x", ["x"]).steps).toEqual([{ text: "Update portcheck, then run:", command: "portcheck browser install" }]);
+    expect(setupHelp("failed", "boom", "x", [])).toEqual({ headline: "portcheck reported a problem", intro: "boom", steps: [] });
+  });
+
+  it("names a store build's ID that portcheck doesn't know yet", () => {
+    const id = "abcdefghijklmnopabcdefghijklmnop";
+    expect(setupHelp("forbidden", "", id, ["fmocabgaaihiflefcdafnhoihcibgnhl"]).steps[0]?.command).toBe(`portcheck browser install --extension-id ${id}`);
+    expect(setupHelp("not-installed", "", id, []).steps[2]?.command).toBe(`portcheck browser install --extension-id ${id}`);
   });
 });
 

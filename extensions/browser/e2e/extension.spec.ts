@@ -38,8 +38,12 @@ const hostBinary = (() => {
   };
 })();
 
-/** Starts Chromium with the extension; registers portcheck in its profile unless told not to. */
-async function launch(register: boolean): Promise<Browser> {
+/**
+ * Starts Chromium with the extension; registers portcheck in its profile for
+ * the given extension IDs (none: not registered).
+ */
+async function launch(register: boolean, opts: { dist?: string; allow?: string[] } = {}): Promise<Browser> {
+  const dist = opts.dist ?? DIST;
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "pc-chromium-"));
   if (register) {
     // Chromium also reads native messaging hosts from <profile>/NativeMessagingHosts.
@@ -47,15 +51,23 @@ async function launch(register: boolean): Promise<Browser> {
     fs.mkdirSync(dir);
     fs.writeFileSync(
       path.join(dir, `${HOST}.json`),
-      JSON.stringify({ name: HOST, description: "portcheck (test)", path: hostBinary(), type: "stdio", allowed_origins: [`chrome-extension://${EXT_ID}/`] }),
+      JSON.stringify({
+        name: HOST,
+        description: "portcheck (test)",
+        path: hostBinary(),
+        type: "stdio",
+        allowed_origins: (opts.allow ?? [EXT_ID]).map((id) => `chrome-extension://${id}/`),
+      }),
     );
   }
   const context = await chromium.launchPersistentContext(profile, {
     channel: "chromium",
-    args: [`--disable-extensions-except=${DIST}`, `--load-extension=${DIST}`],
+    args: [`--disable-extensions-except=${dist}`, `--load-extension=${dist}`],
   });
   const worker = context.serviceWorkers()[0] ?? (await context.waitForEvent("serviceworker"));
-  expect(worker.url()).toBe(`chrome-extension://${EXT_ID}/background.js`);
+  if (dist === DIST) {
+    expect(worker.url()).toBe(`chrome-extension://${EXT_ID}/background.js`);
+  }
   return { context, worker };
 }
 
@@ -220,5 +232,37 @@ test("without portcheck, the popup explains how to set it up", async () => {
     await expect(popup.locator("#ports")).toBeHidden();
   } finally {
     await b.context.close();
+  }
+});
+
+test("a store build (another ID) asks to be allowed, then works", async () => {
+  // Store builds have no manifest key, so the browser assigns another ID.
+  const storeDist = path.join(ROOT, "dist-store");
+  expect(fs.existsSync(storeDist), 'run "npm run build:store"').toBe(true);
+  const first = await launch(true, { dist: storeDist });
+  const id = new URL(first.worker.url()).host;
+  expect(id).not.toBe(EXT_ID);
+  try {
+    const popup = await first.context.newPage();
+    await popup.goto(`chrome-extension://${id}/popup.html`);
+    await expect(popup.locator(".address")).toHaveText("Reconnect portcheck");
+    await expect(popup.locator("code")).toHaveText(`portcheck browser install --extension-id ${id}`);
+  } finally {
+    await first.context.close();
+  }
+
+  // After `portcheck browser install --extension-id <id>` it connects.
+  const { child, port } = await holdPort();
+  const second = await launch(true, { dist: storeDist, allow: [EXT_ID, id] });
+  try {
+    expect(new URL(second.worker.url()).host).toBe(id);
+    const page = await second.context.newPage();
+    const url = `http://127.0.0.1:${port}/`;
+    await page.goto(url);
+    const tab = await tabId(second.worker, url);
+    await expect.poll(async () => (await badgeOf(second.worker, tab)).text).toBe("node");
+  } finally {
+    await second.context.close();
+    child.kill();
   }
 });

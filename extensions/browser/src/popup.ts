@@ -1,5 +1,5 @@
 // The toolbar popup: the current local page's port, and the machine's ports.
-import { call, HostError, type SendNative } from "./host";
+import { call, HostError, PINNED_ID, type SendNative } from "./host";
 import { type LocalTarget, localTarget } from "./local";
 import { listedPorts, portState } from "./model";
 import type { CheckData, KillData, ListData } from "./schema";
@@ -97,7 +97,7 @@ function hero(address: string, chip?: { text: string; status: string }, summary?
 
 function showSetup(section: HTMLElement, err: unknown): void {
   const e = err instanceof HostError ? err : new HostError(String(err), "failed");
-  const help = setupHelp(e.problem, e.message);
+  const help = setupHelp(e.problem, e.message, chrome.runtime.id, [PINNED_ID]);
   const steps = el(
     "ol",
     { className: "steps" },

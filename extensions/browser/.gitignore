@@ -4,3 +4,5 @@ coverage/
 test-results/
 playwright-report/
 *.zip
+dist-store/
+store/out/

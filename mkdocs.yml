@@ -122,6 +122,7 @@ nav:
       - Permissions by OS: permissions.md
       - Troubleshooting: troubleshooting.md
       - FAQ: faq.md
+      - Privacy: privacy.md
   - Go library: library.md
   - Project:
       - Architecture: architecture.md

@@ -5,6 +5,13 @@ import { type Envelope, SCHEMA_VERSION } from "./schema";
 /** The name portcheck registers with `portcheck browser install`. */
 export const HOST = "io.github.roystondwork_dev.portcheck";
 
+/**
+ * The extension ID pinned by the manifest key (release zips). portcheck allows
+ * it by default; store builds get other IDs, which portcheck learns per
+ * release (or via `portcheck browser install --extension-id`).
+ */
+export const PINNED_ID = "fmocabgaaihiflefcdafnhoihcibgnhl";
+
 export type Request =
   | { op: "version" }
   | { op: "list" }
