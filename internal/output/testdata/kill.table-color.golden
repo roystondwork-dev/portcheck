@@ -1,0 +1,7 @@
+[1mPID[m   [1mPROCESS[m  [1mRESULT[m          [1mDETAIL[m
+[90m──────[m[90m─────────[m[90m────────────────[m[90m──────────────────────────────────[m
+4242  node     [32mterminated[m
+77    java     [32mkilled[m
+1     launchd  [1;31mfailed[m          refusing to kill protected process
+99    ?        [90malready-exited[m
+5     x        [90mdry-run[m

@@ -1,0 +1,30 @@
+# Full lifecycle against a real process: detect, inspect, refuse, kill, verify.
+
+holdport
+
+exits 1 portcheck check $PORT
+stdout 'in-use'
+stdout $HOLDER_PID
+
+exits 1 portcheck $PORT --json
+stdout '"status": "in-use"'
+
+exec portcheck list --listening --port $PORT -o csv
+stdout 'tcp,127\.0\.0\.1:'$PORT',-,LISTEN,'$HOLDER_PID
+
+# No terminal and no --yes: refuse.
+exits 2 portcheck kill $PORT
+stderr 'pass --yes'
+
+exec portcheck kill $PORT --dry-run
+stdout 'dry-run'
+
+exec portcheck kill $PORT --yes --grace 5s
+stdout $HOLDER_PID
+stdout 'terminated'
+
+exec portcheck check $PORT
+stdout 'free'
+
+exits 1 portcheck kill $PORT --yes
+stderr 'Nothing is listening'

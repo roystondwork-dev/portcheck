@@ -1,0 +1,10 @@
+# Listing and filters.
+
+exec portcheck list --json --port 1
+stdout '"sockets": \[\]'
+
+exec portcheck list -l -o csv
+stdout '^PROTO,LOCAL ADDRESS,REMOTE ADDRESS,STATE,PID,PROCESS,USER$'
+
+exits 2 portcheck list --proto sctp
+stderr 'unknown protocol'

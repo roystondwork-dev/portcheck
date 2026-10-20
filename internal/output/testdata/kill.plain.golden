@@ -1,0 +1,6 @@
+PID   PROCESS  RESULT          DETAIL
+4242  node     terminated
+77    java     killed
+1     launchd  failed          refusing to kill protected process
+99    ?        already-exited
+5     x        dry-run

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "kind": "free",
+  "data": {
+    "ports": [
+      3001,
+      3002
+    ]
+  }
+}

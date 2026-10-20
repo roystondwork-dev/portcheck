@@ -1,0 +1,12 @@
+# Free-port discovery with real binds.
+
+exec portcheck free 40000-40100 -n 2 -o plain
+stdout '^PORT$'
+stdout -count=2 '^4\d{4}$'
+
+exec portcheck free --random 40000-40100 --json
+stdout '"kind": "free"'
+stdout '"ports": \['
+
+exits 2 portcheck free 0
+stderr 'out of range'

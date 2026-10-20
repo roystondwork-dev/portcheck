@@ -1,0 +1,27 @@
+# Help, version and usage errors.
+
+exec portcheck --help
+stdout 'Usage:'
+stdout 'portcheck \[port\.\.\.\]'
+! stderr .
+
+exec portcheck version
+stdout '^portcheck '
+
+exec portcheck version --json
+stdout '"schemaVersion": 1'
+stdout '"kind": "version"'
+
+exits 2 portcheck lsit
+stderr 'unknown command "lsit"'
+stderr 'Did you mean this\?'
+
+exits 2 portcheck list --bogus
+stderr 'unknown flag: --bogus'
+stderr 'portcheck list --help'
+
+exits 2 portcheck free --random -n 2
+stderr 'single port'
+
+exec portcheck completion bash
+stdout 'bash completion'

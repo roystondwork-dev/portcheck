@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "kill",
+  "data": {
+    "results": [
+      {
+        "pid": 4242,
+        "name": "node",
+        "outcome": "terminated"
+      },
+      {
+        "pid": 77,
+        "name": "java",
+        "outcome": "killed"
+      },
+      {
+        "pid": 1,
+        "name": "launchd",
+        "outcome": "failed",
+        "error": "refusing to kill protected process"
+      },
+      {
+        "pid": 99,
+        "outcome": "already-exited"
+      },
+      {
+        "pid": 5,
+        "name": "x",
+        "outcome": "dry-run"
+      }
+    ]
+  }
+}

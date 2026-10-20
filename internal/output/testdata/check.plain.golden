@@ -1,0 +1,5 @@
+PORT  PROTO  STATUS  PID   PROCESS  USER
+3000  tcp    in-use  4242  node     alice
+3001  tcp    free    -     -        -
+80    tcp    denied  -     -        -
+22    tcp    in-use  -     -        -

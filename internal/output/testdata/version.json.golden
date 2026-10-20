@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "kind": "version",
+  "data": {
+    "version": "v0.1.0",
+    "commit": "abc123",
+    "date": "2026-10-20T00:00:00Z",
+    "modified": false,
+    "goVersion": "go1.27.3",
+    "platform": "darwin/arm64"
+  }
+}

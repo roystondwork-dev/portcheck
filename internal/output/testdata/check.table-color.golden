@@ -1,0 +1,6 @@
+[1mPORT[m  [1mPROTO[m  [1mSTATUS[m  [1mPID[m   [1mPROCESS[m  [1mUSER[m
+[90m──────[m[90m───────[m[90m────────[m[90m──────[m[90m─────────[m[90m─────[m
+3000  tcp    [1;31min-use[m  4242  node     alice
+3001  tcp    [32mfree[m    [90m-[m     [90m-[m        [90m-[m
+80    tcp    [33mdenied[m  [90m-[m     [90m-[m        [90m-[m
+22    tcp    [1;31min-use[m  [90m-[m     [90m-[m        [90m-[m

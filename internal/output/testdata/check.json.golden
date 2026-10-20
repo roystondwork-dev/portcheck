@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "check",
+  "data": {
+    "ports": [
+      {
+        "port": 3000,
+        "proto": "tcp",
+        "status": "in-use",
+        "holders": [
+          {
+            "proto": "tcp",
+            "localAddress": "127.0.0.1",
+            "localPort": 3000,
+            "state": "LISTEN",
+            "pid": 4242,
+            "process": {
+              "pid": 4242,
+              "name": "node",
+              "user": "alice",
+              "cmdline": "node server.js",
+              "exe": "/usr/local/bin/node",
+              "startTime": "2026-10-20T09:30:00Z"
+            }
+          }
+        ]
+      },
+      {
+        "port": 3001,
+        "proto": "tcp",
+        "status": "free",
+        "holders": []
+      },
+      {
+        "port": 80,
+        "proto": "tcp",
+        "status": "denied",
+        "holders": []
+      },
+      {
+        "port": 22,
+        "proto": "tcp",
+        "status": "in-use",
+        "holders": []
+      }
+    ]
+  }
+}
