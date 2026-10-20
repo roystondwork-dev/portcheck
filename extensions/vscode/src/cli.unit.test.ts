@@ -17,15 +17,18 @@ function fakeExec(result: Partial<ExecResult>, calls: string[][] = []): ExecFn {
 }
 
 describe("resolveBinary", () => {
-  const base = { extensionPath: "/ext", platform: "darwin" as NodeJS.Platform, exists: () => false };
+  const base = { extensionPath: "/ext", platform: "darwin" as NodeJS.Platform, arch: "arm64", exists: () => false };
   it("prefers the configured path", () => {
     expect(resolveBinary({ ...base, configured: "  /opt/portcheck  " })).toBe("/opt/portcheck");
   });
-  it("uses the bundled binary when present", () => {
-    expect(resolveBinary({ ...base, configured: "", exists: () => true })).toBe(path.join("/ext", "bin", "portcheck"));
-    expect(resolveBinary({ ...base, configured: "", platform: "win32", exists: () => true })).toBe(
-      path.join("/ext", "bin", "portcheck.exe"),
+  it("uses the binary bundled for this OS and CPU", () => {
+    const seen: string[] = [];
+    const exists = (f: string) => (seen.push(f), true);
+    expect(resolveBinary({ ...base, configured: "", exists })).toBe(path.join("/ext", "bin", "darwin-arm64", "portcheck"));
+    expect(resolveBinary({ ...base, configured: "", platform: "win32", arch: "x64", exists })).toBe(
+      path.join("/ext", "bin", "win32-x64", "portcheck.exe"),
     );
+    expect(seen).toHaveLength(2);
   });
   it("falls back to PATH", () => {
     expect(resolveBinary({ ...base, configured: " " })).toBe("portcheck");

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Builds one VSIX per platform, each bundling that platform's portcheck binary
-# taken from the release archives (ADR-0004). Every archive is checked against
-# the release's checksums.txt first.
+# Builds the release VSIX: one package for every platform, carrying portcheck
+# for each OS and CPU in bin/<platform>-<arch>/ (the extension picks the right
+# one at runtime). One file keeps uploads simple, e.g. on the Marketplace's
+# website. Every archive is checked against the release's checksums.txt first.
 #
 # Usage: scripts/package-platforms.sh <version> <assets-dir> <out-dir>
 #   <assets-dir> holds checksums.txt and the portcheck_<version>_<os>_<arch>
@@ -41,15 +42,16 @@ done
 
 npm run build
 trap 'rm -rf bin' EXIT
+rm -rf bin
 for t in $targets; do
   target=${t%%:*}
   name=$(archive "${t#*:}")
-  rm -rf bin && mkdir bin
+  mkdir -p "bin/$target"
   if [[ $name == *.zip ]]; then
-    unzip -q -j "$assets/$name" portcheck.exe -d bin
+    unzip -q -j "$assets/$name" portcheck.exe -d "bin/$target"
   else
-    tar -xzf "$assets/$name" -C bin portcheck
+    tar -xzf "$assets/$name" -C "bin/$target" portcheck
   fi
-  chmod 755 bin/portcheck*
-  npx vsce package --no-dependencies --target "$target" --out "$out/portcheck-vscode-${target}-${version}.vsix"
 done
+chmod 755 bin/*/portcheck*
+npx vsce package --no-dependencies --out "$out/portcheck-vscode-${version}.vsix"

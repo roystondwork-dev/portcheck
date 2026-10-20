@@ -27,6 +27,7 @@ export function activate(ctx: vscode.ExtensionContext): PortcheckApi {
       configured: settings().get<string>("path", ""),
       extensionPath: ctx.extensionPath,
       platform: process.platform,
+      arch: process.arch,
       exists: fs.existsSync,
     });
 
