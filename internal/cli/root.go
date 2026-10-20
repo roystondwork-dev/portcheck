@@ -45,7 +45,8 @@ Running 'portcheck' alone in an interactive terminal opens the live TUI
   portcheck free -n 3             # three free ports
   portcheck kill 8080             # stop whatever listens on 8080
   portcheck scan db.internal -p 5432,6379
-  portcheck wait 5432 -t 60s      # block until Postgres accepts connections`,
+  portcheck wait 5432 -t 60s      # block until Postgres accepts connections
+  portcheck run --port 3000 --next -- npm start`,
 		Version:           app.Build.Version,
 		DisableAutoGenTag: true, // keep generated docs reproducible
 		Args:              cobra.ArbitraryArgs,
@@ -93,6 +94,7 @@ Running 'portcheck' alone in an interactive terminal opens the live TUI
 		c.newScanCmd(),
 		c.newTUICmd(),
 		c.newWaitCmd(),
+		c.newRunCmd(),
 		c.newVersionCmd(),
 	)
 	return root

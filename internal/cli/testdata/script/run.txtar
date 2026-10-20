@@ -1,0 +1,33 @@
+# portcheck run with a real child process ($CHILD is the test binary acting
+# as a small program, controlled by PORTCHECK_TEST_CHILD).
+
+env PORTCHECK_TEST_CHILD=echo
+
+# Auto-selected port, passed in $PORT and substituted for {port}.
+exec portcheck run -q --range 40000-40100 -- $CHILD {port}
+stdout '^PORT=4\d{4} ARGS=4\d{4}$'
+! stderr .
+
+# Busy port: explain and refuse by default.
+holdport
+exits 1 portcheck run --port $PORT -- $CHILD
+stderr 'is in use by'
+! stdout .
+
+# --next picks another port.
+exec portcheck run -q --port $PORT --next -- $CHILD
+stdout '^PORT=\d+ '
+! stdout 'PORT='$PORT' '
+
+# --kill stops the holder and uses the requested port.
+exec portcheck run --port $PORT --kill --yes -- $CHILD
+stderr 'terminated'
+stdout '^PORT='$PORT' '
+
+# The child's exit code is passed through.
+env PORTCHECK_TEST_CHILD=exit:5
+exits 5 portcheck run -q --range 40000-40100 -- $CHILD
+
+# A missing command exits 127.
+exits 127 portcheck run -q -- portcheck-no-such-command
+stderr 'cannot run portcheck-no-such-command'

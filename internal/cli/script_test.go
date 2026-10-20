@@ -2,6 +2,7 @@ package cli_test
 
 import (
 	"errors"
+	"fmt"
 	"net"
 	"os"
 	"os/exec"
@@ -20,14 +21,37 @@ import (
 // TCP port, writes the port number to the named file, and waits to be killed.
 const holdPortEnv = "PORTCHECK_TEST_HOLDPORT"
 
+// childEnv makes the test binary act as a child process for runner tests:
+// "exit:N" exits with N, "echo" prints $PORT and its arguments, "sigterm"
+// kills itself with SIGTERM.
+const childEnv = "PORTCHECK_TEST_CHILD"
+
 func TestMain(m *testing.M) {
 	if file := os.Getenv(holdPortEnv); file != "" {
 		holdPort(file)
 		return
 	}
+	// testscript runs `portcheck` as this binary too; only other names act as the child.
+	if mode := os.Getenv(childEnv); mode != "" && !strings.HasPrefix(filepath.Base(os.Args[0]), "portcheck") {
+		os.Exit(runChild(mode))
+	}
 	testscript.Main(m, map[string]func(){
 		"portcheck": func() { os.Exit(cli.Main(os.Args[1:])) },
 	})
+}
+
+func runChild(mode string) int {
+	switch {
+	case strings.HasPrefix(mode, "exit:"):
+		n, _ := strconv.Atoi(strings.TrimPrefix(mode, "exit:"))
+		return n
+	case mode == "echo":
+		fmt.Printf("PORT=%s ARGS=%s\n", os.Getenv("PORT"), strings.Join(os.Args[1:], ","))
+		return 0
+	case mode == "sigterm":
+		return killSelf()
+	}
+	return 99
 }
 
 func holdPort(file string) {
@@ -55,6 +79,11 @@ func TestScripts(t *testing.T) {
 		Cmds: map[string]func(*testscript.TestScript, bool, []string){
 			"holdport": cmdHoldPort,
 			"exits":    cmdExits,
+		},
+		Setup: func(env *testscript.Env) error {
+			// Lets scripts run the test binary as a child of `portcheck run`.
+			env.Setenv("CHILD", os.Args[0])
+			return nil
 		},
 	})
 }
