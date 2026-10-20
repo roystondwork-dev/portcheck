@@ -26,7 +26,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M10 | Parent process ("started by") | 5 / 5 | ✅ |
 | M11 | WSL distro attribution | 3 / 4 | 🟨 (needs a test on a Windows machine with WSL) |
 | M12 | `.portcheck.yaml` + `portcheck doctor` | 5 / 5 | ✅ |
-| M13 | Native macOS provider (no `lsof`) | 0 / 4 | ⬜ |
+| M13 | Native macOS provider (no `lsof`) | 4 / 4 | ✅ |
 
 ---
 
@@ -206,6 +206,15 @@ Goal: on Windows, ports forwarded from WSL show the distro and the Linux process
 | M12-03 | `portcheck doctor`: parallel checks, holder-specific fixes (kill / docker / wsl / sudo), exit 0/1/2 | `internal/cli/doctor.go`, `internal/output` | unit + golden + testscript | ✅ | Verified on macOS against real processes |
 | M12-04 | `run --port <name>` | `internal/cli/run.go` | unit + testscript | ✅ | Unknown names list the known ones |
 | M12-05 | Docs | `docs/guide/doctor.md` + schema, exit codes, run, README | strict docs build | ✅ | |
+
+## M13 — Native macOS provider
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M13-01 | libproc socket enumeration (portable logic + `socket_fdinfo` decoder) | `pkg/inspect/libproc.go` | unit on every OS, 100% | ✅ | Offsets from the macOS SDK; identical on arm64 and x86_64 |
+| M13-02 | purego binding to libSystem (no cgo), `lsof` fallback on failure | `pkg/inspect/libproc_darwin.go`, `system.go` | unit with fake function pointers | ✅ | `unsafe.Pointer` buffers only (audited) |
+| M13-03 | Verification: SDK layout check with clang (both arches); live comparison with `lsof` | `libproc_*darwin_test.go` | integration (macOS CI) | ✅ | Agreed on all 10 listening sockets here; identical `list -l` output |
+| M13-04 | ADR-0003 and docs | `docs/adr`, permissions, architecture, troubleshooting | strict docs build | ✅ | Socket listing 43 ms → 4 ms; `list` warm ~20 ms → <10 ms |
 
 ## What's next (candidates, not yet scheduled)
 

@@ -1,6 +1,6 @@
 # ADR-0001: Use gopsutil behind a Provider interface for socket/process data
 
-- **Status:** Accepted
+- **Status:** Accepted; amended for macOS socket listing by [ADR-0003](0003-native-macos-sockets.md)
 - **Date:** 2026-10-20
 
 ## Context

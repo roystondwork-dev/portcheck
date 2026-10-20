@@ -20,9 +20,11 @@ denied). In JSON, `pid` or `process` is omitted accordingly and `partial` is
 
 ## macOS
 
-portcheck reads sockets through `lsof`, which is part of every macOS install. Without
-root, `lsof` only reports your own processes, so other users' sockets are **missing**,
-not just anonymous. `portcheck check` still detects that such a port is busy, because
+portcheck reads sockets directly through libproc, the same system interface `lsof`
+uses (falling back to running `lsof` if that ever fails; see
+[ADR-0003](adr/0003-native-macos-sockets.md)). Without root, macOS only lets you
+inspect your own processes, so other users' sockets are **missing**, not just
+anonymous. `portcheck check` still detects that such a port is busy, because
 it also tries to bind it, but cannot name the owner.
 
 ```sh

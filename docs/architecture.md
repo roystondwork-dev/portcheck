@@ -18,7 +18,7 @@ flowchart TD
     waitfor["pkg/waitfor"]
     containers["pkg/containers"]
     wslpkg["pkg/wsl"]
-    os[("OS: lsof · /proc · IP Helper API<br/>signals · sockets · DNS")]
+    os[("OS: libproc · /proc · IP Helper API<br/>signals · sockets · DNS")]
 
     main --> cli
     cli --> out & tui & bi & proj
@@ -49,7 +49,7 @@ flowchart TD
 | Package | Responsibility | OS boundary (faked in tests) |
 |---|---|---|
 | `pkg/portspec` | Parse, normalize and iterate port sets | none |
-| `pkg/inspect` | Filter, de-duplicate, enrich and sort sockets | `Provider` (gopsutil; [ADR-0001](adr/0001-gopsutil-provider.md)) |
+| `pkg/inspect` | Filter, de-duplicate, enrich and sort sockets | `Provider`: gopsutil ([ADR-0001](adr/0001-gopsutil-provider.md)); on macOS libproc via purego ([ADR-0003](adr/0003-native-macos-sockets.md)) |
 | `pkg/freeport` | Free = no visible listener **and** bindable on 4 addresses | `Lister`, `bind` func |
 | `pkg/killer` | Guards → SIGTERM → wait → SIGKILL | `ops` interface |
 | `pkg/scan` | Target expansion, worker pool, rate limit, classification | `Dialer`, `Resolver` |
