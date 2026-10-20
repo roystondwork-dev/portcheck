@@ -208,9 +208,8 @@ func (c *cli) explainContainers(published map[inspect.Container][]uint16) {
 		for i, p := range published[ctr] {
 			ps[i] = strconv.Itoa(int(p))
 		}
-		ref := cmp.Or(ctr.Name, ctr.ID)
-		fmt.Fprintf(c.app.Stderr, "Port %s is published by %s container %q (%s). Stop the container instead:\n  %s stop %s\n",
-			strings.Join(ps, ", "), ctr.Runtime, ref, cmp.Or(ctr.Image, "unknown image"), ctr.Runtime, ref)
+		fmt.Fprintf(c.app.Stderr, "Port %s is %s. Stop it there instead:\n  %s\n",
+			strings.Join(ps, ", "), output.DescribeContainer(&ctr), output.StopHint(&ctr))
 	}
 }
 

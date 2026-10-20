@@ -208,9 +208,32 @@ func TestContainerLabel(t *testing.T) {
 		"docker:web":          {Name: "web", Image: "nginx", ID: "1", Runtime: "docker"},
 		"podman:nginx:alpine": {Image: "nginx:alpine", ID: "1", Runtime: "podman"},
 		"docker:abc":          {ID: "abc", Runtime: "docker"},
+		"wsl:Ubuntu/node":     {Name: "Ubuntu", Runtime: "wsl", Process: "node", ProcessPID: 12},
 	} {
 		if got := ContainerLabel(c); got != want {
 			t.Errorf("ContainerLabel = %q, want %q", got, want)
+		}
+	}
+}
+
+func TestDescribeAndStopHint(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		c          inspect.Container
+		desc, hint string
+	}{
+		{inspect.Container{Name: "web", Image: "nginx:alpine", Runtime: "docker"}, `published by docker container "web" (nginx:alpine)`, "docker stop web"},
+		{inspect.Container{ID: "abc", Runtime: "podman"}, `published by podman container "abc" (unknown image)`, "podman stop abc"},
+		{inspect.Container{Name: "Ubuntu", Runtime: "wsl", Process: "node", ProcessPID: 1234}, `forwarded from WSL distro "Ubuntu" (node, pid 1234)`, "wsl -d Ubuntu --exec kill 1234"},
+		{inspect.Container{Name: "Debian", Runtime: "wsl", Process: "nginx"}, `forwarded from WSL distro "Debian" (nginx)`, "wsl --terminate Debian   (stops the whole distro)"},
+		{inspect.Container{Name: "Alpine", Runtime: "wsl"}, `forwarded from WSL distro "Alpine"`, "wsl --terminate Alpine   (stops the whole distro)"},
+	}
+	for _, tt := range tests {
+		if got := DescribeContainer(&tt.c); got != tt.desc {
+			t.Errorf("DescribeContainer = %q, want %q", got, tt.desc)
+		}
+		if got := StopHint(&tt.c); got != tt.hint {
+			t.Errorf("StopHint = %q, want %q", got, tt.hint)
 		}
 	}
 }

@@ -353,9 +353,8 @@ func (m Model) askKill(force bool) (tea.Model, tea.Cmd) {
 	case !ok:
 		return m, nil
 	case s.Container != nil:
-		ref := cmp.Or(s.Container.Name, s.Container.ID)
-		m.setStatus(toneBad, "port %d is published by %s container %q; stop it with: %s stop %s",
-			s.Port(), s.Container.Runtime, ref, s.Container.Runtime, ref)
+		m.setStatus(toneBad, "port %d is %s; stop it with: %s",
+			s.Port(), output.DescribeContainer(s.Container), output.StopHint(s.Container))
 		return m, nil
 	case s.PID <= 0:
 		m.setStatus(toneBad, "owner of port %d is not visible. %s", s.Port(), m.deps.Hint)
@@ -417,10 +416,7 @@ func searchText(s inspect.Socket) string {
 	return strings.ToLower(strings.Join(parts, " "))
 }
 
-// containerLabel names a container for display, e.g. "docker:web".
-func containerLabel(c *inspect.Container) string {
-	return c.Runtime + ":" + cmp.Or(c.Name, c.Image, c.ID)
-}
+func containerLabel(c *inspect.Container) string { return output.ContainerLabel(c) }
 
 func processName(s inspect.Socket) string {
 	switch {

@@ -2,6 +2,7 @@ package output
 
 import (
 	"cmp"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -28,12 +29,14 @@ type SocketJSON struct {
 	Container     *ContainerJSON `json:"container,omitempty"`
 }
 
-// ContainerJSON is the container publishing a socket's port.
+// ContainerJSON is the container (or WSL distro) publishing a socket's port.
 type ContainerJSON struct {
-	ID      string `json:"id"`
-	Name    string `json:"name,omitempty"`
-	Image   string `json:"image,omitempty"`
-	Runtime string `json:"runtime"`
+	ID         string `json:"id,omitempty"`
+	Name       string `json:"name,omitempty"`
+	Image      string `json:"image,omitempty"`
+	Runtime    string `json:"runtime"`
+	Process    string `json:"process,omitempty"`
+	ProcessPID int32  `json:"processPid,omitempty"`
 }
 
 // ProcessJSON is a socket's owning process.
@@ -115,7 +118,7 @@ func socketJSON(s inspect.Socket) SocketJSON {
 		out.Process = pj
 	}
 	if c := s.Container; c != nil {
-		out.Container = &ContainerJSON{ID: c.ID, Name: c.Name, Image: c.Image, Runtime: c.Runtime}
+		out.Container = &ContainerJSON{ID: c.ID, Name: c.Name, Image: c.Image, Runtime: c.Runtime, Process: c.Process, ProcessPID: c.ProcessPID}
 	}
 	return out
 }
@@ -135,9 +138,48 @@ func pidCell(pid int32) Cell {
 	return C(strconv.Itoa(int(pid)))
 }
 
-// ContainerLabel names a container for display, e.g. "docker:web".
+// RuntimeWSL is the Container.Runtime of ports forwarded from WSL distros.
+const RuntimeWSL = "wsl"
+
+// ContainerLabel names a container for display, e.g. "docker:web" or
+// "wsl:Ubuntu/node".
 func ContainerLabel(c *inspect.Container) string {
-	return c.Runtime + ":" + cmp.Or(c.Name, c.Image, c.ID)
+	label := c.Runtime + ":" + cmp.Or(c.Name, c.Image, c.ID)
+	if c.Process != "" {
+		label += "/" + c.Process
+	}
+	return label
+}
+
+// DescribeContainer explains where a port comes from, e.g.
+// `published by docker container "web" (nginx:alpine)` or
+// `forwarded from WSL distro "Ubuntu" (node, pid 1234)`.
+func DescribeContainer(c *inspect.Container) string {
+	ref := cmp.Or(c.Name, c.ID)
+	if c.Runtime == RuntimeWSL {
+		s := fmt.Sprintf("forwarded from WSL distro %q", ref)
+		switch {
+		case c.Process != "" && c.ProcessPID > 0:
+			s += fmt.Sprintf(" (%s, pid %d)", c.Process, c.ProcessPID)
+		case c.Process != "":
+			s += fmt.Sprintf(" (%s)", c.Process)
+		}
+		return s
+	}
+	return fmt.Sprintf("published by %s container %q (%s)", c.Runtime, ref, cmp.Or(c.Image, "unknown image"))
+}
+
+// StopHint is the command that stops what holds the port, without touching
+// the proxy process on the host.
+func StopHint(c *inspect.Container) string {
+	ref := cmp.Or(c.Name, c.ID)
+	if c.Runtime == RuntimeWSL {
+		if c.ProcessPID > 0 {
+			return fmt.Sprintf("wsl -d %s --exec kill %d", ref, c.ProcessPID)
+		}
+		return fmt.Sprintf("wsl --terminate %s   (stops the whole distro)", ref)
+	}
+	return c.Runtime + " stop " + ref
 }
 
 // processCells returns the PROCESS and USER cells. Ports published by a

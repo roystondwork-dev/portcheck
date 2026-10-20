@@ -16,6 +16,14 @@ that the engine is running (`docker ps`), and that your user can access its sock
 (on Linux: the `docker` group). If you use a non-default endpoint or a Docker
 context, set `DOCKER_HOST`. See [Containers](guide/containers.md).
 
+## A port shows `wslrelay.exe` or `wslservice.exe` (Windows)
+
+portcheck couldn't tell which WSL distro is behind the port. Check that the distro is
+running (`wsl --list --running`) and that the server is listening there
+(`wsl -d <distro> --exec ss -ltn`). The lookup gives up after 3 seconds, which a cold
+WSL VM can exceed; run the command again once WSL is up. See
+[Containers & WSL](guide/containers.md#wsl-windows).
+
 ## `check` says `denied` for a port below 1024
 
 The port may be free, but **you** can't bind it on every address:

@@ -32,7 +32,7 @@
 
 - **Same commands and output on every OS.** It replaces `lsof -i`, `netstat -ano`, `ss -ltnp` and `kill`.
 - **Built for scripts.** `--json` follows a [versioned schema](docs/json-schema.md), [exit codes](docs/exit-codes.md) are stable, and results go to stdout while messages go to stderr.
-- **Container-aware.** Ports published by Docker or Podman show the container, and `kill` suggests `docker stop` instead of killing Docker.
+- **Container- and WSL-aware.** Ports published by Docker/Podman or forwarded from WSL show the container or distro, and `kill` tells you how to stop it there instead of killing the proxy.
 - **Honest about permissions.** Hidden owners are shown as hidden, with a hint on how to see them.
 - **A Go library too.** See [`pkg/`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck).
 

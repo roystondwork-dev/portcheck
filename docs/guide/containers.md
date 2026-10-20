@@ -1,4 +1,4 @@
-# Containers (Docker & Podman)
+# Containers & WSL
 
 A port published by a container (`docker run -p 8080:80 …`) is held on your machine by
 a proxy process: `com.docker.backend` with Docker Desktop, `docker-proxy` on Linux,
@@ -64,5 +64,40 @@ container engine never makes portcheck slow or fail.
   report them as free.
 - **Socket permissions on Linux.** Reading `/var/run/docker.sock` needs membership in
   the `docker` group (or root). Without it, container attribution is skipped.
-- **WSL.** On Windows, ports forwarded from a WSL distro show `wslrelay.exe`. It's
-  protected from `kill`, but the distro isn't identified yet.
+- **WSL** has its own section below.
+
+## WSL (Windows)
+
+On Windows, a server running inside a WSL 2 distro is reached through a relay
+process: `wslrelay.exe` (default NAT networking) or `wslservice.exe` (mirrored
+networking). All distros share one VM, so the relay doesn't say which distro is
+behind a port. portcheck asks each running distro which TCP ports it listens on and
+shows the distro and, when it can tell, the Linux process:
+
+```console
+PS> portcheck list -l --port 3000
+PROTO  LOCAL ADDRESS   REMOTE ADDRESS  STATE   PID    PROCESS          USER
+tcp    127.0.0.1:3000  -               LISTEN  15872  wsl:Ubuntu/node  alice
+```
+
+`kill` won't stop the relay, which would break every WSL port. It tells you how to
+stop the server inside the distro instead:
+
+```console
+PS> portcheck kill 3000
+Port 3000 is forwarded from WSL distro "Ubuntu" (node, pid 1234). Stop it there instead:
+  wsl -d Ubuntu --exec kill 1234
+```
+
+How it works and what it costs:
+
+- It only runs when a listening port is held by `wslrelay.exe` or `wslservice.exe`,
+  so it costs nothing on machines without WSL.
+- It runs `wsl --list --running`, then once per running distro asks for listening
+  sockets with `ss -Hltnp` (process names, from iproute2), falling back to
+  `/proc/net/tcp`, which every distro has (ports only). The whole lookup gets up to 3
+  seconds; if it's slower, the relay is shown as before.
+- The Linux process is only named when `ss` is installed and can see it. Processes
+  of other Linux users need root inside the distro, so you may see just `wsl:Ubuntu`.
+- If two running distros listen on the same port, the first distro `wsl --list`
+  reports wins.

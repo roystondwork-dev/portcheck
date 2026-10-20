@@ -55,9 +55,9 @@ It also refuses well-known system processes, such as `launchd`, `WindowServer`,
 infrastructure such as `com.docker.backend`, `dockerd`, `containerd`, `docker-proxy`
 and `wslrelay.exe`, unless you pass `--allow-system`.
 
-Ports published by a container are never handled by killing the proxy: portcheck
-names the container and suggests `docker stop <name>` instead. See
-[Containers](containers.md#stopping-a-containers-port). These checks run **before** the confirmation prompt, so a
+Ports published by a container or forwarded from WSL are never handled by killing the
+proxy: portcheck names the container or distro and suggests `docker stop <name>` or
+`wsl -d <distro> --exec kill <pid>` instead. See [Containers & WSL](containers.md). These checks run **before** the confirmation prompt, so a
 refusal never depends on what you answer.
 
 ## Flags

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/roystondwork-dev/portcheck/pkg/portspec"
 )
@@ -62,6 +63,31 @@ func TestEnricherSkippedWhenNothingListed(t *testing.T) {
 	}
 	if e.calls != 0 {
 		t.Errorf("enricher called %d times with no sockets", e.calls)
+	}
+}
+
+type slowEnricher struct {
+	budget   time.Duration
+	deadline time.Duration
+}
+
+func (e *slowEnricher) EnrichTimeout() time.Duration { return e.budget }
+
+func (e *slowEnricher) Enrich(ctx context.Context, _ []Socket) error {
+	if d, ok := ctx.Deadline(); ok {
+		e.deadline = time.Until(d)
+	}
+	return nil
+}
+
+func TestEnricherCustomBudget(t *testing.T) {
+	t.Parallel()
+	e := &slowEnricher{budget: 3 * time.Second}
+	if _, err := New(newFake(), WithEnricher(e)).List(t.Context(), Filter{}); err != nil {
+		t.Fatal(err)
+	}
+	if e.deadline < 2*time.Second {
+		t.Errorf("budget = %v, want about 3s", e.deadline)
 	}
 }
 
