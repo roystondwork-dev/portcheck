@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.4.0](https://github.com/roystondwork-dev/portcheck/compare/v0.3.0...v0.4.0) (2026-10-20)
+
+
+### Features
+
+* add .portcheck.yaml and portcheck doctor ([cfe1a06](https://github.com/roystondwork-dev/portcheck/commit/cfe1a06355745fb69bc1aa171603f49e99e49c87))
+* attribute WSL-forwarded ports to the distro and Linux process ([6733709](https://github.com/roystondwork-dev/portcheck/commit/6733709b8b7538024b2976f84f63cffabe392526))
+* show who started a process (list --wide, kill confirmation, TUI) ([857bb3b](https://github.com/roystondwork-dev/portcheck/commit/857bb3b9dfe61b79584b2232932f94163ca3c60f))
+
+
+### Performance
+
+* **inspect:** read macOS sockets through libproc instead of running lsof ([dae4e7a](https://github.com/roystondwork-dev/portcheck/commit/dae4e7a7516952f18d0bb11cddeb3fe7825f7b33))
+
+
+### Documentation
+
+* ADR-0003 native macOS sockets; update permissions, architecture and tasks ([a6fd20f](https://github.com/roystondwork-dev/portcheck/commit/a6fd20fffea7682efe1ee3c9322f8ee0d60770c0))
+* document .portcheck.yaml and doctor; publish the config JSON Schema ([220d743](https://github.com/roystondwork-dev/portcheck/commit/220d74356f1087dbcd32c94f7ea0b9af7c9fbd4d))
+* **tasks:** M10–M13 complete ([adb9fc5](https://github.com/roystondwork-dev/portcheck/commit/adb9fc55224f1ae3455b9af348ca7736e03fcaf2))
+
 ## [0.3.0](https://github.com/roystondwork-dev/portcheck/compare/v0.2.0...v0.3.0) (2026-10-20)
 
 
