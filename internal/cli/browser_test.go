@@ -65,7 +65,7 @@ func TestBrowserInstallStatusUninstall(t *testing.T) {
 	if st.Host != nativehost.HostName || !chrome.Registered || !chrome.Detected || edge.Registered || edge.Detected {
 		t.Errorf("status = %+v", st)
 	}
-	if chrome.Path != filepath.Join(home, "bin", "portcheck") || len(chrome.Extensions) != 1 || chrome.Extensions[0] != nativehost.ExtensionIDs[0] {
+	if chrome.Path != filepath.Join(home, "bin", "portcheck") || !slices.Equal(chrome.Extensions, nativehost.ExtensionIDs) {
 		t.Errorf("chrome = %+v", chrome)
 	}
 
@@ -90,7 +90,7 @@ func TestBrowserInstallOptions(t *testing.T) {
 	}
 	edge := browserStatus(t, h).Browsers[1]
 	wd, _ := os.Getwd()
-	if !edge.Registered || edge.Path != filepath.Join(wd, "relative", "portcheck") || len(edge.Extensions) != 2 {
+	if !edge.Registered || edge.Path != filepath.Join(wd, "relative", "portcheck") || len(edge.Extensions) != len(nativehost.ExtensionIDs)+1 {
 		t.Errorf("edge = %+v", edge)
 	}
 }

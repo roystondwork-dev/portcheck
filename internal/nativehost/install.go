@@ -11,10 +11,12 @@ import (
 )
 
 // ExtensionIDs are the portcheck extension IDs allowed to start the host by
-// default. The first is the ID pinned by the manifest key in
-// extensions/browser (unpacked and release builds); store IDs are added when
-// the extension is published there.
-var ExtensionIDs = []string{"fmocabgaaihiflefcdafnhoihcibgnhl"}
+// default: the ID pinned by the manifest key in extensions/browser (release
+// zips, loaded unpacked), then the store builds' IDs.
+var ExtensionIDs = []string{
+	"fmocabgaaihiflefcdafnhoihcibgnhl", // release zip
+	"jenlahoamefdpfmpodhidkgcceikheee", // Microsoft Edge Add-ons
+}
 
 // Browser is a Chromium browser portcheck can register with.
 type Browser struct {
