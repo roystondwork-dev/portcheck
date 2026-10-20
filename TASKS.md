@@ -3,9 +3,9 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M10–M13 done; next: two maintainer-requested features. Open: manual WSL check (M11-04), winget review (M7-06)
+**Current milestone:** M14 — VS Code extension MVP. Open: manual WSL check (M11-04, deferred by maintainer), winget review (M7-06)
 **Last updated:** 2026-10-20
-**Latest release:** [v0.3.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.3.0)
+**Latest release:** [v0.4.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.4.0)
 
 Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 
@@ -26,7 +26,11 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M10 | Parent process ("started by") | 5 / 5 | ✅ |
 | M11 | WSL distro attribution | 3 / 4 | 🟨 (needs a test on a Windows machine with WSL) |
 | M12 | `.portcheck.yaml` + `portcheck doctor` | 5 / 5 | ✅ |
-| M13 | Native macOS provider (no `lsof`) | 4 / 4 | ✅ |
+| M13 | Native macOS provider (no `lsof`) | 4 / 4 | ✅ (released in v0.4.0) |
+| M14 | VS Code extension — MVP (ports sidebar, commands) | 0 / 7 | 🟨 |
+| M15 | VS Code extension — USP (terminal "port in use" → one-click fix; project ports) | 0 / 5 | ⬜ |
+| M16 | VS Code extension — packaging & publishing (per-platform VSIX, Marketplace, Open VSX) | 0 / 4 | ⬜ |
+| M17 | Browser extension (optional, native messaging) | 0 / 3 | ⬜ |
 
 ---
 
@@ -216,6 +220,48 @@ Goal: on Windows, ports forwarded from WSL show the distro and the Linux process
 | M13-03 | Verification: SDK layout check with clang (both arches); live comparison with `lsof` | `libproc_*darwin_test.go` | integration (macOS CI) | ✅ | Agreed on all 10 listening sockets here; identical `list -l` output |
 | M13-04 | ADR-0003 and docs | `docs/adr`, permissions, architecture, troubleshooting | strict docs build | ✅ | Socket listing 43 ms → 4 ms; `list` warm ~20 ms → <10 ms |
 
+## M14 — VS Code extension: MVP
+
+Design: [ADR-0004](docs/adr/0004-vscode-extension.md). The extension is a thin client of
+`portcheck --json`; all port logic stays in Go.
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M14-01 | Scaffold: strict TypeScript, esbuild bundle, ESLint, Vitest, npm lockfile | `extensions/vscode/` | `npm run check` | ⬜ | |
+| M14-02 | CLI client: binary resolution (setting → bundled → PATH), run with timeout, JSON envelope + `schemaVersion` check, typed results | `src/cli.ts`, `src/schema.ts` | unit (fake exec), 100% | ⬜ | |
+| M14-03 | View model: group/sort sockets, labels, tooltips (pure, no `vscode` import) | `src/model.ts` | unit, 100% | ⬜ | Containers/WSL/hidden owners distinguished |
+| M14-04 | Ports sidebar: tree view, refresh while visible, context actions | `src/portsView.ts` | integration | ⬜ | |
+| M14-05 | Commands: check port, find free port (copy/insert), stop process (modal confirm, CLI guards), copy PID, open in browser | `src/commands.ts` | integration | ⬜ | Container/WSL ports show the stop hint instead |
+| M14-06 | Integration tests in a real VS Code (`@vscode/test-electron`) + CI job (3 OS) | `src/test/`, `.github/workflows/vscode.yml` | CI green | ⬜ | |
+| M14-07 | Docs: extension guide | `docs/guide/vscode.md` | strict docs build | ⬜ | |
+
+## M15 — VS Code extension: USP
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M15-01 | "Port in use" matcher for Node, Vite, Next.js, Python, Go, Rails, Spring, … | `src/matcher.ts` | unit with a corpus of real error lines | ⬜ | |
+| M15-02 | Terminal link provider: matched lines become links to a fix menu | `src/terminalLinks.ts` | integration | ⬜ | |
+| M15-03 | Fix menu: stop holder and retry, run on next free port, container/WSL commands, details | `src/fixes.ts` | unit + integration | ⬜ | |
+| M15-04 | Project ports: status bar (`doctor`), diagnostics for `.portcheck.yaml`, JSON Schema registration | `src/project.ts` | integration | ⬜ | |
+| M15-05 | Docs + demo recording | `docs/guide/vscode.md` | — | ⬜ | |
+
+## M16 — VS Code extension: packaging & publishing
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M16-01 | Per-platform VSIX with the matching `portcheck` binary from the release | `release.yml` | VSIX smoke test | ⬜ | |
+| M16-02 | Publish to VS Code Marketplace | release workflow | — | ⬜ | Needs maintainer publisher account + token |
+| M16-03 | Publish to Open VSX (VSCodium, Cursor, Windsurf) | release workflow | — | ⬜ | Needs maintainer account + token |
+| M16-04 | Version sync with portcheck releases (release-please extra-files) | `release-please-config.json` | — | ⬜ | |
+
+## M17 — Browser extension (optional)
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M17-01 | `portcheck native-host` (native messaging) + `portcheck browser install` (manifests per browser/OS) | Go | unit + integration | ⬜ | |
+| M17-02 | Extension: badge on `localhost:*` tabs; hint on "connection refused" | `extensions/browser/` | unit | ⬜ | |
+| M17-03 | Chrome Web Store / Edge / Firefox add-ons publishing | — | — | ⬜ | Maintainer accounts |
+
 ## What's next (candidates, not yet scheduled)
 
 | Candidate | Notes |
@@ -240,3 +286,5 @@ Goal: on Windows, ports forwarded from WSL show the distro and the Linux process
 | 2026-10-20 | `wait` checks TCP accept, not application health; documented | #11 |
 | 2026-10-20 | First release is 0.1.0 (`initial-version`), not release-please's default 1.0.0 | #6 |
 | 2026-10-20 | TUI uses a custom table + golden screen snapshots instead of bubbles/table + teatest | M4 notes |
+| 2026-10-20 | macOS sockets via libproc + purego, `lsof` as fallback | [ADR-0003](docs/adr/0003-native-macos-sockets.md) |
+| 2026-10-20 | VS Code extension first, as a thin client of the CLI's JSON; browser extension optional | [ADR-0004](docs/adr/0004-vscode-extension.md) |
