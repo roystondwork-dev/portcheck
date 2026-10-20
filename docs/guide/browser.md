@@ -53,6 +53,19 @@ Connect them once:
 If the popup says *Connect portcheck to this browser*, step 2 hasn't been done for this
 browser (or portcheck moved: run it again).
 
+## Troubleshooting
+
+- **The popup says "Connect portcheck to this browser".** Run `portcheck browser install`
+  (again, if portcheck moved or was installed differently), then reopen the popup.
+- **macOS asks "portcheck would like to access files in your Desktop folder"** (or
+  Documents, Downloads). The registered portcheck binary lives in that folder, for
+  example a build from source; the browser waits for your answer before the badge can
+  appear. Click **Allow**, or register a copy outside those folders
+  (`portcheck browser install --path /usr/local/bin/portcheck`). Package-manager
+  installs (Homebrew, Scoop) aren't affected.
+- **No badge on a localhost tab.** The badge only appears once the page has loaded;
+  reload it. `portcheck browser status` shows whether this browser is registered.
+
 ## Privacy and permissions
 
 - The extension can only read the address of **localhost** tabs; it can't see other
