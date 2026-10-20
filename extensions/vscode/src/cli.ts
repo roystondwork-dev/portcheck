@@ -40,16 +40,20 @@ export interface ResolveOptions {
   /** Directory of the installed extension. */
   extensionPath: string;
   platform: NodeJS.Platform;
+  arch: string;
   exists: (file: string) => boolean;
 }
 
-/** Picks the binary: the setting, else the one bundled in bin/, else portcheck on PATH. */
+/**
+ * Picks the binary: the setting, else the one bundled for this OS and CPU in
+ * bin/<platform>-<arch>/ (release packages carry all six), else portcheck on PATH.
+ */
 export function resolveBinary(o: ResolveOptions): string {
   if (o.configured.trim() !== "") {
     return o.configured.trim();
   }
   const exe = o.platform === "win32" ? "portcheck.exe" : "portcheck";
-  const bundled = path.join(o.extensionPath, "bin", exe);
+  const bundled = path.join(o.extensionPath, "bin", `${o.platform}-${o.arch}`, exe);
   return o.exists(bundled) ? bundled : exe;
 }
 

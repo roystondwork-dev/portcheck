@@ -4,8 +4,8 @@ name: Release
 #    with the changelog and version bump derived from Conventional Commits.
 # 2. Merging that PR makes release-please tag vX.Y.Z and create the GitHub
 #    release; the goreleaser job then builds, signs and publishes the artifacts.
-# 3. The vscode job packages the VS Code extension once per platform, with the
-#    binary from those artifacts, and publishes it.
+# 3. The vscode job packages the VS Code extension with the binaries from those
+#    artifacts (all platforms in one VSIX) and publishes it.
 # See docs/releasing.md.
 
 on:
@@ -110,7 +110,7 @@ jobs:
       (needs.goreleaser.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.vscode_only))
     runs-on: ubuntu-latest
     permissions:
-      contents: write      # attach the VSIX files to the release
+      contents: write      # attach the VSIX to the release
       id-token: write      # provenance
       attestations: write
     env:
@@ -139,8 +139,8 @@ jobs:
             --bundle "$RUNNER_TEMP/assets/checksums.txt.sigstore.json" \
             --certificate-identity "https://github.com/${{ github.repository }}/.github/workflows/release.yml@refs/heads/main" \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com
-      - name: Package one VSIX per platform
-        run: scripts/package-platforms.sh "${TAG#v}" "$RUNNER_TEMP/assets" "$RUNNER_TEMP/vsix"
+      - name: Package the VSIX (portcheck for every platform inside)
+        run: scripts/package-release.sh "${TAG#v}" "$RUNNER_TEMP/assets" "$RUNNER_TEMP/vsix"
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: ${{ runner.temp }}/vsix/*.vsix
@@ -165,6 +165,4 @@ jobs:
             echo "::warning::OVSX_PAT is not set; skipping Open VSX"
             exit 0
           fi
-          for f in "$RUNNER_TEMP"/vsix/*.vsix; do
-            npx ovsx publish "$f"
-          done
+          npx ovsx publish "$RUNNER_TEMP"/vsix/*.vsix

@@ -7,19 +7,19 @@ Cursor, Windsurf).
 ## Install
 
 Every [portcheck release](https://github.com/roystondwork-dev/portcheck/releases)
-has a `portcheck-vscode-<platform>-<version>.vsix` for each platform (`darwin-arm64`,
-`darwin-x64`, `linux-x64`, `linux-arm64`, `win32-x64`, `win32-arm64`), with portcheck
-built in. Download the one for your machine and install it:
+has a `portcheck-vscode-<version>.vsix` with portcheck built in for macOS, Linux and
+Windows (x64 and arm64); the extension uses the right one for the machine it runs on,
+including remote machines, WSL and containers. Download it and install it:
 
 ```sh
-code --install-extension portcheck-vscode-darwin-arm64-0.5.0.vsix
+code --install-extension portcheck-vscode-0.5.0.vsix
 ```
 
 or use **Extensions → … → Install from VSIX…**. Publishing to the VS Code Marketplace
 and Open VSX is being set up (M16 in
 [TASKS.md](https://github.com/roystondwork-dev/portcheck/blob/main/TASKS.md)).
 
-The extension needs VS Code 1.98 or later. The `.vsix` files have build provenance:
+The extension needs VS Code 1.98 or later. The `.vsix` has build provenance:
 `gh attestation verify <file> --repo roystondwork-dev/portcheck`.
 
 ## "Port in use" errors: one-click fixes

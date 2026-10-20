@@ -36,10 +36,13 @@ are hidden.
    [tap](https://github.com/roystondwork-dev/homebrew-tap) and
    [bucket](https://github.com/roystondwork-dev/scoop-bucket) received commits.
 4. Smoke-test: `brew install roystondwork-dev/tap/portcheck && portcheck version`.
-5. Check that the release has six `portcheck-vscode-<platform>-X.Y.Z.vsix` files. The
-   **vscode** job verifies the signed `checksums.txt`, puts each platform's binary into
-   its own extension package, attaches them, and publishes them to the VS Code
-   Marketplace and Open VSX when their tokens are set. The extension's version comes
+5. Check that the release has `portcheck-vscode-X.Y.Z.vsix`. The **vscode** job
+   verifies the signed `checksums.txt`, puts the binary for every platform into one
+   extension package (`bin/<platform>-<arch>/`; the extension picks its own at runtime),
+   attaches it, and publishes it to the VS Code Marketplace and Open VSX when their
+   tokens are set. Without `VSCE_PAT`, upload that one file on
+   [the Marketplace's management page](https://marketplace.visualstudio.com/manage)
+   (**⋯ → Update**). The extension's version comes
    from the same release PR (`extra-files` in `release-please-config.json`).
 6. Follow the winget pull request opened on
    [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+roystondwork-dev.portcheck).
