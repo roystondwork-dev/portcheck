@@ -28,7 +28,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M12 | `.portcheck.yaml` + `portcheck doctor` | 5 / 5 | ✅ |
 | M13 | Native macOS provider (no `lsof`) | 4 / 4 | ✅ (released in v0.4.0) |
 | M14 | VS Code extension — MVP (ports sidebar, commands) | 7 / 7 | ✅ |
-| M15 | VS Code extension — USP (terminal "port in use" → one-click fix; project ports) | 0 / 5 | ⬜ |
+| M15 | VS Code extension — USP (terminal "port in use" → one-click fix; project ports) | 4 / 5 | 🟨 |
 | M16 | VS Code extension — packaging & publishing (per-platform VSIX, Marketplace, Open VSX) | 0 / 4 | ⬜ |
 | M17 | Browser extension (optional, native messaging) | 0 / 3 | ⬜ |
 
@@ -239,11 +239,11 @@ Design: [ADR-0004](docs/adr/0004-vscode-extension.md). The extension is a thin c
 
 | ID | Task | Component / files | Tests required | Status | Notes |
 |---|---|---|---|---|---|
-| M15-01 | "Port in use" matcher for Node, Vite, Next.js, Python, Go, Rails, Spring, … | `src/matcher.ts` | unit with a corpus of real error lines | ⬜ | |
-| M15-02 | Terminal link provider: matched lines become links to a fix menu | `src/terminalLinks.ts` | integration | ⬜ | |
-| M15-03 | Fix menu: stop holder and retry, run on next free port, container/WSL commands, details | `src/fixes.ts` | unit + integration | ⬜ | |
-| M15-04 | Project ports: status bar (`doctor`), diagnostics for `.portcheck.yaml`, JSON Schema registration | `src/project.ts` | integration | ⬜ | |
-| M15-05 | Docs + demo recording | `docs/guide/vscode.md` | — | ⬜ | |
+| M15-01 | "Port in use" matcher for Node, Vite, Next.js, Python, Go, Rails, Spring, … | `src/matcher.ts` | unit with a corpus of real error lines | ✅ | 40+ real lines (Node, Vite, Next, CRA, Angular, Bun, Deno, Go, Rust, Python/uvicorn/Flask/Django, Ruby, Spring, .NET, PHP, nginx, Redis, Postgres, Docker). Port-less errors take the port from the command or the tool's default; streamed output scanner strips ANSI |
+| M15-02 | Terminal link provider: matched lines become links to a fix menu | `src/terminal.ts` | integration | ✅ | Links on matched lines, plus a notification from live output via shell integration (`portcheck.terminal.notify`); tested in a real terminal |
+| M15-03 | Fix menu: stop holder and retry, run on next free port, container/WSL commands, details | `src/fixes.ts`, `src/terminal.ts` | unit + integration | ✅ | Stop and re-run, re-run on next free port (port replaced, tool flag added, or `PORT` per shell), container/WSL/elevated commands, copy, details. Verified end to end: re-run on 3001 → HTTP 200; stop holder and re-run → HTTP 200 |
+| M15-04 | Project ports: status bar (`doctor`), diagnostics for `.portcheck.yaml`, JSON Schema registration | `src/project.ts`, `src/projectModel.ts` | unit + integration | ✅ | Status bar + click-to-fix, Problems for failed checks and invalid files (with line numbers), project ports first in the view, schema bundled for the YAML extension. UDP hidden by default |
+| M15-05 | Docs + demo recording | `docs/guide/vscode.md` | strict docs build | 🟨 | Docs ✅. Demo GIF needs a screen recording on the maintainer's machine (this environment can't capture the screen) |
 
 ## M16 — VS Code extension: packaging & publishing
 
