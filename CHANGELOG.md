@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/roystondwork-dev/portcheck/compare/v0.7.0...v0.8.0) (2026-10-20)
+
+
+### Features
+
+* **browser:** allow the Edge Add-ons build by default ([a60651c](https://github.com/roystondwork-dev/portcheck/commit/a60651ccf2384f227e69233e979f0fe8befc2231))
+
 ## [0.7.0](https://github.com/roystondwork-dev/portcheck/compare/v0.6.0...v0.7.0) (2026-10-20)
 
 
