@@ -102,7 +102,8 @@
           "id": "b1308ab03f9f",
           "name": "web",
           "image": "nginx:alpine",
-          "runtime": "docker"
+          "runtime": "docker",
+          "stopHint": "docker stop web"
         }
       }
     ],
