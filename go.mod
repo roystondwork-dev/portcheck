@@ -48,3 +48,5 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/tools v0.50.0 // indirect
 )
+
+ignore ./extensions
