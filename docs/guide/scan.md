@@ -11,8 +11,8 @@ $ portcheck scan db.internal 10.0.0.6 -p 22,5432
 HOST                    PORT  STATE     SERVICE     LATENCY  DETAIL
 db.internal (10.0.0.5)  22    closed    ssh         700µs
 db.internal (10.0.0.5)  5432  open      postgresql  1.2ms
-10.0.0.6                22    filtered  ssh         1s
-10.0.0.6                5432  filtered  postgresql  1s
+10.0.0.6                22    filtered  ssh         1.0002s
+10.0.0.6                5432  filtered  postgresql  1.0001s
 Scanned 2 host(s) × 2 port(s) in 1.004s: 1 open, 1 closed, 2 filtered, 0 errors.
 ```
 

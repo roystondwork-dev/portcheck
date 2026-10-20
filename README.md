@@ -52,8 +52,9 @@ go install github.com/roystondwork-dev/portcheck/cmd/portcheck@latest
 ```
 
 `.deb`, `.rpm`, `.apk` and archives for amd64/arm64 are on the
-[releases page](https://github.com/roystondwork-dev/portcheck/releases). All
-artifacts are signed with cosign and ship with SBOMs and SLSA provenance; see
+[releases page](https://github.com/roystondwork-dev/portcheck/releases). The
+checksum file covering every artifact is signed with cosign (keyless), and
+releases ship SBOMs and SLSA provenance; see
 [verifying downloads](docs/install.md#verifying-downloads).
 
 ## Quickstart
@@ -84,13 +85,18 @@ $ portcheck list -l --json | jq '.data.sockets[] | {port: .localPort, name: .pro
 ## Use as a Go library
 
 ```go
-res, _ := inspect.NewSystem().List(ctx, inspect.Filter{Ports: portspec.Single(3000), ListeningOnly: true})
+res, err := inspect.NewSystem().List(ctx, inspect.Filter{Ports: portspec.Single(3000), ListeningOnly: true})
+if err != nil {
+	log.Fatal(err)
+}
 for _, s := range res.Sockets {
-	fmt.Println(s.PID, s.Process.Name)
+	if s.Process != nil { // nil when the owner is hidden from your user
+		fmt.Println(s.PID, s.Process.Name)
+	}
 }
 ```
 
-See the [library guide](docs/library.md) for `portspec`, `inspect`, `freeport`, `killer` and `scan`.
+See the [library guide](docs/library.md) for `portspec`, `inspect`, `freeport`, `killer`, `scan` and `waitfor`.
 
 ## Responsible use
 

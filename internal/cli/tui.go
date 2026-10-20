@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"slices"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -35,5 +36,10 @@ func (c *cli) runTUI(cmd *cobra.Command, interval time.Duration) error {
 		return usageError("the TUI needs an interactive terminal; use 'portcheck list' instead")
 	}
 	deps := tui.Deps{Lister: c.app.Lister, Killer: c.app.Killer, Interval: interval, Hint: c.app.PrivilegeHint()}
-	return c.app.RunTUI(cmd.Context(), deps, c.app.Stdin, c.app.Stdout, c.app.Environ)
+	environ := c.app.Environ
+	if c.noColor {
+		// The TUI detects color support from the environment.
+		environ = append(slices.Clone(environ), "NO_COLOR=1")
+	}
+	return c.app.RunTUI(cmd.Context(), deps, c.app.Stdin, c.app.Stdout, environ)
 }

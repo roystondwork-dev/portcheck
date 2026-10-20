@@ -1,6 +1,6 @@
 # Inspect ports: `list`
 
-`portcheck list` shows local TCP and UDP sockets together with the process that owns each one.
+`portcheck list` (alias `ls`) shows local TCP and UDP sockets together with the process that owns each one.
 
 ```console
 $ portcheck list --listening
@@ -8,10 +8,11 @@ PROTO  LOCAL ADDRESS   REMOTE ADDRESS  STATE   PID    PROCESS        USER
 tcp    0.0.0.0:22      -               LISTEN  -      ?              ?
 tcp    127.0.0.1:3000  -               LISTEN  42379  node           alice
 udp    0.0.0.0:5353    -               NONE    300    mDNSResponder  _mdns
-hint: Only your own processes are visible. Re-run with sudo to see sockets owned by other users.
+hint: Some process details are hidden. Re-run with sudo to see owners of all sockets.
 ```
 
-A `-` PID and `?` process mean the owner is hidden from your user. The hint (on stderr)
+A `-` PID and `?` process mean the owner is hidden from your user (this example is
+from Linux; on macOS such sockets are not listed at all). The hint (on stderr)
 says how to see it. See [Permissions by OS](../permissions.md).
 
 ## Filters

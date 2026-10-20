@@ -67,8 +67,8 @@ real terminal; in pipes and CI, portcheck prints help on purpose.
 
 ## Colors look wrong or appear in files
 
-Colors are only used when stdout is a terminal. Set `NO_COLOR=1` or pass `--no-color`
-to turn them off everywhere.
+Colors are only used when stdout is a terminal. Set `NO_COLOR=1`, or pass `--no-color`,
+to turn them off in command output and in the TUI.
 
 ## Still stuck?
 

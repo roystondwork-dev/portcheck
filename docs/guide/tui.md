@@ -3,11 +3,13 @@
 ![portcheck TUI](../assets/demo.gif)
 
 Run `portcheck` with no arguments in a terminal, or `portcheck tui`, to get a live,
-full-screen table of sockets. It refreshes every 2 seconds (`--interval` changes
-this) and keeps your selection in place when rows move.
+full-screen table of sockets. It starts with **listening sockets only** (press ++l++
+for all), refreshes every 2 seconds (`--interval` changes this) and keeps your
+selection in place when rows move.
 
 When stdin or stdout is not a terminal (pipes, CI), bare `portcheck` prints help
-instead, so scripts are never surprised by a full-screen UI.
+instead, so scripts are never surprised by a full-screen UI; `portcheck tui` exits
+with status 2.
 
 ## Keys
 
@@ -33,11 +35,11 @@ name and user, case-insensitively.
 
 ## Colors
 
-- **Green** rows are listening sockets.
+- **Green** rows are TCP listeners.
 - **Dimmed** rows have an owner hidden from your user. Stopping one shows the
   privilege hint; see [Permissions by OS](../permissions.md).
 
-Colors adapt to your terminal and are disabled with `NO_COLOR=1`.
+Colors adapt to your terminal and are disabled with `NO_COLOR=1` or `--no-color`.
 
 ## Stopping processes
 

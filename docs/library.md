@@ -17,8 +17,9 @@ go get github.com/roystondwork-dev/portcheck@latest
 
 The packages have no dependency on the CLI or TUI libraries (enforced by a linter rule),
 and use only the standard library plus gopsutil and `golang.org/x/{sync,sys,time}`.
-The examples below are runnable `Example` tests in the repository, so they are
-checked by CI.
+The examples below are based on the `Example` tests in each package
+(`pkg/*/example_test.go`), which CI compiles and, where their output is
+deterministic, runs.
 
 !!! note "Stability"
     Before v1.0.0, minor releases may change these APIs; changes are called out in the

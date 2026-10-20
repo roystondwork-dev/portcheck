@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"slices"
 	"testing"
 	"time"
 
@@ -11,16 +12,35 @@ import (
 )
 
 type fakeTUI struct {
-	called bool
-	deps   tui.Deps
-	in     io.Reader
-	out    io.Writer
-	err    error
+	called  bool
+	deps    tui.Deps
+	in      io.Reader
+	out     io.Writer
+	environ []string
+	err     error
 }
 
-func (f *fakeTUI) run(_ context.Context, deps tui.Deps, in io.Reader, out io.Writer, _ []string) error {
-	f.called, f.deps, f.in, f.out = true, deps, in, out
+func (f *fakeTUI) run(_ context.Context, deps tui.Deps, in io.Reader, out io.Writer, environ []string) error {
+	f.called, f.deps, f.in, f.out, f.environ = true, deps, in, out, environ
 	return f.err
+}
+
+func TestTUINoColor(t *testing.T) {
+	t.Parallel()
+	h, f := tuiHarness(true, true, nil)
+	h.app.Environ = []string{"TERM=xterm"}
+	h.run(t, "tui", "--no-color")
+	if !slices.Contains(f.environ, "NO_COLOR=1") {
+		t.Errorf("--no-color not passed to the TUI: %v", f.environ)
+	}
+	if len(h.app.Environ) != 1 {
+		t.Error("app environment was modified")
+	}
+	h, f = tuiHarness(true, true, nil)
+	h.run(t, "tui")
+	if slices.Contains(f.environ, "NO_COLOR=1") {
+		t.Error("NO_COLOR set without --no-color")
+	}
 }
 
 func tuiHarness(stdinTTY, stdoutTTY bool, err error) (*harness, *fakeTUI) {

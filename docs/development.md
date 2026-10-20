@@ -11,7 +11,7 @@ This page explains how portcheck is tested and why.
 | `make test` | unit tests with `-race` and shuffled order |
 | `make test-integration` | adds `-tags integration`: real sockets, processes and DNS |
 | `make cover-check` | integration tests + coverage gate (`.testcoverage.yml`) |
-| `make check` | lint + govulncheck + cover-check, exactly what CI runs |
+| `make check` | lint + actionlint + govulncheck + cover-check (CI additionally checks that `docs/commands` is up to date and builds a full release snapshot) |
 | `make fuzz FUZZTIME=1m` | every fuzz target for the given time |
 | `make mutation` | mutation testing of `pkg/` with gremlins |
 | `make bench` | benchmarks |
@@ -41,8 +41,10 @@ merges the three coverage profiles, and enforces:
 
 OS-specific files (`*_windows.go`, `*_unix.go`) are only measured on their own OS,
 which is why profiles are merged before the gate. The only exclusions are
-`cmd/portcheck/main.go` (one line calling `cli.Main`, which is tested directly) and
-test-only helpers; they are listed explicitly in `.testcoverage.yml`.
+`cmd/portcheck/main.go` (one line calling `cli.Main`, which is tested directly),
+test-only helpers (`internal/testutil`) and the documentation generator
+(`internal/cli/gendocs`, exercised by CI's docs drift check); they are listed
+explicitly in `.testcoverage.yml`.
 
 Coverage shows that every line ran, not that its result was checked. Mutation testing
 (`make mutation`) covers that gap: it changes the code and verifies that a test fails.

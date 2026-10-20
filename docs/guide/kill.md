@@ -72,7 +72,7 @@ portcheck kill 8080 --yes --grace 10s
 | Code | Meaning |
 |---|---|
 | `0` | every target stopped (or dry run) |
-| `1` | nothing listening, you declined, or a protected process was refused |
+| `1` | nothing listening, a given PID doesn't exist, you declined, or a protected process was refused |
 | `2` | invalid arguments, or no `--yes` without a terminal |
 | `3` | a process survived `SIGKILL`, or another error |
 | `4` | permission denied (the port's owner is hidden, or you can't signal it) |

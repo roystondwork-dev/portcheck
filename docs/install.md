@@ -29,9 +29,9 @@ portcheck is a single static binary with no runtime dependencies.
     [latest release](https://github.com/roystondwork-dev/portcheck/releases/latest), then:
 
     ```sh
-    sudo apt install ./portcheck_*_linux_amd64.deb      # Debian, Ubuntu
-    sudo dnf install ./portcheck_*_linux_amd64.rpm      # Fedora, RHEL
-    sudo apk add --allow-untrusted ./portcheck_*.apk    # Alpine
+    sudo apt install ./portcheck_*_amd64.deb            # Debian, Ubuntu (arm64: *_arm64.deb)
+    sudo dnf install ./portcheck-*.x86_64.rpm           # Fedora, RHEL (arm64: *.aarch64.rpm)
+    sudo apk add --allow-untrusted ./portcheck_*_x86_64.apk  # Alpine (arm64: *_aarch64.apk)
     ```
 
 === "Binary archive"
@@ -52,6 +52,7 @@ Check the installation:
 
 ```sh
 portcheck version
+man portcheck      # man pages ship with Homebrew and the Linux packages
 ```
 
 ## Shell completion

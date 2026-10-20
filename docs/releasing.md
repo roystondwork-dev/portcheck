@@ -8,7 +8,7 @@ flowchart LR
     B -->|maintainer merges| C["tag vX.Y.Z +<br/>GitHub release with notes"]
     C --> D["GoReleaser: build 6 targets,<br/>archives, deb/rpm/apk"]
     D --> E["SBOMs (syft) +<br/>cosign-signed checksums"]
-    E --> F["Homebrew cask + Scoop manifest<br/>+ SLSA provenance"]
+    E --> F["Homebrew cask + Scoop manifest<br/>+ winget PR + SLSA provenance"]
 ```
 
 ## How versions are chosen
