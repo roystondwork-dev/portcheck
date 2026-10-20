@@ -74,11 +74,15 @@ function freePort(): Promise<number> {
   });
 }
 
+/** The tab showing url; waits until the navigation has committed (error pages too). */
 async function tabId(worker: Worker, url: string): Promise<number> {
-  return worker.evaluate(async (u) => {
-    const [tab] = await chrome.tabs.query({ url: u });
-    return tab?.id ?? -1;
-  }, url);
+  const find = () =>
+    worker.evaluate(async (u) => {
+      const [tab] = await chrome.tabs.query({ url: u });
+      return tab?.id ?? -1;
+    }, url);
+  await expect.poll(find).toBeGreaterThan(0);
+  return find();
 }
 
 function badgeOf(worker: Worker, id: number): Promise<{ text: string; title: string }> {
