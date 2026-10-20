@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** none in progress (M14–M16 done). Open: restore the macOS jobs and the coverage gate as required checks on `main` (made optional on 2026-10-20 while GitHub had no macOS runner capacity), manual WSL check (M11-04, deferred by maintainer), winget review (M7-06), Open VSX namespace claim (October 2027). Next: the maintainer's second feature, or M17 (browser extension, optional)
+**Current milestone:** M17 — browser extension (Chrome, Edge). Open: restore the macOS jobs and the coverage gate as required checks on `main` (made optional on 2026-10-20 while GitHub had no macOS runner capacity), manual WSL check (M11-04, deferred by maintainer), winget review (M7-06), Open VSX namespace claim (October 2027)
 **Last updated:** 2026-10-20
 **Latest release:** [v0.5.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.5.0)
 
@@ -30,7 +30,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M14 | VS Code extension — MVP (ports sidebar, commands) | 7 / 7 | ✅ |
 | M15 | VS Code extension — USP (terminal "port in use" → one-click fix; project ports) | 5 / 5 | ✅ |
 | M16 | VS Code extension — packaging & publishing (VSIX, Marketplace, Open VSX) | 4 / 4 | ✅ |
-| M17 | Browser extension (optional, native messaging) | 0 / 3 | ⬜ |
+| M17 | Browser extension (Chrome, Edge; native messaging) | 2 / 8 | 🟨 |
 
 ---
 
@@ -254,13 +254,21 @@ Design: [ADR-0004](docs/adr/0004-vscode-extension.md). The extension is a thin c
 | M16-03 | Publish to Open VSX (VSCodium, Cursor, Windsurf) | release workflow | — | ✅ | [Live](https://open-vsx.org/extension/portcheck-vscode/portcheck-vscode); the release job created the `portcheck-vscode` namespace and publishes every release. Namespace shows as unverified until it's claimed: the claim needs a GitHub account at least a year old (`roystondwork-dev`: October 2027) |
 | M16-04 | Version sync with portcheck releases (release-please extra-files) | `release-please-config.json` | — | ✅ | `extra-files` bump `package.json` and `package-lock.json` (JSONPaths checked with release-please's jsonpath-plus); the packaging script fails if versions differ |
 
-## M17 — Browser extension (optional)
+## M17 — Browser extension
+
+Design: [ADR-0005](docs/adr/0005-browser-extension.md). portcheck itself is the native
+messaging host; the extension can only ask for `version`, `list`, `check` and `kill`.
 
 | ID | Task | Component / files | Tests required | Status | Notes |
 |---|---|---|---|---|---|
-| M17-01 | `portcheck native-host` (native messaging) + `portcheck browser install` (manifests per browser/OS) | Go | unit + integration | ⬜ | |
-| M17-02 | Extension: badge on `localhost:*` tabs; hint on "connection refused" | `extensions/browser/` | unit | ⬜ | |
-| M17-03 | Chrome Web Store / Edge / Firefox add-ons publishing | — | — | ⬜ | Maintainer accounts |
+| M17-01 | Native messaging host: framing, allowlisted operations run in-process with `--json` | `internal/nativehost/`, `internal/cli/browser.go` | unit 100%; real binary driven like Chrome | ✅ | Started with the extension origin as argument; guards apply (the browser is the host's parent, so it can't be stopped); 1 MiB answer limit handled |
+| M17-02 | `portcheck browser install / uninstall / status` (Chrome, Edge, Chromium, Brave; macOS, Linux, Windows registry) | `internal/nativehost/install.go`, `registry_windows.go` | unit (fake + real registry on Windows CI) | ✅ | Per user, no admin; manifest `0600`; prefers the binary on `PATH` (survives upgrades); extension ID pinned: `fmocabgaaihiflefcdafnhoihcibgnhl` |
+| M17-03 | Extension scaffold: Manifest V3, strict TypeScript, esbuild, ESLint, Vitest | `extensions/browser/` | `npm run check` | ⬜ | |
+| M17-04 | Badge on `localhost:*` tabs: which process serves it | `src/background.ts` | unit 100% | ⬜ | |
+| M17-05 | Popup: process details, who started it, Stop (confirm), local ports list; setup help when portcheck isn't registered | `src/popup.ts` | unit 100% | ⬜ | |
+| M17-06 | "Connection refused" on localhost: say whether anything listens | `src/background.ts` | unit | ⬜ | |
+| M17-07 | End-to-end test in real Chromium (Playwright) with the real binary + CI | `extensions/browser/e2e/`, `.github/workflows/browser.yml` | CI green | ⬜ | |
+| M17-08 | Docs, release zip, store publishing (Edge Add-ons free; Chrome Web Store has a one-time fee) | `docs/guide/browser.md`, `release.yml` | strict docs build | ⬜ | Store accounts: maintainer |
 
 ## What's next (candidates, not yet scheduled)
 
@@ -288,3 +296,4 @@ Design: [ADR-0004](docs/adr/0004-vscode-extension.md). The extension is a thin c
 | 2026-10-20 | TUI uses a custom table + golden screen snapshots instead of bubbles/table + teatest | M4 notes |
 | 2026-10-20 | macOS sockets via libproc + purego, `lsof` as fallback | [ADR-0003](docs/adr/0003-native-macos-sockets.md) |
 | 2026-10-20 | VS Code extension first, as a thin client of the CLI's JSON; browser extension optional | [ADR-0004](docs/adr/0004-vscode-extension.md) |
+| 2026-10-20 | Browser extension via native messaging, portcheck itself as host, four allowlisted operations | [ADR-0005](docs/adr/0005-browser-extension.md) |
