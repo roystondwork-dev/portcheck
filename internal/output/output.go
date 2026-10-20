@@ -58,6 +58,7 @@ const (
 	ToneBad
 	ToneWarn
 	ToneMuted
+	ToneInfo
 )
 
 // Cell is one table cell.
@@ -189,6 +190,7 @@ var (
 		ToneBad:   cellStyle.Foreground(lipgloss.Red).Bold(true),
 		ToneWarn:  cellStyle.Foreground(lipgloss.Yellow),
 		ToneMuted: cellStyle.Foreground(lipgloss.BrightBlack),
+		ToneInfo:  cellStyle.Foreground(lipgloss.Cyan),
 	}
 	borderStyle = lipgloss.NewStyle().Foreground(lipgloss.BrightBlack)
 )

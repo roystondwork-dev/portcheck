@@ -123,6 +123,12 @@ var protectedNames = []string{
 	// Windows
 	"system", "idle", "registry", "smss.exe", "csrss.exe", "wininit.exe",
 	"winlogon.exe", "services.exe", "lsass.exe", "svchost.exe", "dwm.exe",
+	// Container and WSL infrastructure: these hold ports on behalf of
+	// containers or WSL; stopping them breaks every container or distro.
+	"dockerd", "containerd", "docker-proxy", "rootlesskit", "slirp4netns",
+	"com.docker.backend", "com.docker.vpnkit", "vpnkit-bridge", "com.docker.build",
+	"com.docker.backend.exe", "docker desktop.exe", "vpnkit.exe", "dockerd.exe",
+	"wslrelay.exe", "wslservice.exe", "wslhost.exe", "vmmem", "vmmemwsl",
 }
 
 // IsProtectedName reports whether name is a protected system process.

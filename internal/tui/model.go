@@ -350,6 +350,11 @@ func (m Model) askKill(force bool) (tea.Model, tea.Cmd) {
 	switch {
 	case !ok:
 		return m, nil
+	case s.Container != nil:
+		ref := cmp.Or(s.Container.Name, s.Container.ID)
+		m.setStatus(toneBad, "port %d is published by %s container %q; stop it with: %s stop %s",
+			s.Port(), s.Container.Runtime, ref, s.Container.Runtime, ref)
+		return m, nil
 	case s.PID <= 0:
 		m.setStatus(toneBad, "owner of port %d is not visible. %s", s.Port(), m.deps.Hint)
 		return m, nil
@@ -404,14 +409,26 @@ func searchText(s inspect.Socket) string {
 	if p := s.Process; p != nil {
 		parts = append(parts, p.Name, p.User)
 	}
+	if c := s.Container; c != nil {
+		parts = append(parts, containerLabel(c), c.Image)
+	}
 	return strings.ToLower(strings.Join(parts, " "))
 }
 
+// containerLabel names a container for display, e.g. "docker:web".
+func containerLabel(c *inspect.Container) string {
+	return c.Runtime + ":" + cmp.Or(c.Name, c.Image, c.ID)
+}
+
 func processName(s inspect.Socket) string {
-	if s.Process == nil {
+	switch {
+	case s.Container != nil:
+		return containerLabel(s.Container)
+	case s.Process != nil:
+		return s.Process.Name
+	default:
 		return ""
 	}
-	return s.Process.Name
 }
 
 func processUser(s inspect.Socket) string {

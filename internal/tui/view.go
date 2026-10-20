@@ -188,6 +188,9 @@ func rowCells(s inspect.Socket) []string {
 	if s.Process != nil {
 		name, user = s.Process.Name, cmp.Or(s.Process.User, "-")
 	}
+	if s.Container != nil {
+		name = containerLabel(s.Container)
+	}
 	return []string{strconv.Itoa(int(s.Port())), string(s.Proto), s.Local.String(), remote, string(s.State), pid, name, user}
 }
 

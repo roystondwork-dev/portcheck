@@ -16,14 +16,23 @@ import (
 
 // SocketJSON is one socket.
 type SocketJSON struct {
-	Proto         string       `json:"proto"`
-	LocalAddress  string       `json:"localAddress"`
-	LocalPort     uint16       `json:"localPort"`
-	RemoteAddress string       `json:"remoteAddress,omitempty"`
-	RemotePort    uint16       `json:"remotePort,omitempty"`
-	State         string       `json:"state"`
-	PID           int32        `json:"pid,omitempty"`
-	Process       *ProcessJSON `json:"process,omitempty"`
+	Proto         string         `json:"proto"`
+	LocalAddress  string         `json:"localAddress"`
+	LocalPort     uint16         `json:"localPort"`
+	RemoteAddress string         `json:"remoteAddress,omitempty"`
+	RemotePort    uint16         `json:"remotePort,omitempty"`
+	State         string         `json:"state"`
+	PID           int32          `json:"pid,omitempty"`
+	Process       *ProcessJSON   `json:"process,omitempty"`
+	Container     *ContainerJSON `json:"container,omitempty"`
+}
+
+// ContainerJSON is the container publishing a socket's port.
+type ContainerJSON struct {
+	ID      string `json:"id"`
+	Name    string `json:"name,omitempty"`
+	Image   string `json:"image,omitempty"`
+	Runtime string `json:"runtime"`
 }
 
 // ProcessJSON is a socket's owning process.
@@ -94,6 +103,9 @@ func socketJSON(s inspect.Socket) SocketJSON {
 		}
 		out.Process = pj
 	}
+	if c := s.Container; c != nil {
+		out.Container = &ContainerJSON{ID: c.ID, Name: c.Name, Image: c.Image, Runtime: c.Runtime}
+	}
 	return out
 }
 
@@ -112,11 +124,26 @@ func pidCell(pid int32) Cell {
 	return C(strconv.Itoa(int(pid)))
 }
 
-func processCells(p *inspect.ProcessInfo) (name, user Cell) {
-	if p == nil {
-		return T("?", ToneMuted), T("?", ToneMuted)
+// ContainerLabel names a container for display, e.g. "docker:web".
+func ContainerLabel(c *inspect.Container) string {
+	return c.Runtime + ":" + cmp.Or(c.Name, c.Image, c.ID)
+}
+
+// processCells returns the PROCESS and USER cells. Ports published by a
+// container show the container instead of the proxy process holding them.
+func processCells(s inspect.Socket) (name, user Cell) {
+	user = T("?", ToneMuted)
+	if p := s.Process; p != nil {
+		user = C(cmp.Or(p.User, "-"))
 	}
-	return C(p.Name), C(cmp.Or(p.User, "-"))
+	switch {
+	case s.Container != nil:
+		return T(ContainerLabel(s.Container), ToneInfo), user
+	case s.Process != nil:
+		return C(s.Process.Name), user
+	default:
+		return T("?", ToneMuted), user
+	}
 }
 
 func stateTone(s inspect.State) Tone {
@@ -143,7 +170,7 @@ func ListDoc(res *inspect.Result) Document {
 		if s.Remote.IsValid() {
 			remote = C(s.Remote.String())
 		}
-		name, user := processCells(s.Process)
+		name, user := processCells(s)
 		d.Rows = append(d.Rows, []Cell{
 			C(string(s.Proto)), C(s.Local.String()), remote,
 			T(string(s.State), stateTone(s.State)), pidCell(s.PID), name, user,
@@ -180,7 +207,7 @@ func CheckDoc(sts []freeport.Status) Document {
 			continue
 		}
 		for _, h := range st.Holders {
-			name, user := processCells(h.Process)
+			name, user := processCells(h)
 			d.Rows = append(d.Rows, []Cell{port, proto, status, pidCell(h.PID), name, user})
 		}
 	}
