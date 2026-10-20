@@ -90,6 +90,7 @@ nav:
       - Project ports (doctor): guide/doctor.md
       - Interactive view (tui): guide/tui.md
       - VS Code extension: guide/vscode.md
+      - Browser extension: guide/browser.md
       - Containers & WSL: guide/containers.md
       - Scripting & CI: guide/scripting.md
   - Reference:

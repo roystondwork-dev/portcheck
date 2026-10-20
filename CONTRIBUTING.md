@@ -92,6 +92,22 @@ npm run test:integration            # runs the extension inside a downloaded VS 
 
 It must stay a thin client of `portcheck --json` (see ADR-0004): port logic belongs in Go.
 
+## Browser extension
+
+The extension lives in `extensions/browser/` (Manifest V3, TypeScript, esbuild, Vitest,
+Playwright):
+
+```sh
+make build                          # the end-to-end tests use bin/portcheck
+cd extensions/browser && npm ci
+npm run check                       # typecheck, lint, unit tests (100% coverage gate), bundle
+npx playwright install chromium     # once
+npx playwright test                 # the extension in a real Chromium with the real portcheck
+```
+
+Like the VS Code extension, it's a thin client: port logic and safety checks belong in
+Go (see ADR-0005).
+
 ## Commit messages
 
 We use [Conventional Commits](https://www.conventionalcommits.org/) — they drive

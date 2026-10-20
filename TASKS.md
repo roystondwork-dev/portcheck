@@ -30,7 +30,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M14 | VS Code extension — MVP (ports sidebar, commands) | 7 / 7 | ✅ |
 | M15 | VS Code extension — USP (terminal "port in use" → one-click fix; project ports) | 5 / 5 | ✅ |
 | M16 | VS Code extension — packaging & publishing (VSIX, Marketplace, Open VSX) | 4 / 4 | ✅ |
-| M17 | Browser extension (Chrome, Edge; native messaging) | 2 / 8 | 🟨 |
+| M17 | Browser extension (Chrome, Edge; native messaging) | 7 / 8 | 🟨 |
 
 ---
 
@@ -263,11 +263,11 @@ messaging host; the extension can only ask for `version`, `list`, `check` and `k
 |---|---|---|---|---|---|
 | M17-01 | Native messaging host: framing, allowlisted operations run in-process with `--json` | `internal/nativehost/`, `internal/cli/browser.go` | unit 100%; real binary driven like Chrome | ✅ | Started with the extension origin as argument; guards apply (the browser is the host's parent, so it can't be stopped); 1 MiB answer limit handled |
 | M17-02 | `portcheck browser install / uninstall / status` (Chrome, Edge, Chromium, Brave; macOS, Linux, Windows registry) | `internal/nativehost/install.go`, `registry_windows.go` | unit (fake + real registry on Windows CI) | ✅ | Per user, no admin; manifest `0600`; prefers the binary on `PATH` (survives upgrades); extension ID pinned: `fmocabgaaihiflefcdafnhoihcibgnhl` |
-| M17-03 | Extension scaffold: Manifest V3, strict TypeScript, esbuild, ESLint, Vitest | `extensions/browser/` | `npm run check` | ⬜ | |
-| M17-04 | Badge on `localhost:*` tabs: which process serves it | `src/background.ts` | unit 100% | ⬜ | |
-| M17-05 | Popup: process details, who started it, Stop (confirm), local ports list; setup help when portcheck isn't registered | `src/popup.ts` | unit 100% | ⬜ | |
-| M17-06 | "Connection refused" on localhost: say whether anything listens | `src/background.ts` | unit | ⬜ | |
-| M17-07 | End-to-end test in real Chromium (Playwright) with the real binary + CI | `extensions/browser/e2e/`, `.github/workflows/browser.yml` | CI green | ⬜ | |
+| M17-03 | Extension scaffold: Manifest V3, strict TypeScript, esbuild, ESLint, Vitest | `extensions/browser/` | `npm run check` | ✅ | Same toolchain as the VS Code extension; permissions: `nativeMessaging` + localhost URLs only (no tabs/history access) |
+| M17-04 | Badge on `localhost:*` tabs: which process serves it | `src/background.ts` | unit 100% | ✅ | Badge per localhost tab; checks open tabs when the worker starts (events from before are lost: found by a stress test, 0/8 → 16/16) and ignores stale answers |
+| M17-05 | Popup: process details, who started it, Stop (confirm), local ports list; setup help when portcheck isn't registered | `src/popup.ts` | unit 100% | ✅ | Inline confirmation (Stop / Force kill / Cancel); containers get their stop command; setup steps with copy buttons |
+| M17-06 | "Connection refused" on localhost: say whether anything listens | `src/background.ts` | unit | ✅ | Via the badge: `off` on error pages such as ERR_CONNECTION_REFUSED |
+| M17-07 | End-to-end test in real Chromium (Playwright) with the real binary + CI | `extensions/browser/e2e/`, `.github/workflows/browser.yml` | CI green | ✅ | 5 tests: badge, `off`, popup + real Stop, startup race, setup help; native host registered in the test profile. CI on Linux and macOS (Windows registration covered by Go tests) |
 | M17-08 | Docs, release zip, store publishing (Edge Add-ons free; Chrome Web Store has a one-time fee) | `docs/guide/browser.md`, `release.yml` | strict docs build | ⬜ | Store accounts: maintainer |
 
 ## What's next (candidates, not yet scheduled)

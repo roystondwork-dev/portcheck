@@ -30,6 +30,7 @@
 | ▶️ | `portcheck run --port 3000 --next -- npm run dev` | Start a command on a free port (`$PORT`, `{port}`); take the next one or stop the holder |
 | 🩺 | `portcheck doctor` | Check the ports listed in `.portcheck.yaml` and get a fix for each problem |
 | 🖥️ | `portcheck` | Live, sortable, filterable TUI. Stop processes without leaving it |
+| 🌐 | Browser extension | Chrome/Edge: which process serves a localhost tab, `off` when nothing listens, stop it from the popup ([in development](docs/guide/browser.md)) |
 | 🧩 | [VS Code extension](https://marketplace.visualstudio.com/items?itemName=portcheck-vscode.portcheck-vscode) | "Port in use" errors in the terminal become one-click fixes; listening ports in the sidebar ([guide](docs/guide/vscode.md)) |
 
 ### VS Code extension
