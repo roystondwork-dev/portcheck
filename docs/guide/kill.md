@@ -10,7 +10,16 @@ PID    PROCESS  RESULT      DETAIL
 ```
 
 `kill` finds the processes **listening** on the given ports (TCP and UDP by default),
-asks for confirmation, and stops them.
+asks for confirmation, and stops them. The confirmation shows **who started** each
+process, which helps you tell your own dev server from something an IDE or another
+tool is running:
+
+```console
+$ portcheck kill 3000
+About to terminate:
+  PID 42379  node  (port 3000), started by npm (4200) ← zsh (900)
+Proceed? [y/N]
+```
 
 ## How a process is stopped
 

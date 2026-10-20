@@ -59,6 +59,9 @@ if res.Partial {
 }
 ```
 
+`ProcessInfo.Ancestors` lists who started the process, nearest first (up to
+`inspect.MaxAncestors`); `ProcessInfo.Parent()` returns the direct parent or nil.
+
 To test code that uses `inspect`, pass an `inspect.FakeProvider` to `inspect.New`
 instead of using `NewSystem`.
 

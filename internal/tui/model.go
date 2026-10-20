@@ -18,6 +18,7 @@ import (
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/roystondwork-dev/portcheck/internal/output"
 	"github.com/roystondwork-dev/portcheck/pkg/inspect"
 	"github.com/roystondwork-dev/portcheck/pkg/killer"
 )
@@ -112,10 +113,11 @@ type (
 )
 
 type killTarget struct {
-	pid   int32
-	name  string
-	port  uint16
-	force bool
+	pid      int32
+	name     string
+	port     uint16
+	force    bool
+	ancestry string
 }
 
 // Model is the Bubble Tea model.
@@ -363,7 +365,7 @@ func (m Model) askKill(force bool) (tea.Model, tea.Cmd) {
 	if s.Process != nil {
 		name = s.Process.Name
 	}
-	m.confirm = killTarget{pid: s.PID, name: name, port: s.Port(), force: force}
+	m.confirm = killTarget{pid: s.PID, name: name, port: s.Port(), force: force, ancestry: output.Ancestry(s.Process)}
 	m.mode = modeConfirm
 	return m, nil
 }

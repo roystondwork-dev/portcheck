@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "kind": "list",
+  "data": {
+    "sockets": [
+      {
+        "proto": "tcp",
+        "localAddress": "0.0.0.0",
+        "localPort": 22,
+        "state": "LISTEN"
+      },
+      {
+        "proto": "tcp",
+        "localAddress": "127.0.0.1",
+        "localPort": 3000,
+        "state": "LISTEN",
+        "pid": 4242,
+        "process": {
+          "pid": 4242,
+          "name": "node",
+          "user": "alice",
+          "cmdline": "node --max-old-space-size=4096 ./node_modules/.bin/next dev --turbo --hostname 127.0.0.1",
+          "exe": "/usr/local/bin/node",
+          "startTime": "2026-10-20T09:30:00Z",
+          "ancestors": [
+            {
+              "pid": 4200,
+              "name": "npm"
+            },
+            {
+              "pid": 900,
+              "name": "zsh"
+            }
+          ]
+        }
+      },
+      {
+        "proto": "tcp",
+        "localAddress": "127.0.0.1",
+        "localPort": 3000,
+        "remoteAddress": "127.0.0.1",
+        "remotePort": 51234,
+        "state": "ESTABLISHED",
+        "pid": 4242,
+        "process": {
+          "pid": 4242,
+          "name": "node",
+          "user": "alice",
+          "cmdline": "node --max-old-space-size=4096 ./node_modules/.bin/next dev --turbo --hostname 127.0.0.1",
+          "exe": "/usr/local/bin/node",
+          "startTime": "2026-10-20T09:30:00Z",
+          "ancestors": [
+            {
+              "pid": 4200,
+              "name": "npm"
+            },
+            {
+              "pid": 900,
+              "name": "zsh"
+            }
+          ]
+        }
+      },
+      {
+        "proto": "tcp",
+        "localAddress": "::",
+        "localPort": 5432,
+        "state": "LISTEN",
+        "pid": 88,
+        "process": {
+          "pid": 88,
+          "name": "postgres"
+        }
+      },
+      {
+        "proto": "udp",
+        "localAddress": "0.0.0.0",
+        "localPort": 5353,
+        "state": "NONE",
+        "pid": 300
+      },
+      {
+        "proto": "tcp",
+        "localAddress": "10.0.0.2",
+        "localPort": 50000,
+        "remoteAddress": "1.1.1.1",
+        "remotePort": 443,
+        "state": "TIME_WAIT"
+      },
+      {
+        "proto": "tcp",
+        "localAddress": "::",
+        "localPort": 18080,
+        "state": "LISTEN",
+        "pid": 79156,
+        "process": {
+          "pid": 79156,
+          "name": "com.docker.backend",
+          "user": "alice"
+        },
+        "container": {
+          "id": "b1308ab03f9f",
+          "name": "web",
+          "image": "nginx:alpine",
+          "runtime": "docker"
+        }
+      }
+    ],
+    "partial": true
+  }
+}

@@ -17,8 +17,13 @@ import (
 )
 
 var (
-	node = &inspect.ProcessInfo{PID: 4242, Name: "node", User: "alice", Cmdline: "node server.js", Exe: "/usr/local/bin/node", CreateTime: time.Date(2026, 10, 20, 9, 30, 0, 0, time.UTC)}
-	pg   = &inspect.ProcessInfo{PID: 88, Name: "postgres"}
+	node = &inspect.ProcessInfo{
+		PID: 4242, Name: "node", User: "alice",
+		Cmdline: "node --max-old-space-size=4096 ./node_modules/.bin/next dev --turbo --hostname 127.0.0.1",
+		Exe:     "/usr/local/bin/node", CreateTime: time.Date(2026, 10, 20, 9, 30, 0, 0, time.UTC),
+		Ancestors: []inspect.ProcessRef{{PID: 4200, Name: "npm"}, {PID: 900, Name: "zsh"}},
+	}
+	pg = &inspect.ProcessInfo{PID: 88, Name: "postgres"}
 
 	sockets = []inspect.Socket{
 		{RawSocket: inspect.RawSocket{Proto: inspect.TCP, Local: netip.MustParseAddrPort("0.0.0.0:22"), State: inspect.StateListen}},
@@ -61,8 +66,9 @@ var colorEnv = []string{"CLICOLOR_FORCE=1", "TERM=xterm-256color"}
 
 func docs() map[string]Document {
 	return map[string]Document{
-		"list":       ListDoc(&inspect.Result{Sockets: sockets, Partial: true}),
-		"list-empty": ListDoc(&inspect.Result{}),
+		"list":       ListDoc(&inspect.Result{Sockets: sockets, Partial: true}, false),
+		"list-wide":  ListDoc(&inspect.Result{Sockets: sockets, Partial: true}, true),
+		"list-empty": ListDoc(&inspect.Result{}, false),
 		"check":      CheckDoc(statuses),
 		"free":       FreeDoc([]uint16{3001, 3002}),
 		"free-empty": FreeDoc(nil),
@@ -136,7 +142,7 @@ func TestJSONEnvelope(t *testing.T) {
 		Kind          string          `json:"kind"`
 		Data          json.RawMessage `json:"data"`
 	}
-	if err := json.Unmarshal(render(t, ListDoc(&inspect.Result{}), JSON, Options{}), &env); err != nil {
+	if err := json.Unmarshal(render(t, ListDoc(&inspect.Result{}, false), JSON, Options{}), &env); err != nil {
 		t.Fatal(err)
 	}
 	if env.SchemaVersion != SchemaVersion || env.Kind != "list" {
@@ -180,6 +186,19 @@ func TestPrinterFormat(t *testing.T) {
 	t.Parallel()
 	if got := NewPrinter(&bytes.Buffer{}, CSV, Options{}).Format(); got != CSV {
 		t.Errorf("Format() = %q", got)
+	}
+}
+
+func TestAncestryAndTruncate(t *testing.T) {
+	t.Parallel()
+	if got := Ancestry(node); got != "npm (4200) ← zsh (900)" {
+		t.Errorf("Ancestry = %q", got)
+	}
+	if Ancestry(nil) != "" || Ancestry(pg) != "" {
+		t.Error("unknown ancestry must be empty")
+	}
+	if Truncate("abc", 3) != "abc" || Truncate("abcd", 3) != "ab…" || Truncate("héllo wörld", 6) != "héllo…" {
+		t.Error("Truncate")
 	}
 }
 

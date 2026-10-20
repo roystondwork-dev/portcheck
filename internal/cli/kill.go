@@ -31,9 +31,10 @@ type killFlags struct {
 
 // killTarget is a process to stop and the ports it was found on.
 type killTarget struct {
-	pid   int32
-	name  string
-	ports []uint16
+	pid      int32
+	name     string
+	ports    []uint16
+	ancestry string // "npm (4200) ← zsh (900)", if known
 }
 
 func (c *cli) newKillCmd() *cobra.Command {
@@ -171,6 +172,7 @@ func (c *cli) killTargets(cmd *cobra.Command, args []string, protos []inspect.Pr
 			}
 			if s.Process != nil {
 				t.name = s.Process.Name
+				t.ancestry = output.Ancestry(s.Process)
 			}
 			if !slices.Contains(t.ports, s.Port()) {
 				t.ports = append(t.ports, s.Port())
@@ -229,6 +231,9 @@ func (c *cli) confirm(targets []killTarget, force bool) (bool, error) {
 				ps[i] = strconv.Itoa(int(p))
 			}
 			line += "  (port " + strings.Join(ps, ", ") + ")"
+		}
+		if t.ancestry != "" {
+			line += ", started by " + t.ancestry
 		}
 		fmt.Fprintln(c.app.Stderr, line)
 	}

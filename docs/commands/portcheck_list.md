@@ -26,6 +26,7 @@ portcheck list [flags]
   portcheck list --port 3000-3999 --proto tcp
   portcheck list --name 'node*' --json
   portcheck list -l --watch 2s
+  portcheck list -l --wide        # who started each process, and its command line
 ```
 
 ### Options
@@ -39,6 +40,7 @@ portcheck list [flags]
       --proto strings    protocols to include: tcp, udp
       --state strings    only these states, e.g. LISTEN,ESTABLISHED
       --watch duration   refresh every interval until interrupted, e.g. 2s
+  -w, --wide             also show the parent process and command line
 ```
 
 ### Options inherited from parent commands

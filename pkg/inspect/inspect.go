@@ -77,6 +77,27 @@ type ProcessInfo struct {
 	Cmdline    string
 	Exe        string
 	CreateTime time.Time
+	// Ancestors are the processes that started this one, nearest first (the
+	// parent, then its parent, …), up to MaxAncestors. The chain stops before
+	// PID 1 (init, launchd) and at the first process that can't be inspected.
+	Ancestors []ProcessRef
+}
+
+// ProcessRef identifies a process by PID and name.
+type ProcessRef struct {
+	PID  int32
+	Name string
+}
+
+// MaxAncestors bounds how far up the process tree ProcessInfo.Ancestors goes.
+const MaxAncestors = 3
+
+// Parent returns the direct parent, or nil if unknown.
+func (p *ProcessInfo) Parent() *ProcessRef {
+	if p == nil || len(p.Ancestors) == 0 {
+		return nil
+	}
+	return &p.Ancestors[0]
 }
 
 // Container identifies a container that publishes a socket's port (for

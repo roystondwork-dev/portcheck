@@ -19,7 +19,11 @@ type fakeHandle struct {
 	name, user, cmdline, exe string
 	createMS                 int64
 	nameErr, otherErr        error
+	ppid                     int32
+	ppidErr                  error
 }
+
+func (h fakeHandle) PpidWithContext(context.Context) (int32, error) { return h.ppid, h.ppidErr }
 
 func (h fakeHandle) NameWithContext(context.Context) (string, error) { return h.name, h.nameErr }
 func (h fakeHandle) UsernameWithContext(context.Context) (string, error) {
@@ -90,6 +94,69 @@ func TestSystemProcess(t *testing.T) {
 			t.Errorf("error = %v, want ErrAccessDenied", err)
 		}
 	})
+}
+
+// treeProvider serves handles from a fake process tree.
+func treeProvider(tree map[int32]fakeHandle, missing map[int32]error) *systemProvider {
+	return &systemProvider{newProcess: func(_ context.Context, pid int32) (processHandle, error) {
+		if err, ok := missing[pid]; ok {
+			return nil, err
+		}
+		return tree[pid], nil
+	}}
+}
+
+func TestSystemAncestors(t *testing.T) {
+	t.Parallel()
+	tree := map[int32]fakeHandle{
+		50: {name: "node", ppid: 40},
+		40: {name: "npm", ppid: 30},
+		30: {name: "zsh", ppid: 20},
+		20: {name: "iTerm2", ppid: 1},
+		10: {name: "bash", ppid: 1},
+		9:  {name: "child", ppid: 10},
+		8:  {name: "loop", ppid: 8},
+		7:  {name: "orphan", ppidErr: errors.New("no ppid")},
+		6:  {name: "x", ppid: 99},
+		5:  {name: "y", ppid: 98},
+	}
+	missing := map[int32]error{99: process.ErrorProcessNotRunning}
+	tree[98] = fakeHandle{nameErr: fs.ErrPermission}
+	p := treeProvider(tree, missing)
+
+	tests := []struct {
+		pid  int32
+		want []ProcessRef
+	}{
+		{50, []ProcessRef{{40, "npm"}, {30, "zsh"}, {20, "iTerm2"}}}, // capped at MaxAncestors
+		{9, []ProcessRef{{10, "bash"}}},                              // stops before PID 1
+		{10, nil},                                                    // parent is init
+		{8, nil},                                                     // self-reference
+		{7, nil},                                                     // ppid unknown
+		{6, nil},                                                     // parent exited
+		{5, nil},                                                     // parent name denied
+	}
+	for _, tt := range tests {
+		got, err := p.Process(t.Context(), tt.pid)
+		if err != nil {
+			t.Fatalf("pid %d: %v", tt.pid, err)
+		}
+		if d := diff(tt.want, got.Ancestors); d != "" {
+			t.Errorf("pid %d ancestors (-want +got):\n%s", tt.pid, d)
+		}
+	}
+}
+
+func TestParent(t *testing.T) {
+	t.Parallel()
+	var nilInfo *ProcessInfo
+	if nilInfo.Parent() != nil || (&ProcessInfo{}).Parent() != nil {
+		t.Error("Parent of unknown ancestry must be nil")
+	}
+	p := &ProcessInfo{Ancestors: []ProcessRef{{40, "npm"}, {30, "zsh"}}}
+	if got := p.Parent(); got == nil || *got != (ProcessRef{40, "npm"}) {
+		t.Errorf("Parent = %v", got)
+	}
 }
 
 func TestSystemProcessSelf(t *testing.T) {
