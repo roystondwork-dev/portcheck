@@ -69,6 +69,8 @@ linters:
         - github.com/roystondwork-dev/portcheck/*
   exclusions:
     generated: lax
+    paths:
+      - extensions # the VS Code extension; npm packages there can contain Go files
     presets:
       - std-error-handling
     rules:
