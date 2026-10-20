@@ -165,4 +165,6 @@ jobs:
             echo "::warning::OVSX_PAT is not set; skipping Open VSX"
             exit 0
           fi
+          # The namespace must exist and match the publisher; creating it again fails harmlessly.
+          npx ovsx create-namespace "$(node -p 'require("./package.json").publisher')" || true
           npx ovsx publish "$RUNNER_TEMP"/vsix/*.vsix
