@@ -112,6 +112,10 @@ func fromConnectionStat(c gnet.ConnectionStat) (RawSocket, bool) {
 		return RawSocket{}, false
 	}
 	remote, _ := toAddrPort(c.Raddr, c.Family)
+	if remote.Port() == 0 {
+		// Linux and Windows report unconnected sockets as remote 0.0.0.0:0.
+		remote = netip.AddrPort{}
+	}
 	return RawSocket{
 		Proto:  proto,
 		Local:  local,

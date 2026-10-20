@@ -152,6 +152,20 @@ func TestFromConnectionStat(t *testing.T) {
 	}
 }
 
+func TestFromConnectionStatUnconnectedRemote(t *testing.T) {
+	t.Parallel()
+	// Linux and Windows report listeners with remote 0.0.0.0:0 / [::]:0.
+	for _, raddr := range []gnet.Addr{{IP: "0.0.0.0", Port: 0}, {IP: "::", Port: 0}} {
+		got, ok := fromConnectionStat(gnet.ConnectionStat{
+			Type: syscall.SOCK_STREAM, Family: syscall.AF_INET,
+			Laddr: gnet.Addr{IP: "127.0.0.1", Port: 3000}, Raddr: raddr, Status: "LISTEN",
+		})
+		if !ok || got.Remote.IsValid() {
+			t.Errorf("remote %+v: got Remote %v, want unset", raddr, got.Remote)
+		}
+	}
+}
+
 func TestToAddrPort(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
