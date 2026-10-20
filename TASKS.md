@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M13 — native macOS provider. M11 needs a manual WSL check. winget review pending (M7-06)
+**Current milestone:** M10–M13 done; next: two maintainer-requested features. Open: manual WSL check (M11-04), winget review (M7-06)
 **Last updated:** 2026-10-20
 **Latest release:** [v0.3.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.3.0)
 
