@@ -58,6 +58,10 @@ PID    PROCESS  RESULT      DETAIL
 
     `portcheck doctor`: list your project's ports in `.portcheck.yaml`; get a fix for every problem.
 
+-   :material-microsoft-visual-studio-code: **[VS Code extension](guide/vscode.md)**
+
+    See listening ports and who started them in the sidebar; stop them safely without leaving the editor.
+
 -   :material-monitor-dashboard: **[Interactive view](guide/tui.md)**
 
     `portcheck`: a live, sortable, filterable table. Stop processes without leaving it.

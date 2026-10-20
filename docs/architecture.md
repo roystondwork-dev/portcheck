@@ -44,6 +44,10 @@ flowchart TD
 **Dependencies point down only.** `pkg/*` is the public library and must not import
 `internal/*`, cobra or the Charm libraries; `depguard` in `.golangci.yml` enforces this.
 
+The [VS Code extension](guide/vscode.md) in `extensions/vscode/` sits outside this
+diagram: it runs the built `portcheck` binary with `--json` and never imports Go code
+([ADR-0004](adr/0004-vscode-extension.md)).
+
 ## Packages
 
 | Package | Responsibility | OS boundary (faked in tests) |

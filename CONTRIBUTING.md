@@ -79,6 +79,19 @@ See [docs/architecture.md](docs/architecture.md) for details.
 5. **Cross-platform.** OS-specific code lives in `_windows.go` / `_unix.go` files
    (or `_darwin.go` / `_linux.go` when truly needed) behind a small interface.
 
+## VS Code extension
+
+The extension lives in `extensions/vscode/` (TypeScript, esbuild, Vitest, `@vscode/test-electron`):
+
+```sh
+make build                          # the integration tests use bin/portcheck
+cd extensions/vscode && npm ci
+npm run check                       # typecheck, lint, unit tests (100% coverage gate), bundle
+npm run test:integration            # runs the extension inside a downloaded VS Code
+```
+
+It must stay a thin client of `portcheck --json` (see ADR-0004): port logic belongs in Go.
+
 ## Commit messages
 
 We use [Conventional Commits](https://www.conventionalcommits.org/) — they drive
