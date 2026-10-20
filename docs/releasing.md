@@ -44,7 +44,9 @@ are hidden.
    [the Marketplace's management page](https://marketplace.visualstudio.com/manage)
    (**⋯ → Update**). The extension's version comes
    from the same release PR (`extra-files` in `release-please-config.json`).
-6. Follow the winget pull request opened on
+6. Check that the release has `portcheck-browser-X.Y.Z.zip`, the browser extension
+   built by the **browser** job (its version also comes from the release PR).
+7. Follow the winget pull request opened on
    [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+roystondwork-dev.portcheck).
    Microsoft's bots validate and scan it, then a moderator merges it, which can take a few
    days the first time. Keep the fork's `master` branch in sync occasionally

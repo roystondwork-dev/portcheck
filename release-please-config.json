@@ -55,7 +55,10 @@
       "extra-files": [
         { "type": "json", "path": "extensions/vscode/package.json", "jsonpath": "$.version" },
         { "type": "json", "path": "extensions/vscode/package-lock.json", "jsonpath": "$.version" },
-        { "type": "json", "path": "extensions/vscode/package-lock.json", "jsonpath": "$.packages[''].version" }
+        { "type": "json", "path": "extensions/vscode/package-lock.json", "jsonpath": "$.packages[''].version" },
+        { "type": "json", "path": "extensions/browser/package.json", "jsonpath": "$.version" },
+        { "type": "json", "path": "extensions/browser/package-lock.json", "jsonpath": "$.version" },
+        { "type": "json", "path": "extensions/browser/package-lock.json", "jsonpath": "$.packages[''].version" }
       ]
     }
   }

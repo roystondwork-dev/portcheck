@@ -6,6 +6,7 @@ name: Release
 #    release; the goreleaser job then builds, signs and publishes the artifacts.
 # 3. The vscode job packages the VS Code extension with the binaries from those
 #    artifacts (all platforms in one VSIX) and publishes it.
+# 4. The browser job packages the browser extension as a zip for the release.
 # See docs/releasing.md.
 
 on:
@@ -171,3 +172,45 @@ jobs:
           # The namespace must exist and match the publisher; creating it again fails harmlessly.
           npx ovsx create-namespace "$(node -p 'require("./package.json").publisher')" || true
           npx ovsx publish "$RUNNER_TEMP"/vsix/*.vsix
+
+  browser:
+    needs: [release-please, goreleaser]
+    if: >-
+      always() &&
+      (needs.goreleaser.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.vscode_only))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # attach the zip to the release
+      id-token: write      # provenance
+      attestations: write
+    env:
+      TAG: ${{ needs.release-please.outputs.tag_name || inputs.tag }}
+    defaults:
+      run:
+        working-directory: extensions/browser
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ (github.event_name == 'workflow_dispatch' && inputs.vscode_only) && github.sha || env.TAG }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: extensions/browser/package-lock.json
+      - run: npm ci
+      - name: Build and zip the extension
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::extensions/browser/package.json has $version, expected ${TAG#v} (release-please keeps them in sync)"
+            exit 1
+          fi
+          npm run build
+          (cd dist && zip -qr "$RUNNER_TEMP/portcheck-browser-$version.zip" .)
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: ${{ runner.temp }}/portcheck-browser-*.zip
+      - name: Attach to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" "$RUNNER_TEMP"/portcheck-browser-*.zip --clobber

@@ -7,10 +7,9 @@ refuses to connect.
 ![The portcheck popup for localhost:3000: served by node (pid 8447), started by node ← zsh, its command and user, a Stop button, and the ports listening on this machine](../assets/browser-popup.png){ width="360" }
 
 !!! note "Status"
-    The extension is in development (M17 in
-    [TASKS.md](https://github.com/roystondwork-dev/portcheck/blob/main/TASKS.md)). Until it's
-    in the Chrome Web Store and Edge Add-ons, load it from source (see
-    [Building from source](#building-from-source)).
+    The extension isn't in the Chrome Web Store or Edge Add-ons yet (M17 in
+    [TASKS.md](https://github.com/roystondwork-dev/portcheck/blob/main/TASKS.md)). Until
+    then, install it from a release as below.
 
 ## What it does
 
@@ -25,6 +24,14 @@ refuses to connect.
   one click to open.
 
 It works on `localhost`, `*.localhost`, `127.0.0.1`, `[::1]` and `0.0.0.0`, on any port.
+
+## Install
+
+1. Download `portcheck-browser-<version>.zip` from the
+   [latest release](https://github.com/roystondwork-dev/portcheck/releases/latest) and
+   unzip it into a folder you'll keep (the browser loads the extension from there).
+2. Open `chrome://extensions` (Edge: `edge://extensions`), turn on **Developer mode**,
+   click **Load unpacked** and choose that folder.
 
 ## Setup
 
