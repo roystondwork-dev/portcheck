@@ -37,8 +37,10 @@ func NewRootCmd(app *App) *cobra.Command {
 free, finds free ports, safely stops the process holding a port, and checks
 ports on remote hosts.
 
-Running 'portcheck <port>' is a shortcut for 'portcheck check <port>'.`,
-		Example: `  portcheck list --listening      # everything accepting connections
+Running 'portcheck' alone in an interactive terminal opens the live TUI
+('portcheck tui'); 'portcheck <port>' is a shortcut for 'portcheck check <port>'.`,
+		Example: `  portcheck                       # live interactive view (in a terminal)
+  portcheck list --listening      # everything accepting connections
   portcheck 3000                  # is 3000 free? who holds it?
   portcheck free -n 3             # three free ports
   portcheck kill 8080             # stop whatever listens on 8080
@@ -51,6 +53,9 @@ Running 'portcheck <port>' is a shortcut for 'portcheck check <port>'.`,
 		PersistentPreRunE: c.setup,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
+				if c.app.StdinTTY && c.app.StdoutTTY {
+					return c.runTUI(cmd, defaultTUIInterval)
+				}
 				return cmd.Help()
 			}
 			if _, err := portspec.Parse(strings.Join(args, ",")); err != nil {
@@ -85,6 +90,7 @@ Running 'portcheck <port>' is a shortcut for 'portcheck check <port>'.`,
 		c.newFreeCmd(),
 		c.newKillCmd(),
 		c.newScanCmd(),
+		c.newTUICmd(),
 		c.newVersionCmd(),
 	)
 	return root

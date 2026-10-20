@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M4 — Interactive TUI
+**Current milestone:** M5 — Documentation
 **Last updated:** 2026-10-20
 **Target release:** v0.1.0
 
@@ -17,7 +17,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M1 | Core library (`pkg/*` except scan) | 7 / 7 | ✅ |
 | M2 | CLI | 11 / 11 | ✅ |
 | M3 | Remote scanner | 6 / 6 | ✅ |
-| M4 | Interactive TUI | 0 / 7 | ⬜ |
+| M4 | Interactive TUI | 6 / 7 | ✅ (demo GIF rendered in M5) |
 | M5 | Documentation | 0 / 9 | ⬜ |
 | M6 | Release & distribution | 0 / 10 | ⬜ |
 
@@ -84,13 +84,13 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 
 | ID | Task | Component / files | Tests required | Status | Notes |
 |---|---|---|---|---|---|
-| M4-01 | Model/Update/View skeleton, live refresh | `internal/tui` | unit on Update | ⬜ | |
-| M4-02 | Sortable table, resize handling | `internal/tui` | teatest golden | ⬜ | |
-| M4-03 | Filter bar (`/`), proto toggle (`tab`) | `internal/tui` | unit + golden | ⬜ | |
-| M4-04 | Kill with confirm dialog (`k`) | `internal/tui` | unit + golden | ⬜ | |
-| M4-05 | Help (`?`), keymap, adaptive colors | `internal/tui` | golden | ⬜ | |
-| M4-06 | `tui` command + default on bare TTY | `internal/cli/tui.go` | testscript | ⬜ | |
-| M4-07 | Demo recording with vhs | `docs/assets` | — | ⬜ | |
+| M4-01 | Model/Update/View skeleton, live refresh | `internal/tui` | unit on Update | ✅ | Pure model; list/kill run as `tea.Cmd`s via interfaces; cursor follows the selected socket across refreshes |
+| M4-02 | Sortable table, resize handling | `internal/tui` | teatest golden | ✅ | Custom table renderer (deterministic, width-aware truncation). Golden snapshots of ANSI-stripped screens instead of teatest (no tagged v2 release) |
+| M4-03 | Filter bar (`/`), proto toggle (`tab`) | `internal/tui` | unit + golden | ✅ | Live filter over port/proto/address/state/pid/process/user |
+| M4-04 | Kill with confirm dialog (`k`) | `internal/tui` | unit + golden | ✅ | `x`/`k`/`delete` graceful, `K` force; verified killing a real server from the TUI over a PTY |
+| M4-05 | Help (`?`), keymap, adaptive colors | `internal/tui` | golden | ✅ | Hidden-owner rows dimmed, listeners green; `c` copies PID via OSC 52 |
+| M4-06 | `tui` command + default on bare TTY | `internal/cli/tui.go` | testscript | ✅ | Bare `portcheck` opens the TUI only when stdin and stdout are terminals; otherwise prints help |
+| M4-07 | Demo recording with vhs | `docs/assets` | — | 🟨 | `docs/assets/demo.tape` + `make demo` ready; GIF rendered in M5 (needs vhs) |
 
 ## M5 — Documentation
 
@@ -130,3 +130,4 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | 2026-10-20 | Go CLI + Bubble Tea TUI; MIT license; name `portcheck` | plan |
 | 2026-10-20 | gopsutil behind `inspect.Provider` | [ADR-0001](docs/adr/0001-gopsutil-provider.md) |
 | 2026-10-20 | Scanner is TCP-connect only, no stealth features | [ADR-0002](docs/adr/0002-tcp-connect-only-scanning.md) |
+| 2026-10-20 | TUI uses a custom table + golden screen snapshots instead of bubbles/table + teatest | M4 notes |

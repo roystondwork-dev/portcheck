@@ -17,6 +17,7 @@ import (
 	"golang.org/x/term"
 
 	"github.com/roystondwork-dev/portcheck/internal/buildinfo"
+	"github.com/roystondwork-dev/portcheck/internal/tui"
 	"github.com/roystondwork-dev/portcheck/pkg/freeport"
 	"github.com/roystondwork-dev/portcheck/pkg/inspect"
 	"github.com/roystondwork-dev/portcheck/pkg/killer"
@@ -45,6 +46,9 @@ type ProcessKiller interface {
 // ScanFunc runs a port scan; scan.Scan implements it.
 type ScanFunc func(ctx context.Context, targets []scan.Target, ports portspec.Spec, opts scan.Options) <-chan scan.Result
 
+// TUIFunc runs the interactive UI; tui.Run implements it.
+type TUIFunc func(ctx context.Context, deps tui.Deps, in io.Reader, out io.Writer, environ []string) error
+
 // App bundles everything a command needs from the outside world.
 type App struct {
 	Stdin          io.Reader
@@ -59,6 +63,7 @@ type App struct {
 	PrivilegeHint func() string
 	Resolver      scan.Resolver
 	Scan          ScanFunc
+	RunTUI        TUIFunc
 	Build         buildinfo.Info
 }
 
@@ -79,6 +84,7 @@ func NewApp() *App {
 		PrivilegeHint: inspect.PrivilegeHint,
 		Resolver:      net.DefaultResolver,
 		Scan:          scan.Scan,
+		RunTUI:        tui.Run,
 		Build:         buildinfo.Get(),
 	}
 }

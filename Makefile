@@ -105,6 +105,10 @@ docs-cli: ## Regenerate CLI reference markdown + man pages.
 docs: docs-cli ## Build the documentation site (requires mkdocs-material).
 	mkdocs build --strict
 
+.PHONY: demo
+demo: build ## Render docs/assets/demo.gif with vhs.
+	PATH="$(CURDIR)/bin:$$PATH" vhs docs/assets/demo.tape
+
 .PHONY: snapshot
 snapshot: ## Build a local, unpublished release with GoReleaser.
 	goreleaser release --snapshot --clean
