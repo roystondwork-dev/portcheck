@@ -66,6 +66,7 @@ type App struct {
 	Resolver      scan.Resolver
 	Scan          ScanFunc
 	Dialer        waitfor.Dialer
+	Runner        ProcessRunner
 	RunTUI        TUIFunc
 	Build         buildinfo.Info
 }
@@ -94,6 +95,7 @@ func NewApp() *App {
 		Resolver:      net.DefaultResolver,
 		Scan:          scan.Scan,
 		Dialer:        &net.Dialer{},
+		Runner:        execRunner{notify: signal.Notify, stop: signal.Stop},
 		RunTUI:        tui.Run,
 		Build:         buildinfo.Get(),
 	}
