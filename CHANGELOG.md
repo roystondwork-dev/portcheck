@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.5.0](https://github.com/roystondwork-dev/portcheck/compare/v0.4.0...v0.5.0) (2026-10-20)
+
+
+### Features
+
+* **output:** include the stop command for container and WSL ports in JSON ([7caada7](https://github.com/roystondwork-dev/portcheck/commit/7caada7a66242188ddfeba91500fc2ec00feb3df))
+* **vscode:** add the VS Code extension (MVP) ([bc18b62](https://github.com/roystondwork-dev/portcheck/commit/bc18b62fe59dcc513809b7377c06e82a8e34b79e))
+* **vscode:** fix busy ports from the terminal; check project ports ([719c879](https://github.com/roystondwork-dev/portcheck/commit/719c87999b8ec7c9a538e0a12ee692f9b4e7b9b4))
+* **vscode:** recognise "port in use" errors in terminal output ([ae676ce](https://github.com/roystondwork-dev/portcheck/commit/ae676cec4f31d23d64d44fddd7fca5c82bb80ef1))
+
+
+### Bug Fixes
+
+* **vscode:** require VS Code 1.98 for terminal error detection ([e185ed8](https://github.com/roystondwork-dev/portcheck/commit/e185ed8a745b3f3cef43e436e79501f83c68d87c))
+* **vscode:** run integration tests on older VS Code and cover exec errors on Windows ([1d4f532](https://github.com/roystondwork-dev/portcheck/commit/1d4f532f3bc3c92038db7c810f8c61889524f3e7))
+
+
+### Documentation
+
+* plan the VS Code extension (ADR-0004, M14–M17) ([beb3f34](https://github.com/roystondwork-dev/portcheck/commit/beb3f34a7542f7d648a856e62f79f6b116229e3e))
+* terminal fixes and project ports in the VS Code guide; M15 status ([333bf23](https://github.com/roystondwork-dev/portcheck/commit/333bf239bbab16a2e784f66a1cfb22100ff10867))
+* update the winget submission status ([39f0f80](https://github.com/roystondwork-dev/portcheck/commit/39f0f805124914b0867e3b38fc8b4f78398d1e50))
+* VS Code extension guide; M14 complete ([6317b50](https://github.com/roystondwork-dev/portcheck/commit/6317b50ee39441dc76ead9846f6ed231e779ee2e))
+
+
+### Build & Release
+
+* **deps:** bump github.com/ebitengine/purego ([18bc905](https://github.com/roystondwork-dev/portcheck/commit/18bc905f2c6fe5e5372784195a5bada7a8d08ac7))
+* keep Go tooling out of extensions/ ([a2071d7](https://github.com/roystondwork-dev/portcheck/commit/a2071d7e2ec0983d8beb9efd8ef8cf8b13dc4ee6))
+* **vscode:** load the Vitest config as ESM ([dd0f1b6](https://github.com/roystondwork-dev/portcheck/commit/dd0f1b621ef6da69f4e22c4541fb38f2e6d8b64b))
+
 ## [0.4.0](https://github.com/roystondwork-dev/portcheck/compare/v0.3.0...v0.4.0) (2026-10-20)
 
 
