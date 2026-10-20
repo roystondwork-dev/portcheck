@@ -87,6 +87,7 @@ nav:
       - Scan remote hosts (scan): guide/scan.md
       - Wait for ports (wait): guide/wait.md
       - Run on a free port (run): guide/run.md
+      - Project ports (doctor): guide/doctor.md
       - Interactive view (tui): guide/tui.md
       - Containers & WSL: guide/containers.md
       - Scripting & CI: guide/scripting.md
@@ -95,6 +96,7 @@ nav:
           - portcheck: commands/portcheck.md
           - check: commands/portcheck_check.md
           - completion: commands/portcheck_completion.md
+          - doctor: commands/portcheck_doctor.md
           - completion bash: commands/portcheck_completion_bash.md
           - completion fish: commands/portcheck_completion_fish.md
           - completion powershell: commands/portcheck_completion_powershell.md

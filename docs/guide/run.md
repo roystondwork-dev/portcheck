@@ -85,7 +85,7 @@ When portcheck can't start the command:
 
 | Flag | Default | Meaning |
 |---|---|---|
-| `-p`, `--port` | — | port to use |
+| `-p`, `--port` | — | port to use: a number, or a name from [`.portcheck.yaml`](doctor.md) |
 | `--next` | off | if `--port` is taken, use the next free port above it |
 | `--kill` | off | if `--port` is taken, stop the process holding it |
 | `-y`, `--yes` | off | with `--kill`: don't ask |

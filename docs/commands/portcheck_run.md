@@ -45,7 +45,7 @@ portcheck run [flags] [--] <command> [args...]
   -h, --help                    help for run
       --kill                    if --port is taken, stop the process holding it (asks first)
       --next                    if --port is taken, use the next free port above it
-  -p, --port int                port to use (default: first free port in --range)
+  -p, --port string             port number, or a name from .portcheck.yaml (default: first free port in --range)
   -q, --quiet                   don't print portcheck's own messages
       --range string            ports to choose from when --port is not given (default "3000-9999")
       --wait                    report when the command starts accepting connections

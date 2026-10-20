@@ -28,6 +28,7 @@
 | 📡 | `portcheck scan db.internal -p 5432` | Rate-limited TCP connect checks of remote hosts. No root needed |
 | ⏳ | `portcheck wait db:5432 -t 60s` | Block until services accept connections, or until a port is free. Built for CI |
 | ▶️ | `portcheck run --port 3000 --next -- npm run dev` | Start a command on a free port (`$PORT`, `{port}`); take the next one or stop the holder |
+| 🩺 | `portcheck doctor` | Check the ports listed in `.portcheck.yaml` and get a fix for each problem |
 | 🖥️ | `portcheck` | Live, sortable, filterable TUI. Stop processes without leaving it |
 
 - **Same commands and output on every OS.** It replaces `lsof -i`, `netstat -ano`, `ss -ltnp` and `kill`.

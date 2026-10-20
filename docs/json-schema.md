@@ -1,7 +1,7 @@
 # JSON output
 
 Every command that prints results (`list`, `check`, `free`, `kill`, `scan`, `wait`,
-`version`) accepts `--json` (or `-o json`) and prints one JSON document. (`run`
+`doctor`, `version`) accepts `--json` (or `-o json`) and prints one JSON document. (`run`
 hands stdout to the command it starts; with `--kill`, its kill report goes to
 stderr in the requested format.)
 
@@ -16,7 +16,7 @@ stderr in the requested format.)
 | Field | Meaning |
 |---|---|
 | `schemaVersion` | Version of this schema. It only increases when a field is removed or changes meaning. New optional fields can appear in any release. |
-| `kind` | Which command produced the document: `list`, `check`, `free`, `kill`, `scan`, `wait`, `version`. |
+| `kind` | Which command produced the document: `list`, `check`, `free`, `kill`, `scan`, `wait`, `doctor`, `version`. |
 | `data` | The payload, described below. |
 
 With `list --watch`, one document is printed per refresh.
@@ -126,6 +126,24 @@ detected on the wire. With `--open`, `results` contains only open ports, but
 ```
 
 `condition` is `open` or `free`. `target` is the argument as given; `ready: false` means it timed out.
+
+## `doctor`
+
+```json
+{
+  "config": "/work/shop/.portcheck.yaml",
+  "ok": false,
+  "checks": [
+    { "name": "web", "port": 3000, "proto": "tcp", "expect": "free", "ok": false, "status": "in-use",
+      "detail": "in use by node (pid 4242), started by npm (4200)", "fix": "portcheck kill 3000" },
+    { "name": "postgres", "port": 5432, "proto": "tcp", "expect": "open", "host": "localhost", "ok": true, "status": "ok" }
+  ]
+}
+```
+
+`status` is `ok`, `in-use`, `denied` (expect free), `closed` (expect open) or `error`.
+`detail` and `fix` are human-readable and may change between releases; match on `ok`
+and `status` in scripts.
 
 ## `version`
 
