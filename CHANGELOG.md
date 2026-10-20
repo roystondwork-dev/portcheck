@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.1.0 (2026-10-20)
+
+
+### Features
+
+* **cli:** add list, check, free, kill and version commands (M2) ([2cb0f33](https://github.com/roystondwork-dev/portcheck/commit/2cb0f33bb286cc99aa40fcfb9aa59a0e148d4953))
+* **cli:** add scan command (M3) ([df97c4e](https://github.com/roystondwork-dev/portcheck/commit/df97c4ecdfaa5a6c338f0e96dc723d9472c5c1a0))
+* **cli:** add tui command and open it by default in a terminal (M4) ([a8708c9](https://github.com/roystondwork-dev/portcheck/commit/a8708c91df7b04fd3c515a4d816afd50501691ea))
+* **pkg:** add portspec, inspect, freeport and killer libraries (M1) ([64e95f7](https://github.com/roystondwork-dev/portcheck/commit/64e95f7edc06802addc11f59f227674fe7207c1e))
+* **scan:** add TCP connect scanner library ([407b113](https://github.com/roystondwork-dev/portcheck/commit/407b113f18910a4883c84a59ab582a4b84af7efe))
+* **tui:** add interactive live view of ports ([a2d979d](https://github.com/roystondwork-dev/portcheck/commit/a2d979d11e86730748b8e1b49922499979990c9e))
+
+
+### Bug Fixes
+
+* **inspect:** treat remote port 0 as unconnected on Linux and Windows ([972f996](https://github.com/roystondwork-dev/portcheck/commit/972f9967a6fc02779d0e1405925e0a3e064dda35))
+
+
+### Documentation
+
+* add documentation site, guides, examples and demo (M5) ([8a0ff22](https://github.com/roystondwork-dev/portcheck/commit/8a0ff224457c95bb33c62f7f3698ac7b1a3498a5))
+* **tasks:** mark M0 complete ([70ccd5d](https://github.com/roystondwork-dev/portcheck/commit/70ccd5dbaae0fde85f51e9049525396ab8f99a2a))
+
+
+### Build & Release
+
+* automate releases with release-please and GoReleaser (M6) ([c651b0a](https://github.com/roystondwork-dev/portcheck/commit/c651b0a28612b4b007daf5b3f885b0339c800635))
+* bootstrap project tooling, CI and community files (M0) ([348dc08](https://github.com/roystondwork-dev/portcheck/commit/348dc08dbf890a37bca43a08b58cfee918732aae))
+* **release:** start versioning at 0.1.0 ([0de88ac](https://github.com/roystondwork-dev/portcheck/commit/0de88ac9a934859c67be56b9959f71f012e5f0f2))
+
+## Changelog
+
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follow
 [Semantic Versioning](https://semver.org/), and entries are generated from
