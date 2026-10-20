@@ -48,6 +48,14 @@ problem), run the **Release** workflow manually and enter the tag.
 | `RELEASE_PLEASE_TOKEN` | recommended | Fine-grained PAT with **Contents** and **Pull requests: read & write** on this repo. PRs opened with the default `GITHUB_TOKEN` don't trigger CI, so required checks never run on the release PR. Without this token, a maintainer must merge the release PR with admin override. |
 | `CODECOV_TOKEN` | optional | Coverage upload; the coverage gate doesn't depend on it. |
 
+!!! note "Without `RELEASE_PLEASE_TOKEN`"
+    New repositories don't allow workflows to open pull requests with the default
+    token, so release-please fails with *"GitHub Actions is not permitted to create or
+    approve pull requests"*. Either set `RELEASE_PLEASE_TOKEN` (recommended), or enable
+    *Settings → Actions → General → Allow GitHub Actions to create and approve pull requests*.
+
+The first release is `0.1.0` (`initial-version` in `release-please-config.json`).
+
 Signing needs no secret: cosign uses the workflow's GitHub OIDC identity
 (keyless), and users verify against that identity; see
 [verifying downloads](install.md#verifying-downloads).

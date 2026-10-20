@@ -6,17 +6,52 @@
   "bump-patch-for-minor-pre-major": false,
   "pull-request-title-pattern": "chore: release ${version}",
   "changelog-sections": [
-    { "type": "feat", "section": "Features" },
-    { "type": "fix", "section": "Bug Fixes" },
-    { "type": "perf", "section": "Performance" },
-    { "type": "docs", "section": "Documentation" },
-    { "type": "build", "section": "Build & Release" },
-    { "type": "refactor", "section": "Refactoring", "hidden": true },
-    { "type": "test", "section": "Tests", "hidden": true },
-    { "type": "ci", "section": "CI", "hidden": true },
-    { "type": "chore", "section": "Miscellaneous", "hidden": true }
+    {
+      "type": "feat",
+      "section": "Features"
+    },
+    {
+      "type": "fix",
+      "section": "Bug Fixes"
+    },
+    {
+      "type": "perf",
+      "section": "Performance"
+    },
+    {
+      "type": "docs",
+      "section": "Documentation"
+    },
+    {
+      "type": "build",
+      "section": "Build & Release"
+    },
+    {
+      "type": "refactor",
+      "section": "Refactoring",
+      "hidden": true
+    },
+    {
+      "type": "test",
+      "section": "Tests",
+      "hidden": true
+    },
+    {
+      "type": "ci",
+      "section": "CI",
+      "hidden": true
+    },
+    {
+      "type": "chore",
+      "section": "Miscellaneous",
+      "hidden": true
+    }
   ],
   "packages": {
-    ".": { "package-name": "portcheck", "changelog-path": "CHANGELOG.md" }
+    ".": {
+      "package-name": "portcheck",
+      "changelog-path": "CHANGELOG.md",
+      "initial-version": "0.1.0"
+    }
   }
 }
