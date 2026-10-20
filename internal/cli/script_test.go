@@ -2,6 +2,7 @@ package cli_test
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"net"
 	"os"
@@ -73,6 +74,7 @@ func holdPort(file string) {
 // TestScripts runs the end-to-end scenarios in testdata/script against the
 // real portcheck command (re-executed test binary) and real sockets.
 func TestScripts(t *testing.T) {
+	writeCoverageMeta(t)
 	testscript.Run(t, testscript.Params{
 		Dir:                 "testdata/script",
 		RequireExplicitExec: true,
@@ -86,6 +88,24 @@ func TestScripts(t *testing.T) {
 			return nil
 		},
 	})
+}
+
+// writeCoverageMeta runs the test binary once, to completion, before the
+// scripts start. With coverage on, every process that exits writes the same
+// metadata file to the coverage directory unless it already exists; on Windows,
+// scripts starting at once can collide on that write and print an error to
+// stderr, which fails scripts that expect no stderr.
+func writeCoverageMeta(t *testing.T) {
+	t.Helper()
+	f := flag.Lookup("test.gocoverdir")
+	if f == nil || f.Value.String() == "" {
+		return
+	}
+	cmd := exec.Command(os.Args[0])
+	cmd.Env = append(os.Environ(), childEnv+"=exit:0", "GOCOVERDIR="+f.Value.String())
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("warm-up run: %v\n%s", err, out)
+	}
 }
 
 // cmdHoldPort starts a helper process holding a TCP port and sets $PORT and
