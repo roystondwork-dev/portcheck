@@ -30,6 +30,9 @@ async function main(): Promise<void> {
       "--disable-extensions",
       "--disable-workspace-trust",
       "--skip-welcome",
+      // Headless CI (Xvfb) has no GPU; VS Code's window sometimes hangs at
+      // startup ("CodeWindow: detected unresponsive") while setting one up.
+      "--disable-gpu",
     ],
     extensionTestsEnv: { PORTCHECK_TEST_BINARY: binary },
   });
