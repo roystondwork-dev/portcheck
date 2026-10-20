@@ -1,0 +1,5 @@
+HOST                    PORT  STATE     SERVICE     LATENCY  DETAIL
+db.internal (10.0.0.5)  5432  open      postgresql  1.2ms
+db.internal (10.0.0.5)  6379  closed    redis       800µs
+10.0.0.6                22    filtered  ssh         1s
+10.0.0.7                4     error     -           2ms      no route to host

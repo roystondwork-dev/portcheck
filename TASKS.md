@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M3 — Remote scanner
+**Current milestone:** M4 — Interactive TUI
 **Last updated:** 2026-10-20
 **Target release:** v0.1.0
 
@@ -16,7 +16,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M0 | Bootstrap & project hygiene | 13 / 13 | ✅ |
 | M1 | Core library (`pkg/*` except scan) | 7 / 7 | ✅ |
 | M2 | CLI | 11 / 11 | ✅ |
-| M3 | Remote scanner | 0 / 6 | ⬜ |
+| M3 | Remote scanner | 6 / 6 | ✅ |
 | M4 | Interactive TUI | 0 / 7 | ⬜ |
 | M5 | Documentation | 0 / 9 | ⬜ |
 | M6 | Release & distribution | 0 / 10 | ⬜ |
@@ -73,12 +73,12 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 
 | ID | Task | Component / files | Tests required | Status | Notes |
 |---|---|---|---|---|---|
-| M3-01 | Target expansion: host / IP / CIDR with cap | `pkg/scan/targets.go` | unit + fuzz | ⬜ | |
-| M3-02 | Scanner engine: worker pool, timeout, rate limit, retries | `pkg/scan/scanner.go` | unit with fake Dialer, `-race` | ⬜ | |
-| M3-03 | Result classification open/closed/filtered/error | `pkg/scan` | unit | ⬜ | |
-| M3-04 | Embedded service-name table | `pkg/scan/services.go` | unit | ⬜ | |
-| M3-05 | `scan` command with progress + summary | `internal/cli/scan.go` | testscript + integration | ⬜ | |
-| M3-06 | Benchmarks | `pkg/scan` | `make bench` | ⬜ | |
+| M3-01 | Target expansion: host / IP / CIDR with cap | `pkg/scan/targets.go` | unit + fuzz | ✅ | Hostnames prefer IPv4; de-duplicated; huge prefixes rejected before enumeration; default cap 1024 |
+| M3-02 | Scanner engine: worker pool, timeout, rate limit, retries | `pkg/scan/scanner.go` | unit with fake Dialer, `-race` | ✅ | Defaults: 100 workers, 1s timeout, 500 conn/s; retries apply to timeouts only; stress-tested 30× under `-race` |
+| M3-03 | Result classification open/closed/filtered/error | `pkg/scan` | unit | ✅ | Per-OS "connection refused" (Winsock 10061 on Windows) |
+| M3-04 | Embedded service-name table | `pkg/scan/services.go` | unit | ✅ | ~60 well-known names; labels only, no fingerprinting |
+| M3-05 | `scan` command with progress + summary | `internal/cli/scan.go` | testscript + integration | ✅ | Live progress on TTY, summary line, `--open`, authorization note for public addresses, partial results on Ctrl-C |
+| M3-06 | Benchmarks | `pkg/scan` | `make bench` | ✅ | ~4k probes in 3.2 ms with a fake dialer (scheduling overhead is negligible) |
 
 ## M4 — Interactive TUI
 

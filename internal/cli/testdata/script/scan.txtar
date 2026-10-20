@@ -1,0 +1,18 @@
+# Scanning real loopback ports.
+
+holdport
+
+exec portcheck scan 127.0.0.1 -p $PORT
+stdout '127\.0\.0\.1\s+'$PORT'\s+open'
+stderr '1 open, 0 closed'
+! stderr 'note:'
+
+exec portcheck scan localhost 127.0.0.1 -p $PORT --json
+stdout '"state": "open"'
+stdout '"hosts": 1'
+
+exits 2 portcheck scan 10.0.0.0/8 -p 80
+stderr 'too many hosts'
+
+exits 2 portcheck scan 'not a host'
+stderr 'invalid target'

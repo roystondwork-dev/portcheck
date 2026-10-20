@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "scan",
+  "data": {
+    "results": [
+      {
+        "host": "db.internal",
+        "address": "10.0.0.5",
+        "port": 5432,
+        "state": "open",
+        "service": "postgresql",
+        "latencyMs": 1.234
+      },
+      {
+        "host": "db.internal",
+        "address": "10.0.0.5",
+        "port": 6379,
+        "state": "closed",
+        "service": "redis",
+        "latencyMs": 0.8
+      },
+      {
+        "host": "10.0.0.6",
+        "address": "10.0.0.6",
+        "port": 22,
+        "state": "filtered",
+        "service": "ssh",
+        "latencyMs": 1000
+      },
+      {
+        "host": "10.0.0.7",
+        "address": "10.0.0.7",
+        "port": 4,
+        "state": "error",
+        "latencyMs": 2,
+        "error": "no route to host"
+      }
+    ],
+    "summary": {
+      "hosts": 3,
+      "ports": 4,
+      "open": 1,
+      "closed": 1,
+      "filtered": 1,
+      "errors": 1,
+      "durationMs": 1500
+    }
+  }
+}

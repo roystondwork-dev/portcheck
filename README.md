@@ -6,6 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > 🚧 **Status: pre-release, under active development.** See [TASKS.md](TASKS.md) for progress.
+> Install from source until the first release: `go install github.com/roystondwork-dev/portcheck/cmd/portcheck@latest`
 
 ## Planned features
 

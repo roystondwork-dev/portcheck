@@ -1,0 +1,6 @@
+[1mHOST[m                    [1mPORT[m  [1mSTATE[m     [1mSERVICE[m     [1mLATENCY[m  [1mDETAIL[m
+[90m────────────────────────[m[90m──────[m[90m──────────[m[90m────────────[m[90m─────────[m[90m────────────────[m
+db.internal (10.0.0.5)  5432  [32mopen[m      postgresql  [90m1.2ms[m
+db.internal (10.0.0.5)  6379  [90mclosed[m    redis       [90m800µs[m
+10.0.0.6                22    [33mfiltered[m  ssh         [90m1s[m
+10.0.0.7                4     [1;31merror[m     -           [90m2ms[m      no route to host

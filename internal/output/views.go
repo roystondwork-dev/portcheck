@@ -8,6 +8,7 @@ import (
 	"github.com/roystondwork-dev/portcheck/internal/buildinfo"
 	"github.com/roystondwork-dev/portcheck/pkg/freeport"
 	"github.com/roystondwork-dev/portcheck/pkg/inspect"
+	"github.com/roystondwork-dev/portcheck/pkg/scan"
 )
 
 // JSON payload types. Field names and meanings are part of the public,
@@ -239,4 +240,78 @@ func VersionDoc(info buildinfo.Info) Document {
 			C(info.Version), C(info.Commit), C(info.Date), C(strconv.FormatBool(info.Modified)), C(info.GoVersion), C(info.Platform),
 		}},
 	}
+}
+
+// ScanResultJSON is one probed host/port.
+type ScanResultJSON struct {
+	Host      string  `json:"host"`
+	Address   string  `json:"address"`
+	Port      uint16  `json:"port"`
+	State     string  `json:"state"` // open | closed | filtered | error
+	Service   string  `json:"service,omitempty"`
+	LatencyMs float64 `json:"latencyMs"`
+	Error     string  `json:"error,omitempty"`
+}
+
+// ScanSummaryJSON totals a scan.
+type ScanSummaryJSON struct {
+	Hosts      int   `json:"hosts"`
+	Ports      int   `json:"ports"`
+	Open       int   `json:"open"`
+	Closed     int   `json:"closed"`
+	Filtered   int   `json:"filtered"`
+	Errors     int   `json:"errors"`
+	DurationMs int64 `json:"durationMs"`
+}
+
+// ScanJSON is the payload of `portcheck scan`.
+type ScanJSON struct {
+	Results []ScanResultJSON `json:"results"`
+	Summary ScanSummaryJSON  `json:"summary"`
+}
+
+func scanStateTone(s scan.State) Tone {
+	switch s {
+	case scan.Open:
+		return ToneGood
+	case scan.Filtered:
+		return ToneWarn
+	case scan.Error:
+		return ToneBad
+	default:
+		return ToneMuted
+	}
+}
+
+// ScanDoc renders the result of `portcheck scan`. Results are shown in the
+// order given.
+func ScanDoc(results []scan.Result, sum scan.Summary, took time.Duration) Document {
+	data := ScanJSON{
+		Results: make([]ScanResultJSON, len(results)),
+		Summary: ScanSummaryJSON{
+			Hosts: sum.Hosts, Ports: sum.Ports, Open: sum.Open, Closed: sum.Closed,
+			Filtered: sum.Filtered, Errors: sum.Errored, DurationMs: took.Milliseconds(),
+		},
+	}
+	d := Document{
+		Kind:    "scan",
+		Headers: []string{"HOST", "PORT", "STATE", "SERVICE", "LATENCY", "DETAIL"},
+		Empty:   "No results to show.",
+	}
+	for i, r := range results {
+		rj := ScanResultJSON{
+			Host: r.Target.Host, Address: r.Target.Addr.String(), Port: r.Port, State: string(r.State),
+			Service: r.Service, LatencyMs: float64(r.Latency.Microseconds()) / 1000,
+		}
+		if r.Err != nil {
+			rj.Error = r.Err.Error()
+		}
+		data.Results[i] = rj
+		d.Rows = append(d.Rows, []Cell{
+			C(r.Target.String()), C(strconv.Itoa(int(r.Port))), T(string(r.State), scanStateTone(r.State)),
+			C(cmp.Or(r.Service, "-")), T(r.Latency.Round(100*time.Microsecond).String(), ToneMuted), C(rj.Error),
+		})
+	}
+	d.Data = data
+	return d
 }

@@ -41,7 +41,8 @@ Running 'portcheck <port>' is a shortcut for 'portcheck check <port>'.`,
 		Example: `  portcheck list --listening      # everything accepting connections
   portcheck 3000                  # is 3000 free? who holds it?
   portcheck free -n 3             # three free ports
-  portcheck kill 8080             # stop whatever listens on 8080`,
+  portcheck kill 8080             # stop whatever listens on 8080
+  portcheck scan db.internal -p 5432,6379`,
 		Version:           app.Build.Version,
 		DisableAutoGenTag: true, // keep generated docs reproducible
 		Args:              cobra.ArbitraryArgs,
@@ -83,6 +84,7 @@ Running 'portcheck <port>' is a shortcut for 'portcheck check <port>'.`,
 		c.newCheckCmd(),
 		c.newFreeCmd(),
 		c.newKillCmd(),
+		c.newScanCmd(),
 		c.newVersionCmd(),
 	)
 	return root

@@ -13,7 +13,7 @@ Every command accepts `--json` (or `-o json`) and prints one JSON document:
 | Field | Meaning |
 |---|---|
 | `schemaVersion` | Version of this schema. It only increases when a field is removed or changes meaning. New optional fields can appear in any release. |
-| `kind` | Which command produced the document: `list`, `check`, `free`, `kill`, `version`. |
+| `kind` | Which command produced the document: `list`, `check`, `free`, `kill`, `scan`, `version`. |
 | `data` | The payload, described below. |
 
 With `list --watch`, one document is printed per refresh.
@@ -80,6 +80,23 @@ range on Windows. `holders` can be empty for an `in-use` port whose owner is hid
 
 `outcome` is one of `terminated`, `killed` (needed force), `already-exited`, `dry-run`
 or `failed`. A failed entry has an `error` message.
+
+## `scan`
+
+```json
+{
+  "results": [
+    { "host": "db.internal", "address": "10.0.0.5", "port": 5432, "state": "open",
+      "service": "postgresql", "latencyMs": 1.234 }
+  ],
+  "summary": { "hosts": 1, "ports": 2, "open": 1, "closed": 1, "filtered": 0, "errors": 0, "durationMs": 12 }
+}
+```
+
+`state` is one of `open`, `closed`, `filtered` (timed out) or `error`. An `error` result has
+an `error` message. `service` is the port's well-known name, not something
+detected on the wire. With `--open`, `results` contains only open ports, but
+`summary` still counts every probe.
 
 ## `version`
 

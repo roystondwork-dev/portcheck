@@ -27,6 +27,7 @@ portcheck [port...] [flags]
   portcheck 3000                  # is 3000 free? who holds it?
   portcheck free -n 3             # three free ports
   portcheck kill 8080             # stop whatever listens on 8080
+  portcheck scan db.internal -p 5432,6379
 ```
 
 ### Options
@@ -47,5 +48,6 @@ portcheck [port...] [flags]
 * [portcheck free](portcheck_free.md)	 - Find free ports
 * [portcheck kill](portcheck_kill.md)	 - Stop the process listening on a port
 * [portcheck list](portcheck_list.md)	 - List sockets and the processes that own them
+* [portcheck scan](portcheck_scan.md)	 - Check which TCP ports are reachable on remote hosts
 * [portcheck version](portcheck_version.md)	 - Print version and build information
 
