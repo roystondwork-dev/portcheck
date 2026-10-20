@@ -1,0 +1,14 @@
+portcheck — keys
+
+  ↑ / ↓ / j         move selection
+  pgup / pgdown     move one page
+  home g / end G    jump to first / last
+  /                 filter (enter to keep, esc to clear)
+  esc               clear filter
+  tab               cycle protocol: tcp+udp → tcp → udp
+  l                 toggle listening-only / all sockets
+  s / S             next sort column / reverse order
+  r                 refresh now
+  c                 copy PID to clipboard
+  x / k / delete    stop the selected process (asks first)
+  K                 force-kill the selected process (asks first)
