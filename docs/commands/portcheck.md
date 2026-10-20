@@ -14,7 +14,8 @@ portcheck shows which processes own local ports, checks whether ports are
 free, finds free ports, safely stops the process holding a port, and checks
 ports on remote hosts.
 
-Running 'portcheck <port>' is a shortcut for 'portcheck check <port>'.
+Running 'portcheck' alone in an interactive terminal opens the live TUI
+('portcheck tui'); 'portcheck <port>' is a shortcut for 'portcheck check <port>'.
 
 ```
 portcheck [port...] [flags]
@@ -23,6 +24,7 @@ portcheck [port...] [flags]
 ### Examples
 
 ```
+  portcheck                       # live interactive view (in a terminal)
   portcheck list --listening      # everything accepting connections
   portcheck 3000                  # is 3000 free? who holds it?
   portcheck free -n 3             # three free ports
@@ -49,5 +51,6 @@ portcheck [port...] [flags]
 * [portcheck kill](portcheck_kill.md)	 - Stop the process listening on a port
 * [portcheck list](portcheck_list.md)	 - List sockets and the processes that own them
 * [portcheck scan](portcheck_scan.md)	 - Check which TCP ports are reachable on remote hosts
+* [portcheck tui](portcheck_tui.md)	 - Live, interactive view of ports (the default in a terminal)
 * [portcheck version](portcheck_version.md)	 - Print version and build information
 

@@ -538,7 +538,7 @@ func TestInterruptedIsSilent(t *testing.T) {
 func TestNewApp(t *testing.T) {
 	t.Parallel()
 	app := NewApp()
-	if app.Lister == nil || app.Ports == nil || app.Killer == nil || app.PrivilegeHint == nil || app.Build.Version == "" {
+	if app.Lister == nil || app.Ports == nil || app.Killer == nil || app.PrivilegeHint == nil || app.Scan == nil || app.Resolver == nil || app.RunTUI == nil || app.Build.Version == "" {
 		t.Errorf("NewApp left dependencies unset: %+v", app)
 	}
 	if app.Stdout != os.Stdout || app.Stderr != os.Stderr || app.Stdin != os.Stdin {
