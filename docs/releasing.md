@@ -52,7 +52,9 @@ are hidden.
 
 To rebuild artifacts for an existing tag (for example, after fixing a publishing
 problem), run the **Release** workflow manually and enter the tag. Tick **vscode_only**
-to only repackage and publish the VS Code extension for that tag.
+to only package and publish the VS Code extension: the extension from the branch the
+workflow runs on (usually `main`), with the portcheck binaries from that tag's release.
+Its `package.json` version must equal the tag's.
 
 ## Repository secrets
 
