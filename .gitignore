@@ -1,0 +1,26 @@
+# Build output
+/bin/
+/dist/
+/portcheck
+/portcheck.exe
+
+# Test & coverage artifacts
+*.out
+*.test
+coverage*.txt
+coverage.html
+/testdata/fuzz-cache/
+
+# Docs build
+/site/
+/.venv/
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Generated man pages (built at release time)
+/man/

@@ -1,0 +1,7 @@
+# Default owners for everything in the repo.
+*                       @roystondwork-dev
+
+# Safety-critical code needs maintainer review.
+/pkg/killer/            @roystondwork-dev
+/pkg/scan/              @roystondwork-dev
+/.github/workflows/     @roystondwork-dev

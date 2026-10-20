@@ -1,0 +1,88 @@
+version: "2"
+
+run:
+  timeout: 5m
+  build-tags:
+    - integration
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - copyloopvar
+    - depguard
+    - errorlint
+    - exhaustive
+    - gocritic
+    - gosec
+    - misspell
+    - nilerr
+    - noctx
+    - nolintlint
+    - perfsprint
+    - prealloc
+    - revive
+    - testifylint
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - wrapcheck
+  settings:
+    depguard:
+      rules:
+        # The public library must stay free of CLI/TUI concerns and internal packages.
+        library:
+          files:
+            - "**/pkg/**/*.go"
+          deny:
+            - pkg: github.com/roystondwork-dev/portcheck/internal
+              desc: pkg/* is a public API and must not depend on internal/*
+            - pkg: github.com/spf13/cobra
+              desc: CLI framework belongs in internal/cli
+            - pkg: charm.land
+              desc: TUI libraries belong in internal/tui and internal/output
+            - pkg: github.com/charmbracelet
+              desc: TUI libraries belong in internal/tui and internal/output
+    exhaustive:
+      default-signifies-exhaustive: true
+    gosec:
+      excludes:
+        - G115 # integer overflow conversions are range-checked explicitly where they matter
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+    thelper:
+      test:
+        # Inline assertion closures in table tests are not helpers.
+        begin: false
+    revive:
+      rules:
+        - name: exported
+        - name: package-comments
+        - name: var-naming
+        - name: indent-error-flow
+        - name: unused-parameter
+    wrapcheck:
+      ignore-package-globs:
+        - github.com/roystondwork-dev/portcheck/*
+  exclusions:
+    generated: lax
+    presets:
+      - std-error-handling
+    rules:
+      - path: (_test\.go|^internal/testutil/)
+        linters:
+          - gosec
+          - wrapcheck
+          - noctx
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/roystondwork-dev/portcheck

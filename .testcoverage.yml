@@ -1,0 +1,22 @@
+# Coverage gate enforced by `make cover-check` and CI.
+# See docs/contributing/testing.md for the policy.
+profile: coverage.out
+local-prefix: github.com/roystondwork-dev/portcheck
+
+threshold:
+  file: 90
+  package: 95
+  total: 95
+
+override:
+  # The public library is held to full line coverage.
+  - path: ^pkg/
+    threshold: 100
+
+exclude:
+  paths:
+    # main() only wires os.Exit around cli.Execute, which is tested directly.
+    - ^cmd/portcheck/main\.go$
+    # Test helpers and doc generator are not shipped code.
+    - ^internal/testutil/
+    - ^internal/cli/gendocs/
