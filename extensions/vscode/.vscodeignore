@@ -1,6 +1,7 @@
-# Only dist/, bin/, media/ and the manifest files ship in the VSIX.
+# Only the bundle, the schema, bin/, media/ and the manifest files ship in the VSIX.
 **
 !dist/extension.js
+!dist/portcheck.schema.json
 !bin/**
 !media/**
 !package.json

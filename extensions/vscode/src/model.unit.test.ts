@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import * as path from "node:path";
 import { describe, expect, it } from "vitest";
-import { ancestry, buildRows, containerLabel, validatePort } from "./model";
+import { ancestry, buildRows, containerLabel, validatePort, viewRows } from "./model";
 import type { Envelope, ListData, Socket } from "./schema";
 
 const goldenList = (JSON.parse(
@@ -134,5 +134,22 @@ describe("helpers", () => {
     for (const bad of ["", "0", "65536", "-1", "3.5", "http"]) {
       expect(validatePort(bad)).toBe("Enter a port between 1 and 65535");
     }
+  });
+});
+
+describe("viewRows", () => {
+  const rows = buildRows(goldenList);
+  it("hides UDP unless asked", () => {
+    expect(viewRows(rows, { showUdp: false, project: new Map() }).some((r) => r.proto === "udp")).toBe(false);
+    expect(viewRows(rows, { showUdp: true, project: new Map() })).toEqual(rows);
+  });
+
+  it("puts project ports first and names them", () => {
+    const v = viewRows(rows, { showUdp: true, project: new Map([[5432, "db"], [5353, "mdns"]]) });
+    expect(v[0]).toMatchObject({ port: 5432, project: "db" });
+    expect(v[0]?.description).toMatch(/^db · tcp/);
+    expect(v[0]?.tooltip).toMatch(/^Project port \*\*db\*\*/);
+    expect(v.find((r) => r.port === 5353)?.project).toBeUndefined(); // UDP ports aren't project ports
+    expect(v.slice(1).map((r) => r.port)).toEqual(rows.filter((r) => r.port !== 5432).map((r) => r.port));
   });
 });

@@ -86,7 +86,7 @@ export async function stopRow(d: Deps, row: PortRow): Promise<string | undefined
     return runOrCopy(pick, c.stopHint);
   }
   if (row.pid === undefined) {
-    const cmd = `${process.platform === "win32" ? "" : "sudo "}"${d.binary()}" kill ${row.port}`;
+    const cmd = elevatedKill(d, row.port);
     const pick = await d.ui().warn(
       `The owner of port ${row.port} is hidden from your user. Stopping it needs elevated privileges: ${cmd}`,
       "Run in Terminal",
@@ -107,7 +107,12 @@ export async function stopRow(d: Deps, row: PortRow): Promise<string | undefined
   if (choice === undefined) {
     return undefined;
   }
-  const res = await d.client().kill(row.pid, choice === "Force Kill");
+  return killRow(d, row.pid, choice === "Force Kill");
+}
+
+/** Stops a process with portcheck kill (its guards apply) and reports the outcome. */
+export async function killRow(d: Deps, pid: number, force = false): Promise<string | undefined> {
+  const res = await d.client().kill(pid, force);
   const r = res.results[0];
   await d.view.refresh();
   if (r === undefined) {
@@ -121,18 +126,28 @@ export async function stopRow(d: Deps, row: PortRow): Promise<string | undefined
   return r.outcome;
 }
 
+/** Runs a command in a new "portcheck" terminal. */
+export function runInTerminal(command: string): void {
+  const t = vscode.window.createTerminal("portcheck");
+  t.show();
+  t.sendText(command);
+}
+
+/** The command that stops a hidden owner with elevated privileges. */
+export function elevatedKill(d: Deps, port: number): string {
+  return `${process.platform === "win32" ? "" : "sudo "}"${d.binary()}" kill ${port}`;
+}
+
 async function runOrCopy(pick: string | undefined, command: string): Promise<string | undefined> {
   if (pick === "Run in Terminal") {
-    const t = vscode.window.createTerminal("portcheck");
-    t.show();
-    t.sendText(command);
+    runInTerminal(command);
   } else if (pick === "Copy Command") {
     await vscode.env.clipboard.writeText(command);
   }
   return pick;
 }
 
-async function rowsForPort(d: Deps, port: number): Promise<{ status: string; rows: PortRow[] }> {
+export async function rowsForPort(d: Deps, port: number): Promise<{ status: string; rows: PortRow[] }> {
   const res = await d.client().check(port);
   const st = res.ports[0];
   return { status: st?.status ?? "free", rows: buildRows({ sockets: st?.holders ?? [], partial: false }) };
@@ -160,7 +175,7 @@ async function checkPort(d: Deps, port?: number): Promise<string | undefined> {
   return status;
 }
 
-async function stopPort(d: Deps, port?: number): Promise<string | undefined> {
+export async function stopPort(d: Deps, port?: number): Promise<string | undefined> {
   port ??= await askPort(d, "Port to free");
   if (port === undefined) {
     return undefined;

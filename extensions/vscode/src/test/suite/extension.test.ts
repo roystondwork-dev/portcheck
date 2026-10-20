@@ -1,94 +1,14 @@
 import * as assert from "node:assert/strict";
-import { type ChildProcess, spawn } from "node:child_process";
-import * as net from "node:net";
 import * as vscode from "vscode";
-import type { UI } from "../../commands";
 import type { PortcheckApi } from "../../extension";
 import type { PortRow } from "../../model";
-
-/** Records messages and returns scripted answers in order. */
-class ScriptedUI implements UI {
-  readonly messages: string[] = [];
-  constructor(private readonly answers: (string | undefined)[] = []) {}
-  private answer(kind: string, message: string): Promise<string | undefined> {
-    this.messages.push(`${kind}: ${message}`);
-    return Promise.resolve(this.answers.shift());
-  }
-  info(m: string): Promise<string | undefined> {
-    return this.answer("info", m);
-  }
-  warn(m: string): Promise<string | undefined> {
-    return this.answer("warn", m);
-  }
-  error(m: string): Promise<unknown> {
-    return this.answer("error", m);
-  }
-  confirm(m: string, detail: string): Promise<string | undefined> {
-    return this.answer("confirm", `${m} | ${detail}`);
-  }
-  input(o: vscode.InputBoxOptions): Promise<string | undefined> {
-    return this.answer("input", o.prompt ?? "");
-  }
-  pick<T extends vscode.QuickPickItem>(items: T[]): Promise<T | undefined> {
-    this.messages.push(`pick: ${items.map((i) => i.label).join(", ")}`);
-    return Promise.resolve(items[0]);
-  }
-  has(fragment: string): boolean {
-    return this.messages.some((m) => m.includes(fragment));
-  }
-}
-
-function listen(): Promise<net.Server> {
-  return new Promise((resolve) => {
-    const s = net.createServer().listen(0, "127.0.0.1", () => {
-      resolve(s);
-    });
-  });
-}
-
-function portOf(s: net.Server): number {
-  return (s.address() as net.AddressInfo).port;
-}
-
-function close(s: net.Server): Promise<void> {
-  return new Promise((resolve) => s.close(() => {
-    resolve();
-  }));
-}
-
-/** Starts a separate node process holding a TCP port; resolves with it and the port. */
-function spawnHolder(): Promise<{ child: ChildProcess; port: number }> {
-  const child = spawn(process.execPath, [
-    "-e",
-    "const s=require('net').createServer().listen(0,'127.0.0.1',()=>console.log(s.address().port));setInterval(()=>{},1e6)",
-  ], { env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" } });
-  return new Promise((resolve, reject) => {
-    child.stdout.once("data", (d: Buffer) => {
-      resolve({ child, port: Number(d.toString().trim()) });
-    });
-    child.once("error", reject);
-  });
-}
-
-async function rowFor(api: PortcheckApi, port: number, pid?: number): Promise<PortRow> {
-  for (let i = 0; i < 20; i++) {
-    await api.view.refresh();
-    const row = api.view.rows.find((r) => r.port === port && (pid === undefined || r.pid === pid));
-    if (row) {
-      return row;
-    }
-    await new Promise((r) => setTimeout(r, 250));
-  }
-  throw new Error(`no row for port ${port}`);
-}
+import { activateExtension, close, listen, portOf, rowFor, ScriptedUI, spawnHolder } from "./helpers";
 
 describe("portcheck extension", () => {
   let api: PortcheckApi;
 
   before(async () => {
-    const ext = vscode.extensions.getExtension<PortcheckApi>("roystondwork-dev.portcheck");
-    assert.ok(ext, "extension not found");
-    api = await ext.activate();
+    api = await activateExtension();
   });
 
   it("uses the configured binary and reports its version", async () => {

@@ -23,6 +23,8 @@ export interface PortRow {
   processName?: string;
   ancestry?: string;
   container?: ContainerInfo;
+  /** The name the project's .portcheck.yaml gives this port. */
+  project?: string;
 }
 
 /** "npm (4200) ← zsh (900)", or "" when unknown. */
@@ -124,6 +126,35 @@ function tooltip(s: Socket, addresses: string[]): string {
     lines.push("The owner is hidden from your user. Run portcheck with elevated privileges to see it.");
   }
   return lines.join("\n\n");
+}
+
+export interface ViewOptions {
+  showUdp: boolean;
+  /** Port → name from the project's .portcheck.yaml. */
+  project: ReadonlyMap<number, string>;
+}
+
+/** What the view shows: UDP only on request, and the project's ports first, named. */
+export function viewRows(rows: readonly PortRow[], o: ViewOptions): PortRow[] {
+  const out: PortRow[] = [];
+  for (const r of rows) {
+    if (r.proto === "udp" && !o.showUdp) {
+      continue;
+    }
+    const name = r.proto === "tcp" ? o.project.get(r.port) : undefined;
+    out.push(
+      name === undefined
+        ? r
+        : {
+            ...r,
+            project: name,
+            description: `${name} · ${r.description}`,
+            tooltip: `Project port **${name}** (.portcheck.yaml)\n\n${r.tooltip}`,
+          },
+    );
+  }
+  // Stable sort: project ports first, otherwise keep buildRows' order.
+  return out.sort((a, b) => Number(b.project !== undefined) - Number(a.project !== undefined));
 }
 
 /** Validates a port typed by the user; returns an error message or undefined. */
