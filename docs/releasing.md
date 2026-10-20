@@ -61,8 +61,8 @@ to only repackage and publish the VS Code extension for that tag.
 | `HOMEBREW_TAP_GITHUB_TOKEN` | for Homebrew/Scoop | Fine-grained PAT with **Contents: read & write** on `homebrew-tap` and `scoop-bucket`. Without it, those publishers are skipped with a warning. |
 | `WINGET_GITHUB_TOKEN` | for winget | **Classic** PAT with the `public_repo` scope. GoReleaser pushes the manifest to the [`winget-pkgs` fork](https://github.com/roystondwork-dev/winget-pkgs) and opens a PR to `microsoft/winget-pkgs`; fine-grained tokens can't open PRs on repositories you don't own. Without it, the winget submission is skipped with a warning. |
 | `RELEASE_PLEASE_TOKEN` | recommended | Fine-grained PAT with **Contents** and **Pull requests: read & write** on this repo. PRs opened with the default `GITHUB_TOKEN` don't trigger CI, so required checks never run on the release PR. Without this token, a maintainer must merge the release PR with admin override. |
-| `VSCE_PAT` | for the VS Code Marketplace | Azure DevOps personal access token with the **Marketplace: Manage** scope for *All accessible organizations*, from the account that owns the `roystondwork-dev` publisher. Without it, Marketplace publishing is skipped with a warning. |
-| `OVSX_PAT` | for Open VSX | Access token from [open-vsx.org](https://open-vsx.org) (user settings), for the account that owns the `roystondwork-dev` namespace and has signed the publisher agreement. Without it, Open VSX publishing is skipped with a warning. |
+| `VSCE_PAT` | for the VS Code Marketplace | Azure DevOps personal access token with the **Marketplace: Manage** scope for *All accessible organizations*, from the account that owns the `portcheck-vscode` publisher. Without it, Marketplace publishing is skipped with a warning. |
+| `OVSX_PAT` | for Open VSX | Access token from [open-vsx.org](https://open-vsx.org) (user settings), for the account that owns the `portcheck-vscode` namespace and has signed the publisher agreement. Without it, Open VSX publishing is skipped with a warning. |
 | `CODECOV_TOKEN` | optional | Coverage upload; the coverage gate doesn't depend on it. |
 
 !!! note "Without `RELEASE_PLEASE_TOKEN`"

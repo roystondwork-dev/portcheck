@@ -3,7 +3,7 @@
   "displayName": "portcheck: ports, processes & fixes",
   "description": "See what's using your ports — process, who started it, container or WSL distro — and free them safely.",
   "version": "0.5.0",
-  "publisher": "roystondwork-dev",
+  "publisher": "portcheck-vscode",
   "license": "MIT",
   "homepage": "https://roystondwork-dev.github.io/portcheck/guide/vscode/",
   "repository": {
