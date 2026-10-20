@@ -24,6 +24,12 @@ running (`wsl --list --running`) and that the server is listening there
 WSL VM can exceed; run the command again once WSL is up. See
 [Containers & WSL](guide/containers.md#wsl-windows).
 
+## Something looks different on macOS than `lsof -i`
+
+portcheck reads the same kernel data as `lsof` but without running it. It hides
+sockets not bound to any port (`lsof`'s `*:*` UDP entries). Otherwise the listings
+should match; if they don't, please open an issue with both outputs.
+
 ## `check` says `denied` for a port below 1024
 
 The port may be free, but **you** can't bind it on every address:
