@@ -54,6 +54,7 @@ pkg/freeport        free-port detection              (public library)
 pkg/killer          safe process termination         (public library)
 pkg/scan            TCP connect scanner              (public library)
 pkg/waitfor         poll until a port opens          (public library)
+pkg/containers      Docker/Podman port attribution   (public library)
 ```
 
 Dependencies point one way: `cmd → internal/cli → internal/* → pkg/*`. `depguard`

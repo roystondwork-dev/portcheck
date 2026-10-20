@@ -42,8 +42,13 @@ portcheck **never** kills:
 - itself, or its parent process (usually your shell).
 
 It also refuses well-known system processes, such as `launchd`, `WindowServer`,
-`systemd`, `init`, `lsass.exe`, `csrss.exe` and `svchost.exe`, unless you pass
-`--allow-system`. These checks run **before** the confirmation prompt, so a
+`systemd`, `init`, `lsass.exe`, `csrss.exe` and `svchost.exe`, and container/WSL
+infrastructure such as `com.docker.backend`, `dockerd`, `containerd`, `docker-proxy`
+and `wslrelay.exe`, unless you pass `--allow-system`.
+
+Ports published by a container are never handled by killing the proxy: portcheck
+names the container and suggests `docker stop <name>` instead. See
+[Containers](containers.md#stopping-a-containers-port). These checks run **before** the confirmation prompt, so a
 refusal never depends on what you answer.
 
 ## Flags
@@ -72,7 +77,7 @@ portcheck kill 8080 --yes --grace 10s
 | Code | Meaning |
 |---|---|
 | `0` | every target stopped (or dry run) |
-| `1` | nothing listening, a given PID doesn't exist, you declined, or a protected process was refused |
+| `1` | nothing listening, a given PID doesn't exist, you declined, a protected process was refused, or the port belongs to a container |
 | `2` | invalid arguments, or no `--yes` without a terminal |
 | `3` | a process survived `SIGKILL`, or another error |
 | `4` | permission denied (the port's owner is hidden, or you can't signal it) |

@@ -9,6 +9,13 @@ The owner belongs to another user and your user can't see it. Re-run with
 the socket may not appear in `list` at all, but `check` still reports the port as
 `in-use` because binding it fails.
 
+## A container's port shows `com.docker.backend` or `docker-proxy`
+
+portcheck couldn't reach the container engine, so it shows the proxy process. Check
+that the engine is running (`docker ps`), and that your user can access its socket
+(on Linux: the `docker` group). If you use a non-default endpoint or a Docker
+context, set `DOCKER_HOST`. See [Containers](guide/containers.md).
+
 ## `check` says `denied` for a port below 1024
 
 The port may be free, but **you** can't bind it on every address:

@@ -36,6 +36,7 @@ present, and empty arrays are `[]`, never `null`.
 | `state` | string | e.g. `LISTEN`, `ESTABLISHED`, `TIME_WAIT`; `NONE` for UDP |
 | `pid` | number, optional | omitted when the owner is not visible (permissions) |
 | `process` | Process, optional | |
+| `container` | Container, optional | the container publishing this port, when a container engine is reachable |
 
 ### Process
 
@@ -47,6 +48,15 @@ present, and empty arrays are `[]`, never `null`.
 | `cmdline` | string, optional | |
 | `exe` | string, optional | |
 | `startTime` | string, optional | RFC 3339, UTC |
+
+### Container
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | string | short (12-character) container ID |
+| `name` | string, optional | container name |
+| `image` | string, optional | image reference, e.g. `nginx:alpine` |
+| `runtime` | string | `docker` or `podman` |
 
 ## `list`
 

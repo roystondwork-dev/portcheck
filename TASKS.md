@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M8 — Docker attribution
+**Current milestone:** v0.2.0 release (M7 winget review pending)
 **Last updated:** 2026-10-20
 **Latest release:** [v0.1.1](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.1.1) · **Next release:** v0.2.0
 
@@ -21,7 +21,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M5 | Documentation | 9 / 9 | ✅ |
 | M6 | Release & distribution | 10 / 10 | ✅ |
 | M7 | Post-release hardening & distribution (v0.1.1 → v0.2.0) | 7 / 8 | 🟨 (winget awaiting Microsoft review) |
-| M8 | Docker attribution | 0 / 7 | 🟨 |
+| M8 | Docker attribution | 7 / 7 | ✅ |
 
 ---
 
@@ -144,13 +144,13 @@ never stops Docker's infrastructure by accident.
 
 | ID | Task | Component / files | Tests required | Status | Notes |
 |---|---|---|---|---|---|
-| M8-01 | Docker Engine API client: unix socket / named pipe / tcp, `DOCKER_HOST`, per-OS defaults; Podman-compatible | `pkg/containers` | unit with fake API server, 100% | ⬜ | No Docker SDK dependency |
-| M8-02 | Enrichment hook in `inspect` + `Socket.Container` | `pkg/inspect` | unit | ⬜ | Docker unavailable ⇒ silently skipped, never slows listing |
-| M8-03 | Show containers in `list`/`check` tables, JSON and TUI | `internal/output`, `internal/tui` | golden | ⬜ | Additive JSON field (`container`), schema stays v1 |
-| M8-04 | `kill` and TUI refuse container ports with a `docker stop` hint | `internal/cli/kill.go`, `internal/tui` | unit + golden | ⬜ | |
-| M8-05 | Protect Docker/WSL infrastructure processes in `killer` | `pkg/killer` | unit | ⬜ | e.g. `com.docker.backend`, `dockerd`, `wslrelay.exe` |
-| M8-06 | Integration test against a real Docker daemon | CI (Linux) | integration | ⬜ | |
-| M8-07 | Docs: guide section, permissions/troubleshooting, JSON schema | `docs/` | strict docs build | ⬜ | |
+| M8-01 | Docker Engine API client: unix socket / named pipe / tcp, `DOCKER_HOST`, per-OS defaults; Podman-compatible | `pkg/containers` | unit with fake API server, 100% | ✅ | Docker Desktop, Colima, OrbStack, rootless, Podman; `DOCKER_HOST`; go-winio for pipes; TLS/ssh unsupported (documented) |
+| M8-02 | Enrichment hook in `inspect` + `Socket.Container` | `pkg/inspect` | unit | ✅ | 500 ms budget, errors ignored; `--name` matches container names; ~10 ms measured on macOS |
+| M8-03 | Show containers in `list`/`check` tables, JSON and TUI | `internal/output`, `internal/tui` | golden | ✅ | `docker:web` label; JSON `container` {id, name, image, runtime} |
+| M8-04 | `kill` and TUI refuse container ports with a `docker stop` hint | `internal/cli/kill.go`, `internal/tui` | unit + golden | ✅ | Previously `kill` on a published port would stop Docker Desktop's backend |
+| M8-05 | Protect Docker/WSL infrastructure processes in `killer` | `pkg/killer` | unit | ✅ | Docker, containerd, rootlesskit, slirp4netns, vpnkit, WSL relay/service, vmmem |
+| M8-06 | Integration test against a real Docker daemon | CI (Linux) | integration | ✅ | Real busybox container on a random port; passes on Docker Desktop (macOS) and runs on GitHub's Ubuntu runner |
+| M8-07 | Docs: guide section, permissions/troubleshooting, JSON schema | `docs/` | strict docs build | ✅ | New Containers guide incl. limitations (no-userland-proxy, socket permissions, WSL) |
 
 ---
 
@@ -161,6 +161,7 @@ never stops Docker's infrastructure by accident.
 | 2026-10-20 | Go CLI + Bubble Tea TUI; MIT license; name `portcheck` | plan |
 | 2026-10-20 | gopsutil behind `inspect.Provider` | [ADR-0001](docs/adr/0001-gopsutil-provider.md) |
 | 2026-10-20 | Scanner is TCP-connect only, no stealth features | [ADR-0002](docs/adr/0002-tcp-connect-only-scanning.md) |
+| 2026-10-20 | Container attribution via the Engine API (no Docker SDK); `kill` never stops container proxies | M8 |
 | 2026-10-20 | winget package ID `roystondwork-dev.portcheck` (chosen by maintainer; permanent once accepted) | #10 |
 | 2026-10-20 | `wait` checks TCP accept, not application health; documented | #11 |
 | 2026-10-20 | First release is 0.1.0 (`initial-version`), not release-please's default 1.0.0 | #6 |

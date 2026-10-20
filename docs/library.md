@@ -14,6 +14,7 @@ go get github.com/roystondwork-dev/portcheck@latest
 | [`pkg/killer`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck/pkg/killer) | stop processes gracefully, with safety guards |
 | [`pkg/scan`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck/pkg/scan) | rate-limited TCP connect scanning |
 | [`pkg/waitfor`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck/pkg/waitfor) | poll until a port opens (or any condition holds) |
+| [`pkg/containers`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck/pkg/containers) | attribute published ports to Docker/Podman containers |
 
 The packages have no dependency on the CLI or TUI libraries (enforced by a linter rule),
 and use only the standard library plus gopsutil and `golang.org/x/{sync,sys,time}`.
@@ -60,6 +61,17 @@ if res.Partial {
 
 To test code that uses `inspect`, pass an `inspect.FakeProvider` to `inspect.New`
 instead of using `NewSystem`.
+
+To attribute container ports, add the container engine as an enricher:
+
+```go
+var opts []inspect.Option
+if engine, ok := containers.Discover(os.Getenv); ok {
+	opts = append(opts, inspect.WithEnricher(engine))
+}
+res, err := inspect.NewSystem(opts...).List(ctx, inspect.Filter{ListeningOnly: true})
+// s.Container is set for ports published by a container.
+```
 
 ## Free ports
 

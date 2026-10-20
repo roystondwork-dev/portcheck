@@ -13,6 +13,7 @@ denied). In JSON, `pid` or `process` is omitted accordingly and `partial` is
 | Stop other users' processes | needs `sudo` | needs `sudo` | needs Administrator |
 | Bind ports below 1024 (`check`/`free`) | wildcard only² | needs root¹ | allowed |
 | `scan` | no privileges needed | no privileges needed | no privileges needed |
+| Container attribution | Docker Desktop socket is per-user | needs `docker` group (or root) for `/var/run/docker.sock` | Docker Desktop pipe is per-user |
 
 ¹ Unless `net.ipv4.ip_unprivileged_port_start` has been lowered, or the binary has `CAP_NET_BIND_SERVICE`.  
 ² macOS lets any user bind low ports on `0.0.0.0` and `::`, but binding a specific address such as `127.0.0.1` needs root.

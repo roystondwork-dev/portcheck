@@ -60,6 +60,7 @@ PID    PROCESS  RESULT      DETAIL
 
 - **One tool, every OS.** It replaces `lsof -i`, `netstat -ano`, `ss -ltnp`, `Get-NetTCPConnection` and `kill`, with the same flags and output on macOS, Linux and Windows.
 - **Made for scripts.** `--json` output follows a [versioned schema](json-schema.md), and the [exit codes](exit-codes.md) mean the same thing on every command.
+- **Container-aware.** Ports published by Docker or Podman show the container, not a proxy process. See [Containers](guide/containers.md).
 - **Safe by default.** `kill` asks before it acts, refuses PID 1, itself, your shell and well-known system processes, and tries a graceful stop first. `scan` is rate-limited and has no stealth features.
 - **Honest about permissions.** When the OS hides process owners, portcheck tells you instead of silently showing less. See [Permissions by OS](permissions.md).
 - **Usable as a library.** Everything is built on importable Go packages. See the [Go library](library.md) page.
