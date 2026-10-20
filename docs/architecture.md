@@ -8,6 +8,7 @@ flowchart TD
     cli["internal/cli<br/><small>cobra commands · flags · exit codes</small>"]
     out["internal/output<br/><small>table · plain · csv · json</small>"]
     tui["internal/tui<br/><small>Bubble Tea model</small>"]
+    bi["internal/buildinfo<br/><small>version · commit · date</small>"]
     portspec["pkg/portspec"]
     inspect["pkg/inspect"]
     freeport["pkg/freeport"]
@@ -17,7 +18,8 @@ flowchart TD
     os[("OS: lsof · /proc · IP Helper API<br/>signals · sockets · DNS")]
 
     main --> cli
-    cli --> out & tui
+    cli --> out & tui & bi
+    out --> bi
     cli --> portspec & inspect & freeport & killer & scan & waitfor
     tui --> inspect & killer
     out --> inspect & freeport & scan
@@ -45,6 +47,7 @@ flowchart TD
 | `pkg/scan` | Target expansion, worker pool, rate limit, classification | `Dialer`, `Resolver` |
 | `pkg/waitfor` | Poll a condition until it holds or the context ends | `Check`, `Dialer` |
 | `internal/output` | Render a `Document` (JSON payload + toned rows) in 4 formats | writer |
+| `internal/buildinfo` | Version, commit and date from `-ldflags` or Go's embedded build info | `debug.ReadBuildInfo` |
 | `internal/tui` | Pure model; I/O happens in `tea.Cmd`s | `Lister`, `Killer` |
 | `internal/cli` | Arguments → library calls → `Document` → exit code | `App` struct |
 

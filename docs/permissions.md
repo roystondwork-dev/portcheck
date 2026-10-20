@@ -2,8 +2,9 @@
 
 Operating systems restrict what an ordinary user can see about other users'
 processes. portcheck never hides this: rows whose owner it cannot see show PID `-`
-and process `?`. In JSON, `pid` is omitted and `partial` is `true`. A one-line hint
-is printed to stderr.
+and process `?` (or a PID with process `?` when only the process details are
+denied). In JSON, `pid` or `process` is omitted accordingly and `partial` is
+`true`. A one-line hint is printed to stderr.
 
 | | macOS | Linux | Windows |
 |---|---|---|---|

@@ -5,20 +5,21 @@
 ```console
 $ portcheck check 3000 3001 80
 PORT  PROTO  STATUS  PID    PROCESS  USER
+80    tcp    denied  -      -        -
 3000  tcp    in-use  42379  node     alice
 3001  tcp    free    -      -        -
-80    tcp    denied  -      -        -
 ```
 
 `portcheck <port>` is a shortcut for `portcheck check <port>`. Arguments are
 [port specs](../port-specs.md), so `portcheck check 8000-8010` works too (up to 4096 ports).
+Results are listed in ascending port order.
 
 ## Statuses
 
 | Status | Meaning |
 |---|---|
 | `free` | No listener, and portcheck could bind the port on `127.0.0.1`, `0.0.0.0`, `::1` and `::` (addresses your system doesn't support, e.g. IPv6, are skipped) |
-| `in-use` | A process listens on the port, or binding failed because the address is in use |
+| `in-use` | A process listens on the port, or binding failed because the address is in use (or for another unexpected reason, so a port is never wrongly reported free) |
 | `denied` | Binding failed for lack of privileges: ports below 1024 without root on Linux (and on specific addresses on macOS), or a [Windows excluded port range](../troubleshooting.md#windows-says-a-port-is-denied-but-nothing-uses-it) |
 
 !!! info "Why both checks?"

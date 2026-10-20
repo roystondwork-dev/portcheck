@@ -1,6 +1,7 @@
 # JSON output
 
-Every command accepts `--json` (or `-o json`) and prints one JSON document:
+Every command that prints results (`list`, `check`, `free`, `kill`, `scan`, `wait`,
+`version`) accepts `--json` (or `-o json`) and prints one JSON document:
 
 ```json
 {

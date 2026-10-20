@@ -34,31 +34,38 @@ cd portcheck
 lefthook install      # optional: format on commit, lint + test on push
 make help             # list all tasks
 make build            # -> ./bin/portcheck
-make check            # lint + vuln + tests + coverage gate (what CI runs)
+make check            # lint + actionlint + vuln + tests + coverage gate
+make docs-cli         # regenerate docs/commands (CI fails if it is stale)
 ```
 
 ## Project layout
 
 ```
-cmd/portcheck     entry point (thin)
-internal/cli      cobra commands — argument parsing and wiring only
-internal/output   table/json/csv/plain renderers
-internal/tui      Bubble Tea interactive UI
-pkg/portspec      port list/range parsing         (public library)
-pkg/inspect       local socket → process lookup   (public library)
-pkg/freeport      free-port detection             (public library)
-pkg/killer        safe process termination        (public library)
-pkg/scan          TCP connect scanner             (public library)
+cmd/portcheck       entry point (thin)
+internal/cli        cobra commands — argument parsing and wiring only
+internal/cli/gendocs  CLI reference + man page generator
+internal/output     table/json/csv/plain renderers
+internal/tui        Bubble Tea interactive UI
+internal/buildinfo  version/commit/date of the binary
+internal/testutil   shared test helpers (golden files)
+pkg/portspec        port list/range parsing          (public library)
+pkg/inspect         local socket → process lookup    (public library)
+pkg/freeport        free-port detection              (public library)
+pkg/killer          safe process termination         (public library)
+pkg/scan            TCP connect scanner              (public library)
+pkg/waitfor         poll until a port opens          (public library)
 ```
 
-Dependency direction is enforced by `depguard`: `cmd → internal/cli → internal/* → pkg/*`.
-Packages under `pkg/` must never import `internal/`, cobra or Charm libraries.
+Dependencies point one way: `cmd → internal/cli → internal/* → pkg/*`. `depguard`
+enforces the most important part: packages under `pkg/` must never import
+`internal/`, cobra or Charm libraries. The rest is a reviewed convention.
 See [docs/architecture.md](docs/architecture.md) for details.
 
 ## Standards every change must meet
 
-1. **Tests for every line.** `pkg/*` is held to **100% line coverage**; `internal/*`
-   to ≥ 95%. CI enforces this with `.testcoverage.yml`. Prefer table-driven tests
+1. **Tests for every line.** `pkg/*` is held to **100% line coverage**; everything
+   else to ≥ 95% per package and in total, and ≥ 90% per file. CI enforces this
+   with `.testcoverage.yml`. Prefer table-driven tests
    with `t.Parallel()`, use fakes (not mocks frameworks) at OS boundaries, and add
    a fuzz target for any parser.
 2. **Integration tests** that touch real sockets or processes live behind the
@@ -66,8 +73,8 @@ See [docs/architecture.md](docs/architecture.md) for details.
 3. **Lint clean.** `make lint` must pass. `//nolint` requires a specific linter and an explanation.
 4. **Documented.** Every exported identifier has a doc comment. User-facing
    changes update `docs/` and, for commands, the CLI help text.
-5. **Cross-platform.** OS-specific code lives in `_darwin.go`, `_linux.go`,
-   `_windows.go` (or `_unix.go`) files behind a small interface.
+5. **Cross-platform.** OS-specific code lives in `_windows.go` / `_unix.go` files
+   (or `_darwin.go` / `_linux.go` when truly needed) behind a small interface.
 
 ## Commit messages
 

@@ -40,8 +40,9 @@ hear about:
 
 ## Verifying releases
 
-Release artifacts are signed with [cosign](https://github.com/sigstore/cosign)
-(keyless) and ship with an SBOM and SLSA build provenance. See
+Each release's `checksums.txt`, which covers every artifact, is signed with
+[cosign](https://github.com/sigstore/cosign) (keyless), and releases ship with
+SBOMs and SLSA build provenance. See
 [docs/install.md](docs/install.md#verifying-downloads) for verification commands.
 
 ## Responsible use

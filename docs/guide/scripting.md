@@ -6,7 +6,8 @@ portcheck is designed to be driven by scripts:
   summaries never break a pipe.
 - **Exit codes are stable** and mean the same thing on every command. See [Exit codes](../exit-codes.md).
 - **`--json` output is versioned.** See [JSON output](../json-schema.md).
-- **No prompts without a terminal.** `kill` requires `--yes` when stdin isn't a TTY.
+- **No prompts without a terminal.** `kill` requires `--yes` when stdin isn't a TTY
+  (`--dry-run` needs neither).
 - **No colors when piped.** Colors are also off when `NO_COLOR` is set or with `--no-color`.
 
 ## Output formats
@@ -69,6 +70,11 @@ portcheck list -l --json | jq -c '.data.sockets[] | {port: .localPort, pid, name
 - name: Wait for Postgres
   run: portcheck wait 5432 -t 60s
 ```
+
+## Version
+
+`portcheck --version` prints just the version; `portcheck version --json` adds the
+commit, build date, Go version and platform.
 
 ## Debugging
 

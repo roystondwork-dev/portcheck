@@ -68,7 +68,16 @@ Scanned 1 host(s) × 2 port(s) in 3ms: 1 open, 1 closed, 0 filtered, 0 errors.
 !!! warning
     Only scan hosts and networks you own or are authorized to test.
 
-## 6. Watch it live
+## 6. Wait for a service
+
+```sh
+portcheck wait 5432 -t 60s
+```
+
+Blocks until something accepts connections on port 5432, and exits `1` if
+nothing does within the timeout. See [`wait`](guide/wait.md).
+
+## 7. Watch it live
 
 ```sh
 portcheck
@@ -77,7 +86,7 @@ portcheck
 Running `portcheck` with no arguments in a terminal opens the [interactive view](guide/tui.md).
 Press `?` for keys and `q` to quit.
 
-## 7. Use it from scripts
+## 8. Use it from scripts
 
 ```sh
 portcheck list -l --json | jq '.data.sockets[] | {port: .localPort, process: .process.name}'
