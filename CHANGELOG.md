@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.7.0](https://github.com/roystondwork-dev/portcheck/compare/v0.6.0...v0.7.0) (2026-10-20)
+
+
+### Features
+
+* **browser:** Chrome/Edge extension showing which process serves a localhost page ([41f985f](https://github.com/roystondwork-dev/portcheck/commit/41f985f158a8dbd202894461e857ac0382af8433))
+* **browser:** Edge Add-ons kit and store builds ([d9f41e3](https://github.com/roystondwork-dev/portcheck/commit/d9f41e3b6bdbc5497dca4304bd83835c11c3c7e4))
+* **browser:** redesign the popup ([c202419](https://github.com/roystondwork-dev/portcheck/commit/c20241945a50bf2793dbed9be1bc5af06d2dbe70))
+* **cli:** portcheck browser install, status and uninstall; native host mode ([1f6b8aa](https://github.com/roystondwork-dev/portcheck/commit/1f6b8aa205a490b45a90f725fd4d0a59b3906b2b))
+* **nativehost:** native messaging for the browser extension ([7f11003](https://github.com/roystondwork-dev/portcheck/commit/7f11003d46bd61eb32e849e8403dc6841bbc903f))
+* **release:** attach the browser extension to every release ([1296eb2](https://github.com/roystondwork-dev/portcheck/commit/1296eb2119ab596f1494132b26a6a76bf6cf0564))
+
+
+### Documentation
+
+* browser commands, JSON schema and M17 tasks ([208ab79](https://github.com/roystondwork-dev/portcheck/commit/208ab794072b0d284344dbe3a7e377ce8bfe4d8b))
+* browser extension guide; M17 status ([2d4c9da](https://github.com/roystondwork-dev/portcheck/commit/2d4c9daf50620df139bbe8a601f2aa130a1d8857))
+* browser extension troubleshooting, incl. the macOS folder prompt ([f8f0365](https://github.com/roystondwork-dev/portcheck/commit/f8f03652d78909b9474d100aeb743e93c5454430))
+* defer the Chrome Web Store until portcheck has 100 users ([1ba4894](https://github.com/roystondwork-dev/portcheck/commit/1ba4894e13b7b100ab053c66e9b41e3e4862cb0d))
+* plan the browser extension (ADR-0005) ([82c6598](https://github.com/roystondwork-dev/portcheck/commit/82c65984ffe5f76039176f3dff28a5451627332e))
+
 ## [0.6.0](https://github.com/roystondwork-dev/portcheck/compare/v0.5.0...v0.6.0) (2026-10-20)
 
 
