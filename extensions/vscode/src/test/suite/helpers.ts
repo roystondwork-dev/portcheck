@@ -110,7 +110,7 @@ export function waitFor(cond: () => boolean, what: string, ms = 15_000): Promise
 }
 
 export async function activateExtension(): Promise<PortcheckApi> {
-  const ext = vscode.extensions.getExtension<PortcheckApi>("roystondwork-dev.portcheck");
+  const ext = vscode.extensions.getExtension<PortcheckApi>("roystondwork-dev.portcheck-vscode");
   if (!ext) {
     throw new Error("extension not found");
   }
