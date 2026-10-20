@@ -1,0 +1,4 @@
+[1mNAME[m  [1mPORT[m  [1mEXPECT[m  [1mSTATUS[m  [1mDETAIL[m                                            [1mFIX[m
+[90m──────[m[90m──────[m[90m────────[m[90m────────[m[90m──────────────────────────────────────────────────[m[90m───────────────────[m
+web   3000  free    [1;31min-use[m  in use by node (pid 4242), started by npm (4200)  [36mportcheck kill 3000[m
+db    5432  open    [32mok[m                                                        [36m[m

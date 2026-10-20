@@ -69,6 +69,7 @@ type App struct {
 	Scan          ScanFunc
 	Dialer        waitfor.Dialer
 	Runner        ProcessRunner
+	Workdir       func() (string, error)
 	RunTUI        TUIFunc
 	Build         buildinfo.Info
 }
@@ -102,6 +103,7 @@ func NewApp() *App {
 		Scan:          scan.Scan,
 		Dialer:        &net.Dialer{},
 		Runner:        execRunner{notify: signal.Notify, stop: signal.Stop},
+		Workdir:       os.Getwd,
 		RunTUI:        tui.Run,
 		Build:         buildinfo.Get(),
 	}

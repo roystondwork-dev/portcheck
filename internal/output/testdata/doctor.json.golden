@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "kind": "doctor",
+  "data": {
+    "config": "/work/app/.portcheck.yaml",
+    "ok": false,
+    "checks": [
+      {
+        "name": "web",
+        "port": 3000,
+        "proto": "tcp",
+        "expect": "free",
+        "ok": false,
+        "status": "in-use",
+        "detail": "in use by node (pid 4242), started by npm (4200)",
+        "fix": "portcheck kill 3000"
+      },
+      {
+        "name": "db",
+        "port": 5432,
+        "proto": "tcp",
+        "expect": "open",
+        "host": "localhost",
+        "ok": true,
+        "status": "ok"
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+# portcheck doctor and run --port <name> with a real .portcheck.yaml.
+
+# Config found by walking up from a subdirectory; port 40991 is free.
+cd project/src
+exec portcheck doctor -o plain
+stdout '^web\s+40991\s+free\s+ok'
+stderr 'All 1 checks passed'
+
+env PORTCHECK_TEST_CHILD=echo
+exec portcheck run -q --port web -- $CHILD
+stdout '^PORT=40991 '
+
+exits 2 portcheck run --port nope -- $CHILD
+stderr 'unknown port name'
+
+# A service that should be up but isn't.
+cd $WORK/down
+exits 1 portcheck doctor -o plain
+stdout 'closed'
+stdout 'start db \(docker compose up -d db\)'
+
+# Invalid and missing configuration.
+cd $WORK/broken
+exits 2 portcheck doctor
+stderr 'field exepct not found'
+
+cd $WORK/empty
+exits 2 portcheck doctor
+stderr 'no .portcheck.yaml found'
+
+-- project/.portcheck.yaml --
+version: 1
+ports:
+  - name: web
+    port: 40991
+-- project/src/.keep --
+-- down/.portcheck.yaml --
+version: 1
+ports:
+  - name: db
+    port: 40992
+    expect: open
+    description: docker compose up -d db
+-- broken/.portcheck.yaml --
+version: 1
+ports:
+  - name: web
+    port: 1
+    exepct: open
+-- empty/.keep --
