@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.0](https://github.com/roystondwork-dev/portcheck/compare/v0.1.1...v0.2.0) (2026-10-20)
+
+
+### Features
+
+* **cli:** add wait command ([436594b](https://github.com/roystondwork-dev/portcheck/commit/436594b934b617a6384cada5fb442937fc7c27c2))
+* **containers:** attribute published ports to Docker and Podman containers ([42b18e9](https://github.com/roystondwork-dev/portcheck/commit/42b18e9b15dbc4f14043a69627b5f0d6f6a7f111))
+* show containers instead of proxy processes; never kill Docker infrastructure ([0b5ddac](https://github.com/roystondwork-dev/portcheck/commit/0b5ddacb5d21414a5c245b338e1b9434c1b9460e))
+* **waitfor:** add polling library for waiting on ports ([79a8357](https://github.com/roystondwork-dev/portcheck/commit/79a83572aae5fb1cf43436d7613cea68ea1cdd39))
+
+
+### Documentation
+
+* document container attribution ([1d5f3be](https://github.com/roystondwork-dev/portcheck/commit/1d5f3be068722d92a15a0bd91747cdefb5696968))
+* fix inaccuracies found in a full docs audit; honor --no-color in the TUI ([ebd3b0f](https://github.com/roystondwork-dev/portcheck/commit/ebd3b0fc3ca45d1146685dce86e161fe14fd00a2))
+* **tasks:** record post-release work (M7), the docs audit and the Docker plan (M8) ([725e3d1](https://github.com/roystondwork-dev/portcheck/commit/725e3d189e6523df530b6229ef8d7edd0a1ba6ac))
+
 ## [0.1.1](https://github.com/roystondwork-dev/portcheck/compare/v0.1.0...v0.1.1) (2026-10-20)
 
 
