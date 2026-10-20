@@ -268,7 +268,7 @@ messaging host; the extension can only ask for `version`, `list`, `check` and `k
 | M17-05 | Popup: process details, who started it, Stop (confirm), local ports list; setup help when portcheck isn't registered | `src/popup.ts` | unit 100% | ✅ | Inline confirmation (Stop / Force kill / Cancel); containers get their stop command; setup steps with copy buttons |
 | M17-06 | "Connection refused" on localhost: say whether anything listens | `src/background.ts` | unit | ✅ | Via the badge: `off` on error pages such as ERR_CONNECTION_REFUSED |
 | M17-07 | End-to-end test in real Chromium (Playwright) with the real binary + CI | `extensions/browser/e2e/`, `.github/workflows/browser.yml` | CI green | ✅ | 5 tests: badge, `off`, popup + real Stop, startup race, setup help; native host registered in the test profile. CI on Linux and macOS (Windows registration covered by Go tests) |
-| M17-08 | Docs, release zip, store publishing (Edge Add-ons free; Chrome Web Store has a one-time fee) | `docs/guide/browser.md`, `release.yml` | strict docs build | ⬜ | Store accounts: maintainer |
+| M17-08 | Docs, release zip, store publishing (Edge Add-ons free; Chrome Web Store has a one-time fee) | `docs/guide/browser.md`, `release.yml` | strict docs build | 🟨 | Docs ✅; `portcheck-browser-X.Y.Z.zip` attached to every release with provenance, version synced by release-please ✅. Store publishing pending: Edge Add-ons (free, Microsoft Partner Center) and Chrome Web Store (one-time fee); store builds must drop the manifest `key`, and their IDs must be added to `nativehost.ExtensionIDs` |
 
 ## What's next (candidates, not yet scheduled)
 
