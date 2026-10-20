@@ -59,6 +59,7 @@ describe("PortcheckClient", () => {
     await c.kill(42);
     await c.kill(42, true);
     await c.version();
+    await c.doctor("/w/.portcheck.yaml");
     expect(calls).toEqual([
       ["check", "3000", "--proto", "tcp", "--json"],
       ["check", "53", "--proto", "udp", "--json"],
@@ -67,6 +68,7 @@ describe("PortcheckClient", () => {
       ["kill", "--pid", "42", "--yes", "--json"],
       ["kill", "--pid", "42", "--yes", "--force", "--json"],
       ["version", "--json"],
+      ["doctor", "--config", "/w/.portcheck.yaml", "--json"],
     ]);
   });
 
@@ -103,5 +105,19 @@ describe("PortcheckClient", () => {
     expect(err).toBeInstanceOf(PortcheckError);
     expect((err as PortcheckError).exitCode).toBe(4);
     expect((err as PortcheckError).name).toBe("PortcheckError");
+    expect((err as PortcheckError).detail).toBe("permission denied");
+  });
+
+  it("keeps multi-line error detail without the usage hint", async () => {
+    const stderr =
+      "portcheck: /w/.portcheck.yaml: invalid .portcheck.yaml: yaml: unmarshal errors:\n  line 3: field prot not found\nRun 'portcheck doctor --help' for usage.\n";
+    const err = (await new PortcheckClient("pc", fakeExec({ code: 2, stderr })).doctor("/w/.portcheck.yaml").catch((e: unknown) => e)) as PortcheckError;
+    expect(err.message).toBe("/w/.portcheck.yaml: invalid .portcheck.yaml: yaml: unmarshal errors:");
+    expect(err.detail).toBe("/w/.portcheck.yaml: invalid .portcheck.yaml: yaml: unmarshal errors:\n  line 3: field prot not found");
+  });
+
+  it("parses real doctor output", async () => {
+    const data = await new PortcheckClient("pc", fakeExec({ stdout: golden("doctor"), code: 1 })).doctor("/c");
+    expect(data.checks[0]).toMatchObject({ name: "web", ok: false, fix: "portcheck kill 3000" });
   });
 });

@@ -2,6 +2,12 @@
 
 See what's using your ports, and free them safely, without leaving the editor.
 
+- **"Port in use" → fixed in one click.** When `npm run dev`, `rails s`,
+  `python -m http.server`, `go run .` (and many more) fail because the port is taken,
+  you're told who holds it and can **stop it and re-run**, or **re-run on the next free
+  port**, from the terminal.
+- **Project ports**: with a `.portcheck.yaml`, the status bar and Problems show which of
+  your project's ports are blocked, and how to fix them.
 - **Listening ports** view: every listening port with its process, who started it
   (`node ← npm ← zsh`), and the Docker/Podman container or WSL distro behind it.
 - **Stop** a process from the view or the command palette. You confirm first, and

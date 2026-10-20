@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import type { PortcheckClient } from "./cli";
-import { buildRows, type OwnerKind, type PortRow } from "./model";
+import { buildRows, type OwnerKind, type PortRow, viewRows } from "./model";
 
 const ICONS: Record<OwnerKind, string> = { process: "server-process", container: "package", hidden: "lock" };
 
@@ -9,7 +9,11 @@ export class PortsView implements vscode.TreeDataProvider<PortRow>, vscode.Dispo
   private readonly changed = new vscode.EventEmitter<undefined>();
   readonly onDidChangeTreeData = this.changed.event;
 
+  /** The rows shown (after filtering), project ports first. */
   rows: PortRow[] = [];
+  private all: PortRow[] = [];
+  private showUdp = false;
+  private project: ReadonlyMap<number, string> = new Map();
   private tree: vscode.TreeView<PortRow> | undefined;
   private timer: NodeJS.Timeout | undefined;
   private intervalSeconds = 0;
@@ -60,7 +64,8 @@ export class PortsView implements vscode.TreeDataProvider<PortRow>, vscode.Dispo
   private async load(): Promise<void> {
     try {
       const data = await this.client().list();
-      this.rows = buildRows(data);
+      this.all = buildRows(data);
+      this.rows = viewRows(this.all, { showUdp: this.showUdp, project: this.project });
       this.setMessage(
         this.rows.length === 0
           ? "Nothing is listening."
@@ -71,9 +76,18 @@ export class PortsView implements vscode.TreeDataProvider<PortRow>, vscode.Dispo
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       this.log.error(`list failed: ${msg}`);
+      this.all = [];
       this.rows = [];
       this.setMessage(`portcheck failed: ${msg}`);
     }
+    this.changed.fire(undefined);
+  }
+
+  /** Changes what's shown without running portcheck again. */
+  setFilter(showUdp: boolean, project: ReadonlyMap<number, string> = this.project): void {
+    this.showUdp = showUdp;
+    this.project = project;
+    this.rows = viewRows(this.all, { showUdp, project });
     this.changed.fire(undefined);
   }
 
@@ -92,7 +106,7 @@ export class PortsView implements vscode.TreeDataProvider<PortRow>, vscode.Dispo
     item.id = row.id;
     item.description = row.description;
     item.tooltip = new vscode.MarkdownString(row.tooltip);
-    item.iconPath = new vscode.ThemeIcon(ICONS[row.kind]);
+    item.iconPath = new vscode.ThemeIcon(row.project === undefined ? ICONS[row.kind] : "star-full");
     item.contextValue = row.contextValue;
     return item;
   }

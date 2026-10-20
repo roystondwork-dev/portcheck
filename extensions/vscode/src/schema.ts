@@ -82,3 +82,21 @@ export interface VersionData {
   commit: string;
   platform: string;
 }
+
+export interface DoctorCheck {
+  name: string;
+  port: number;
+  proto: string;
+  expect: "free" | "open";
+  host?: string;
+  ok: boolean;
+  status: string;
+  detail?: string;
+  fix?: string;
+}
+
+export interface DoctorData {
+  config: string;
+  ok: boolean;
+  checks: DoctorCheck[];
+}

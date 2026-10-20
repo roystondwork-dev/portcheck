@@ -33,6 +33,9 @@
   "extensionKind": [
     "workspace"
   ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
@@ -95,6 +98,22 @@
         "command": "portcheck.showOutput",
         "title": "Show Log",
         "category": "portcheck"
+      },
+      {
+        "command": "portcheck.fixPort",
+        "title": "Fix a Busy Port…",
+        "category": "portcheck"
+      },
+      {
+        "command": "portcheck.doctor",
+        "title": "Check Project Ports (.portcheck.yaml)",
+        "category": "portcheck"
+      },
+      {
+        "command": "portcheck.toggleUdp",
+        "title": "Show/Hide UDP Ports",
+        "category": "portcheck",
+        "icon": "$(filter)"
       }
     ],
     "menus": {
@@ -103,6 +122,11 @@
           "command": "portcheck.refresh",
           "when": "view == portcheck.ports",
           "group": "navigation"
+        },
+        {
+          "command": "portcheck.toggleUdp",
+          "when": "view == portcheck.ports",
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [
@@ -151,9 +175,28 @@
           "default": 5,
           "minimum": 0,
           "markdownDescription": "Seconds between refreshes of the **Listening ports** view while it is visible. `0` refreshes only on demand."
+        },
+        "portcheck.showUdp": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Show UDP ports in **Listening ports**. Off by default: most UDP listeners are system services (mDNS, AirDrop, …)."
+        },
+        "portcheck.terminal.notify": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "When a command in the integrated terminal fails because a port is in use, show who holds it and offer a fix. Needs [shell integration](https://code.visualstudio.com/docs/terminal/shell-integration). Errors are always clickable links, whatever this setting."
         }
       }
-    }
+    },
+    "yamlValidation": [
+      {
+        "fileMatch": [
+          ".portcheck.yaml",
+          ".portcheck.yml"
+        ],
+        "url": "./dist/portcheck.schema.json"
+      }
+    ]
   },
   "scripts": {
     "build": "node esbuild.mjs",

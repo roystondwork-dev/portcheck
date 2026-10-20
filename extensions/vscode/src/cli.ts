@@ -4,6 +4,7 @@
 import * as path from "node:path";
 import {
   type CheckData,
+  type DoctorData,
   type Envelope,
   type FreeData,
   type KillData,
@@ -25,6 +26,8 @@ export class PortcheckError extends Error {
   constructor(
     message: string,
     readonly exitCode?: number,
+    /** portcheck's full error output, without the usage hint. */
+    readonly detail = "",
   ) {
     super(message);
     this.name = "PortcheckError";
@@ -68,7 +71,7 @@ export class PortcheckClient {
     const r = await this.exec(this.binary, [...args, "--json"], this.timeoutMs);
     const out = r.stdout.trim();
     if (!okCodes.includes(r.code) || out === "") {
-      throw new PortcheckError(firstLine(r.stderr) ?? `portcheck exited with status ${r.code}`, r.code);
+      throw new PortcheckError(firstLine(r.stderr) ?? `portcheck exited with status ${r.code}`, r.code, errorDetail(r.stderr));
     }
     let env: Envelope<T>;
     try {
@@ -109,9 +112,23 @@ export class PortcheckClient {
     return this.run<KillData>("kill", args, [0, 1, 3, 4]);
   }
 
+  /** Checks a project's .portcheck.yaml. Exit code 2 (missing or invalid file) is an error. */
+  doctor(config: string): Promise<DoctorData> {
+    return this.run<DoctorData>("doctor", ["doctor", "--config", config], [0, 1]);
+  }
+
   version(): Promise<VersionData> {
     return this.run<VersionData>("version", ["version"]);
   }
+}
+
+function errorDetail(stderr: string): string {
+  return stderr
+    .split("\n")
+    .filter((l) => !l.startsWith("Run 'portcheck"))
+    .join("\n")
+    .trim()
+    .replace(/^portcheck: /, "");
 }
 
 function firstLine(s: string): string | undefined {
