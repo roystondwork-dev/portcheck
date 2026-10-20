@@ -1,0 +1,90 @@
+:root {
+  --bg: #ffffff;
+  --fg: #1f1f1f;
+  --muted: #5f6368;
+  --line: #e0e0e0;
+  --good: #2e7d32;
+  --bad: #c62828;
+  --accent: #283593;
+  --code-bg: #f1f3f4;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #202124;
+    --fg: #e8eaed;
+    --muted: #9aa0a6;
+    --line: #3c4043;
+    --good: #81c995;
+    --bad: #f28b82;
+    --accent: #8ab4f8;
+    --code-bg: #303134;
+  }
+}
+body {
+  margin: 0;
+  width: 360px;
+  font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--line);
+}
+section {
+  padding: 10px 14px;
+}
+h1 {
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+h1.good { color: var(--good); }
+h1.bad { color: var(--bad); }
+h1.muted { color: var(--muted); }
+h2 {
+  font-size: 12px;
+  margin: 0 0 6px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 10px;
+  margin: 0 0 10px;
+}
+dt { color: var(--muted); }
+dd { margin: 0; overflow-wrap: anywhere; }
+code {
+  font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background: var(--code-bg);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+button {
+  font: inherit;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+}
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+button.danger { background: var(--bad); border-color: var(--bad); color: var(--bg); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.muted { color: var(--muted); }
+.message { margin-top: 8px; }
+#ports { border-top: 1px solid var(--line); }
+ul { list-style: none; margin: 0; padding: 0; max-height: 220px; overflow: auto; }
+li { padding: 3px 0; }
+li a { color: var(--accent); text-decoration: none; }
+li a:hover { text-decoration: underline; }
+ol { margin: 0; padding-left: 18px; }
+ol li { padding: 4px 0; }
