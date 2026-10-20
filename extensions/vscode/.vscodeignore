@@ -1,0 +1,9 @@
+# Only dist/, bin/, media/ and the manifest files ship in the VSIX.
+**
+!dist/extension.js
+!bin/**
+!media/**
+!package.json
+!README.md
+!CHANGELOG.md
+!LICENSE

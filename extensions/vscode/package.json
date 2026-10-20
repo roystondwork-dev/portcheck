@@ -1,0 +1,189 @@
+{
+  "name": "portcheck",
+  "displayName": "portcheck: ports, processes & fixes",
+  "description": "See what's using your ports — process, who started it, container or WSL distro — and free them safely.",
+  "version": "0.4.0",
+  "publisher": "roystondwork-dev",
+  "license": "MIT",
+  "homepage": "https://roystondwork-dev.github.io/portcheck/guide/vscode/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/roystondwork-dev/portcheck.git",
+    "directory": "extensions/vscode"
+  },
+  "bugs": {
+    "url": "https://github.com/roystondwork-dev/portcheck/issues"
+  },
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "port",
+    "ports",
+    "EADDRINUSE",
+    "kill port",
+    "lsof",
+    "netstat",
+    "docker",
+    "wsl"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "portcheck",
+          "title": "portcheck",
+          "icon": "media/ports.svg"
+        }
+      ]
+    },
+    "views": {
+      "portcheck": [
+        {
+          "id": "portcheck.ports",
+          "name": "Listening ports"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "portcheck.refresh",
+        "title": "Refresh",
+        "category": "portcheck",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "portcheck.checkPort",
+        "title": "Check a Port…",
+        "category": "portcheck"
+      },
+      {
+        "command": "portcheck.findFreePort",
+        "title": "Find a Free Port…",
+        "category": "portcheck"
+      },
+      {
+        "command": "portcheck.stopPort",
+        "title": "Stop What's Using a Port…",
+        "category": "portcheck"
+      },
+      {
+        "command": "portcheck.stop",
+        "title": "Stop",
+        "category": "portcheck",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "portcheck.openInBrowser",
+        "title": "Open in Browser",
+        "category": "portcheck",
+        "icon": "$(globe)"
+      },
+      {
+        "command": "portcheck.copyPid",
+        "title": "Copy PID",
+        "category": "portcheck"
+      },
+      {
+        "command": "portcheck.showOutput",
+        "title": "Show Log",
+        "category": "portcheck"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "portcheck.refresh",
+          "when": "view == portcheck.ports",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "portcheck.openInBrowser",
+          "when": "view == portcheck.ports && viewItem =~ /tcp/",
+          "group": "inline@1"
+        },
+        {
+          "command": "portcheck.stop",
+          "when": "view == portcheck.ports && viewItem =~ /^port\\./",
+          "group": "inline@2"
+        },
+        {
+          "command": "portcheck.copyPid",
+          "when": "view == portcheck.ports && viewItem =~ /^port\\.process/",
+          "group": "1_copy"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "portcheck.stop",
+          "when": "false"
+        },
+        {
+          "command": "portcheck.openInBrowser",
+          "when": "false"
+        },
+        {
+          "command": "portcheck.copyPid",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "portcheck",
+      "properties": {
+        "portcheck.path": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Path to the `portcheck` binary. Empty: use the one bundled with the extension, or `portcheck` on your `PATH`.",
+          "scope": "machine-overridable"
+        },
+        "portcheck.refreshInterval": {
+          "type": "number",
+          "default": 5,
+          "minimum": 0,
+          "markdownDescription": "Seconds between refreshes of the **Listening ports** view while it is visible. `0` refreshes only on demand."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test:unit": "vitest run --coverage",
+    "compile:tests": "tsc -p tsconfig.test.json",
+    "test:integration": "npm run build && npm run compile:tests && node out/test/runTest.js",
+    "check": "npm run typecheck && npm run lint && npm run test:unit && npm run build",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/mocha": "10.0.10",
+    "@types/node": "22.20.5",
+    "@types/vscode": "1.95.0",
+    "@vitest/coverage-v8": "5.0.5",
+    "@vscode/test-electron": "3.1.0",
+    "@vscode/vsce": "4.0.0",
+    "esbuild": "0.28.2",
+    "eslint": "10.13.0",
+    "mocha": "12.0.3",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.0",
+    "vitest": "5.0.5"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "@vscode/vsce-sign@2.1.0": true,
+    "fsevents": false
+  }
+}
