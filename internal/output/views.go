@@ -315,3 +315,39 @@ func ScanDoc(results []scan.Result, sum scan.Summary, took time.Duration) Docume
 	d.Data = data
 	return d
 }
+
+// WaitResultJSON is the outcome for one awaited target.
+type WaitResultJSON struct {
+	Target    string `json:"target"` // as given on the command line
+	Host      string `json:"host"`
+	Port      uint16 `json:"port"`
+	Condition string `json:"condition"` // open | free
+	Ready     bool   `json:"ready"`
+	WaitedMs  int64  `json:"waitedMs"`
+	Attempts  int    `json:"attempts"`
+}
+
+// WaitJSON is the payload of `portcheck wait`.
+type WaitJSON struct {
+	Targets []WaitResultJSON `json:"targets"`
+}
+
+// WaitDoc renders the result of `portcheck wait`.
+func WaitDoc(results []WaitResultJSON) Document {
+	d := Document{
+		Kind:    "wait",
+		Data:    WaitJSON{Targets: append([]WaitResultJSON{}, results...)},
+		Headers: []string{"TARGET", "CONDITION", "STATUS", "WAITED", "ATTEMPTS"},
+	}
+	for _, r := range results {
+		status := T("ready", ToneGood)
+		if !r.Ready {
+			status = T("timeout", ToneBad)
+		}
+		waited := (time.Duration(r.WaitedMs) * time.Millisecond).String()
+		d.Rows = append(d.Rows, []Cell{
+			C(r.Target), C(r.Condition), status, T(waited, ToneMuted), C(strconv.Itoa(r.Attempts)),
+		})
+	}
+	return d
+}

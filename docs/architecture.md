@@ -13,11 +13,12 @@ flowchart TD
     freeport["pkg/freeport"]
     killer["pkg/killer"]
     scan["pkg/scan"]
+    waitfor["pkg/waitfor"]
     os[("OS: lsof · /proc · IP Helper API<br/>signals · sockets · DNS")]
 
     main --> cli
     cli --> out & tui
-    cli --> portspec & inspect & freeport & killer & scan
+    cli --> portspec & inspect & freeport & killer & scan & waitfor
     tui --> inspect & killer
     out --> inspect & freeport & scan
     freeport --> inspect & portspec
@@ -27,6 +28,7 @@ flowchart TD
     killer -. "ops (gopsutil)" .-> os
     freeport -. "bind" .-> os
     scan -. "Dialer / Resolver" .-> os
+    waitfor -. "Dialer" .-> os
 ```
 
 **Dependencies point down only.** `pkg/*` is the public library and must not import
@@ -41,6 +43,7 @@ flowchart TD
 | `pkg/freeport` | Free = no visible listener **and** bindable on 4 addresses | `Lister`, `bind` func |
 | `pkg/killer` | Guards → SIGTERM → wait → SIGKILL | `ops` interface |
 | `pkg/scan` | Target expansion, worker pool, rate limit, classification | `Dialer`, `Resolver` |
+| `pkg/waitfor` | Poll a condition until it holds or the context ends | `Check`, `Dialer` |
 | `internal/output` | Render a `Document` (JSON payload + toned rows) in 4 formats | writer |
 | `internal/tui` | Pure model; I/O happens in `tea.Cmd`s | `Lister`, `Killer` |
 | `internal/cli` | Arguments → library calls → `Document` → exit code | `App` struct |

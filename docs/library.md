@@ -13,6 +13,7 @@ go get github.com/roystondwork-dev/portcheck@latest
 | [`pkg/freeport`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck/pkg/freeport) | check and find free ports |
 | [`pkg/killer`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck/pkg/killer) | stop processes gracefully, with safety guards |
 | [`pkg/scan`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck/pkg/scan) | rate-limited TCP connect scanning |
+| [`pkg/waitfor`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck/pkg/waitfor) | poll until a port opens (or any condition holds) |
 
 The packages have no dependency on the CLI or TUI libraries (enforced by a linter rule),
 and use only the standard library plus gopsutil and `golang.org/x/{sync,sys,time}`.
@@ -96,6 +97,16 @@ if err != nil {
 for r := range scan.Scan(ctx, targets, portspec.MustParse("5432,6379"), scan.Options{}) {
 	fmt.Println(r.Target, r.Port, r.State)
 }
+```
+
+## Waiting for a service
+
+```go
+ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+defer cancel()
+r := waitfor.Poll(ctx, 250*time.Millisecond,
+	waitfor.DialCheck(&net.Dialer{}, "tcp", "localhost:5432", time.Second))
+fmt.Println(r.Ready, r.Attempts, r.Waited)
 ```
 
 `scan.Options{}` uses safe defaults: 100 concurrent connections, a 1s timeout and at

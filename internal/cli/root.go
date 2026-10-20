@@ -44,7 +44,8 @@ Running 'portcheck' alone in an interactive terminal opens the live TUI
   portcheck 3000                  # is 3000 free? who holds it?
   portcheck free -n 3             # three free ports
   portcheck kill 8080             # stop whatever listens on 8080
-  portcheck scan db.internal -p 5432,6379`,
+  portcheck scan db.internal -p 5432,6379
+  portcheck wait 5432 -t 60s      # block until Postgres accepts connections`,
 		Version:           app.Build.Version,
 		DisableAutoGenTag: true, // keep generated docs reproducible
 		Args:              cobra.ArbitraryArgs,
@@ -91,6 +92,7 @@ Running 'portcheck' alone in an interactive terminal opens the live TUI
 		c.newKillCmd(),
 		c.newScanCmd(),
 		c.newTUICmd(),
+		c.newWaitCmd(),
 		c.newVersionCmd(),
 	)
 	return root

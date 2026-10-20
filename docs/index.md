@@ -46,6 +46,10 @@ PID    PROCESS  RESULT      DETAIL
 
     `portcheck scan db.internal -p 5432`: rate-limited TCP connect checks, with no special privileges needed.
 
+-   :material-timer-sand: **[Wait for ports](guide/wait.md)**
+
+    `portcheck wait db:5432 -t 60s`: block until services are up, or until a port is free. Built for CI.
+
 -   :material-monitor-dashboard: **[Interactive view](guide/tui.md)**
 
     `portcheck`: a live, sortable, filterable table. Stop processes without leaving it.

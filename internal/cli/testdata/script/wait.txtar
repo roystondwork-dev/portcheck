@@ -1,0 +1,16 @@
+# Waiting for real ports.
+
+holdport
+
+exec portcheck wait $PORT -t 5s
+stdout 'open\s+ready'
+stderr 'Waiting for localhost:'$PORT
+
+exits 1 portcheck wait $PORT --free -t 300ms --interval 50ms
+stdout 'free\s+timeout'
+
+exec portcheck wait 127.0.0.1:$PORT --json
+stdout '"ready": true'
+
+exits 2 portcheck wait db:5432 --free
+stderr 'only works with local ports'

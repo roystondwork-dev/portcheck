@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "kind": "wait",
+  "data": {
+    "targets": [
+      {
+        "target": "5432",
+        "host": "localhost",
+        "port": 5432,
+        "condition": "open",
+        "ready": true,
+        "waitedMs": 1250,
+        "attempts": 6
+      },
+      {
+        "target": "db.internal:6379",
+        "host": "db.internal",
+        "port": 6379,
+        "condition": "open",
+        "ready": false,
+        "waitedMs": 30000,
+        "attempts": 120
+      },
+      {
+        "target": "3000",
+        "host": "localhost",
+        "port": 3000,
+        "condition": "free",
+        "ready": true,
+        "waitedMs": 0,
+        "attempts": 1
+      }
+    ]
+  }
+}
