@@ -4,11 +4,23 @@ The portcheck extension shows what's using your ports and frees them safely, wit
 leaving the editor. It works in VS Code and in editors that use Open VSX (VSCodium,
 Cursor, Windsurf).
 
-!!! note "Status"
-    The extension is in development (milestones M14–M16 in
-    [TASKS.md](https://github.com/roystondwork-dev/portcheck/blob/main/TASKS.md)). Until
-    it's published on the Marketplace, you can build and install it from source
-    (see [Building from source](#building-from-source)).
+## Install
+
+Every [portcheck release](https://github.com/roystondwork-dev/portcheck/releases)
+has a `portcheck-vscode-<platform>-<version>.vsix` for each platform (`darwin-arm64`,
+`darwin-x64`, `linux-x64`, `linux-arm64`, `win32-x64`, `win32-arm64`), with portcheck
+built in. Download the one for your machine and install it:
+
+```sh
+code --install-extension portcheck-vscode-darwin-arm64-0.5.0.vsix
+```
+
+or use **Extensions → … → Install from VSIX…**. Publishing to the VS Code Marketplace
+and Open VSX is being set up (M16 in
+[TASKS.md](https://github.com/roystondwork-dev/portcheck/blob/main/TASKS.md)).
+
+The extension needs VS Code 1.98 or later. The `.vsix` files have build provenance:
+`gh attestation verify <file> --repo roystondwork-dev/portcheck`.
 
 ## "Port in use" errors: one-click fixes
 
