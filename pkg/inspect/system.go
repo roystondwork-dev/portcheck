@@ -24,19 +24,25 @@ type processHandle interface {
 	PpidWithContext(ctx context.Context) (int32, error)
 }
 
-// systemProvider implements Provider using gopsutil. See ADR-0001.
+// systemProvider implements Provider using gopsutil, and on macOS a native
+// libproc socket listing. See ADR-0001 and ADR-0003.
 type systemProvider struct {
+	// native, if set, lists sockets without gopsutil (macOS: libproc instead
+	// of running lsof). On error, connections is used instead.
+	native      func(ctx context.Context) ([]RawSocket, error)
 	connections func(ctx context.Context, kind string) ([]gnet.ConnectionStat, error)
 	newProcess  func(ctx context.Context, pid int32) (processHandle, error)
 }
 
 // NewSystemProvider returns a Provider backed by the operating system.
 //
-// On macOS it relies on lsof (preinstalled); without root it only sees
-// sockets of the current user. On Linux and Windows, sockets of all users are
-// listed but process details may require elevated privileges.
+// On macOS it reads sockets directly through libproc (the API lsof uses),
+// falling back to lsof if that fails; without root it only sees sockets of the
+// current user. On Linux and Windows, sockets of all users are listed but
+// process details may require elevated privileges.
 func NewSystemProvider() Provider {
 	return &systemProvider{
+		native:      nativeSockets,
 		connections: gnet.ConnectionsWithContext,
 		newProcess: func(ctx context.Context, pid int32) (processHandle, error) {
 			return process.NewProcessWithContext(ctx, pid)
@@ -45,6 +51,12 @@ func NewSystemProvider() Provider {
 }
 
 func (p *systemProvider) Sockets(ctx context.Context) ([]RawSocket, error) {
+	if p.native != nil {
+		if socks, err := p.native(ctx); err == nil {
+			return socks, nil
+		}
+		// Fall through: the generic implementation still works.
+	}
 	stats, err := p.connections(ctx, "inet")
 	if err != nil {
 		return nil, fmt.Errorf("query connections: %w", classify(err))
