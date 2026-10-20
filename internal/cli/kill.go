@@ -150,7 +150,16 @@ func (c *cli) killTargets(cmd *cobra.Command, args []string, protos []inspect.Pr
 			return nil, err
 		}
 		hidden := false
+		published := map[inspect.Container][]uint16{}
 		for _, s := range res.Sockets {
+			if s.Container != nil {
+				// Killing the proxy (docker-proxy, com.docker.backend, …) would
+				// break every container; point the user at the container instead.
+				if ports := published[*s.Container]; !slices.Contains(ports, s.Port()) {
+					published[*s.Container] = append(ports, s.Port())
+				}
+				continue
+			}
 			if s.PID <= 0 {
 				hidden = true
 				continue
@@ -167,7 +176,11 @@ func (c *cli) killTargets(cmd *cobra.Command, args []string, protos []inspect.Pr
 				t.ports = append(t.ports, s.Port())
 			}
 		}
+		c.explainContainers(published)
 		if len(byPID) == 0 {
+			if len(published) > 0 {
+				return nil, negative()
+			}
 			if hidden {
 				c.hintPrivileges()
 				return nil, &ExitError{Code: ExitPermission, Err: fmt.Errorf("port %s is in use but its owner is not visible", spec)}
@@ -181,6 +194,22 @@ func (c *cli) killTargets(cmd *cobra.Command, args []string, protos []inspect.Pr
 		out = append(out, *byPID[pid])
 	}
 	return out, nil
+}
+
+// explainContainers tells the user how to stop containers publishing ports.
+func (c *cli) explainContainers(published map[inspect.Container][]uint16) {
+	ctrs := slices.SortedFunc(maps.Keys(published), func(a, b inspect.Container) int {
+		return cmp.Compare(output.ContainerLabel(&a), output.ContainerLabel(&b))
+	})
+	for _, ctr := range ctrs {
+		ps := make([]string, len(published[ctr]))
+		for i, p := range published[ctr] {
+			ps[i] = strconv.Itoa(int(p))
+		}
+		ref := cmp.Or(ctr.Name, ctr.ID)
+		fmt.Fprintf(c.app.Stderr, "Port %s is published by %s container %q (%s). Stop the container instead:\n  %s stop %s\n",
+			strings.Join(ps, ", "), ctr.Runtime, ref, cmp.Or(ctr.Image, "unknown image"), ctr.Runtime, ref)
+	}
 }
 
 func (c *cli) confirm(targets []killTarget, force bool) (bool, error) {

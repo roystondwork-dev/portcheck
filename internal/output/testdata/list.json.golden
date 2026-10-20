@@ -66,6 +66,24 @@
         "remoteAddress": "1.1.1.1",
         "remotePort": 443,
         "state": "TIME_WAIT"
+      },
+      {
+        "proto": "tcp",
+        "localAddress": "::",
+        "localPort": 18080,
+        "state": "LISTEN",
+        "pid": 79156,
+        "process": {
+          "pid": 79156,
+          "name": "com.docker.backend",
+          "user": "alice"
+        },
+        "container": {
+          "id": "b1308ab03f9f",
+          "name": "web",
+          "image": "nginx:alpine",
+          "runtime": "docker"
+        }
       }
     ],
     "partial": true

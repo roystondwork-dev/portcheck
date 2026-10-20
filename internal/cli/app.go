@@ -18,6 +18,7 @@ import (
 
 	"github.com/roystondwork-dev/portcheck/internal/buildinfo"
 	"github.com/roystondwork-dev/portcheck/internal/tui"
+	"github.com/roystondwork-dev/portcheck/pkg/containers"
 	"github.com/roystondwork-dev/portcheck/pkg/freeport"
 	"github.com/roystondwork-dev/portcheck/pkg/inspect"
 	"github.com/roystondwork-dev/portcheck/pkg/killer"
@@ -69,9 +70,15 @@ type App struct {
 	Build         buildinfo.Info
 }
 
-// NewApp returns an App wired to the real operating system.
+// NewApp returns an App wired to the real operating system. When a
+// Docker-compatible engine is reachable, ports published by containers are
+// attributed to the container.
 func NewApp() *App {
-	lister := inspect.NewSystem()
+	var opts []inspect.Option
+	if engine, ok := containers.Discover(os.Getenv); ok {
+		opts = append(opts, inspect.WithEnricher(engine))
+	}
+	lister := inspect.NewSystem(opts...)
 	return &App{
 		Stdin:         os.Stdin,
 		Stdout:        os.Stdout,

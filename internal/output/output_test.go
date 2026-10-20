@@ -27,6 +27,8 @@ var (
 		{RawSocket: inspect.RawSocket{Proto: inspect.TCP, Local: netip.MustParseAddrPort("[::]:5432"), State: inspect.StateListen, PID: 88}, Process: pg},
 		{RawSocket: inspect.RawSocket{Proto: inspect.UDP, Local: netip.MustParseAddrPort("0.0.0.0:5353"), State: inspect.StateNone, PID: 300}},
 		{RawSocket: inspect.RawSocket{Proto: inspect.TCP, Local: netip.MustParseAddrPort("10.0.0.2:50000"), Remote: netip.MustParseAddrPort("1.1.1.1:443"), State: inspect.StateTimeWait}},
+		{RawSocket: inspect.RawSocket{Proto: inspect.TCP, Local: netip.MustParseAddrPort("[::]:18080"), State: inspect.StateListen, PID: 79156},
+			Process: &inspect.ProcessInfo{PID: 79156, Name: "com.docker.backend", User: "alice"}, Container: &inspect.Container{ID: "b1308ab03f9f", Name: "web", Image: "nginx:alpine", Runtime: "docker"}},
 	}
 
 	statuses = []freeport.Status{
@@ -178,6 +180,19 @@ func TestPrinterFormat(t *testing.T) {
 	t.Parallel()
 	if got := NewPrinter(&bytes.Buffer{}, CSV, Options{}).Format(); got != CSV {
 		t.Errorf("Format() = %q", got)
+	}
+}
+
+func TestContainerLabel(t *testing.T) {
+	t.Parallel()
+	for want, c := range map[string]*inspect.Container{
+		"docker:web":          {Name: "web", Image: "nginx", ID: "1", Runtime: "docker"},
+		"podman:nginx:alpine": {Image: "nginx:alpine", ID: "1", Runtime: "podman"},
+		"docker:abc":          {ID: "abc", Runtime: "docker"},
+	} {
+		if got := ContainerLabel(c); got != want {
+			t.Errorf("ContainerLabel = %q, want %q", got, want)
+		}
 	}
 }
 

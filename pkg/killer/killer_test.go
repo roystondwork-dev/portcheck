@@ -199,7 +199,10 @@ func TestContextCanceledWhileWaiting(t *testing.T) {
 
 func TestIsProtectedName(t *testing.T) {
 	t.Parallel()
-	for name, want := range map[string]bool{"launchd": true, "SystemD": true, "LSASS.EXE": true, "node": false, "": false, "launchd2": false} {
+	for name, want := range map[string]bool{
+		"launchd": true, "SystemD": true, "LSASS.EXE": true, "node": false, "": false, "launchd2": false,
+		"com.docker.backend": true, "Docker Desktop.exe": true, "dockerd": true, "docker-proxy": true, "wslrelay.exe": true, "nginx": false,
+	} {
 		if got := IsProtectedName(name); got != want {
 			t.Errorf("IsProtectedName(%q) = %v, want %v", name, got, want)
 		}

@@ -79,10 +79,28 @@ type ProcessInfo struct {
 	CreateTime time.Time
 }
 
-// Socket is a RawSocket enriched with information about its owning process.
+// Container identifies a container that publishes a socket's port (for
+// example through docker-proxy or Docker Desktop's backend).
+type Container struct {
+	ID      string
+	Name    string
+	Image   string
+	Runtime string // e.g. "docker"
+}
+
+// Socket is a RawSocket enriched with information about its owning process
+// and, when an Enricher is configured, the container publishing it.
 type Socket struct {
 	RawSocket
-	Process *ProcessInfo // nil when unknown
+	Process   *ProcessInfo // nil when unknown
+	Container *Container   // nil when the port is not published by a known container
+}
+
+// Enricher adds information to sockets after they are listed, e.g. which
+// container publishes a port. Errors are ignored by Inspector: enrichment is
+// best effort and must never make listing fail.
+type Enricher interface {
+	Enrich(ctx context.Context, sockets []Socket) error
 }
 
 // Port returns the local port.
@@ -94,7 +112,7 @@ type Filter struct {
 	Protos        []Proto
 	States        []State
 	PIDs          []int32
-	Name          string // case-insensitive glob on the process name, e.g. "node*"
+	Name          string // case-insensitive glob on the process or container name, e.g. "node*"
 	ListeningOnly bool
 }
 
@@ -130,15 +148,34 @@ func (f Filter) matchRaw(s RawSocket) bool {
 	return true
 }
 
-func (f Filter) matchProcess(p *ProcessInfo) bool {
+func (f Filter) matchName(s Socket) bool {
 	if f.Name == "" {
 		return true
 	}
-	if p == nil {
-		return false
+	pattern := strings.ToLower(f.Name)
+	for _, name := range []string{processName(s.Process), containerName(s.Container)} {
+		if name == "" {
+			continue
+		}
+		if ok, _ := path.Match(pattern, strings.ToLower(name)); ok { // pattern validated in List
+			return true
+		}
 	}
-	ok, _ := path.Match(strings.ToLower(f.Name), strings.ToLower(p.Name)) // validated in List
-	return ok
+	return false
+}
+
+func processName(p *ProcessInfo) string {
+	if p == nil {
+		return ""
+	}
+	return p.Name
+}
+
+func containerName(c *Container) string {
+	if c == nil {
+		return ""
+	}
+	return c.Name
 }
 
 // Result is the outcome of Inspector.List.
@@ -151,8 +188,10 @@ type Result struct {
 
 // Inspector lists sockets using a Provider.
 type Inspector struct {
-	provider    Provider
-	concurrency int
+	provider      Provider
+	concurrency   int
+	enrichers     []Enricher
+	enrichTimeout time.Duration
 }
 
 // Option configures an Inspector.
@@ -168,9 +207,19 @@ func WithConcurrency(n int) Option {
 	}
 }
 
+// WithEnricher adds an Enricher that runs after sockets are listed. Each
+// enricher gets at most 500ms; nil is ignored.
+func WithEnricher(e Enricher) Option {
+	return func(in *Inspector) {
+		if e != nil {
+			in.enrichers = append(in.enrichers, e)
+		}
+	}
+}
+
 // New returns an Inspector that uses p.
 func New(p Provider, opts ...Option) *Inspector {
-	in := &Inspector{provider: p, concurrency: 16}
+	in := &Inspector{provider: p, concurrency: 16, enrichTimeout: 500 * time.Millisecond}
 	for _, o := range opts {
 		o(in)
 	}
@@ -219,16 +268,32 @@ func (in *Inspector) List(ctx context.Context, f Filter) (*Result, error) {
 	}
 	res.Partial = res.Partial || denied
 
-	res.Sockets = make([]Socket, 0, len(candidates))
-	for _, s := range candidates {
-		p := procs[s.PID]
-		if !f.matchProcess(p) {
-			continue
+	all := make([]Socket, len(candidates))
+	for i, s := range candidates {
+		all[i] = Socket{RawSocket: s, Process: procs[s.PID]}
+	}
+	in.enrich(ctx, all)
+
+	res.Sockets = make([]Socket, 0, len(all))
+	for _, s := range all {
+		if f.matchName(s) {
+			res.Sockets = append(res.Sockets, s)
 		}
-		res.Sockets = append(res.Sockets, Socket{RawSocket: s, Process: p})
 	}
 	slices.SortFunc(res.Sockets, compareSockets)
 	return res, nil
+}
+
+// enrich runs every enricher with a bounded time budget, ignoring failures.
+func (in *Inspector) enrich(ctx context.Context, sockets []Socket) {
+	if len(sockets) == 0 {
+		return
+	}
+	for _, e := range in.enrichers {
+		ectx, cancel := context.WithTimeout(ctx, in.enrichTimeout)
+		_ = e.Enrich(ectx, sockets) // best effort by design
+		cancel()
+	}
 }
 
 // lookupProcesses resolves each PID concurrently. Processes that exited in
