@@ -40,7 +40,7 @@
 brew install roystondwork-dev/tap/portcheck
 
 # winget (Windows)
-winget install RoystonD.portcheck
+winget install roystondwork-dev.portcheck
 
 # Scoop (Windows)
 scoop bucket add portcheck https://github.com/roystondwork-dev/scoop-bucket

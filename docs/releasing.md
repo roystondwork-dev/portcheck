@@ -37,7 +37,7 @@ are hidden.
    [bucket](https://github.com/roystondwork-dev/scoop-bucket) received commits.
 4. Smoke-test: `brew install roystondwork-dev/tap/portcheck && portcheck version`.
 5. Follow the winget pull request opened on
-   [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+RoystonD.portcheck).
+   [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+roystondwork-dev.portcheck).
    Microsoft's bots validate and scan it, then a moderator merges it, which can take a few
    days the first time. Keep the fork's `master` branch in sync occasionally
    (`gh repo sync roystondwork-dev/winget-pkgs`).

@@ -11,7 +11,7 @@ portcheck is a single static binary with no runtime dependencies.
 === "winget (Windows)"
 
     ```powershell
-    winget install RoystonD.portcheck
+    winget install roystondwork-dev.portcheck
     ```
 
     Open a new terminal afterwards so `portcheck` is on your `PATH`.

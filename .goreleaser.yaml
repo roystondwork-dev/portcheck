@@ -133,7 +133,7 @@ scoops:
 # and opens a pull request upstream, where Microsoft validates and merges it.
 winget:
   - name: portcheck
-    package_identifier: RoystonD.portcheck
+    package_identifier: roystondwork-dev.portcheck
     publisher: Royston D
     publisher_url: https://github.com/roystondwork-dev
     publisher_support_url: https://github.com/roystondwork-dev/portcheck/issues
