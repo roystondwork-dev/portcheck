@@ -19,7 +19,7 @@ PORT  PROTO  STATUS  PID    PROCESS  USER
 |---|---|
 | `free` | No listener, and portcheck could bind the port on `127.0.0.1`, `0.0.0.0`, `::1` and `::` (addresses your system doesn't support, e.g. IPv6, are skipped) |
 | `in-use` | A process listens on the port, or binding failed because the address is in use |
-| `denied` | Binding failed for lack of privileges: ports below 1024 on Linux without root, or a [Windows excluded port range](../troubleshooting.md#windows-says-a-port-is-denied-but-nothing-uses-it) |
+| `denied` | Binding failed for lack of privileges: ports below 1024 without root on Linux (and on specific addresses on macOS), or a [Windows excluded port range](../troubleshooting.md#windows-says-a-port-is-denied-but-nothing-uses-it) |
 
 !!! info "Why both checks?"
     Some systems let you bind `0.0.0.0:3000` even though another program already

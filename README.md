@@ -50,8 +50,6 @@ go install github.com/roystondwork-dev/portcheck/cmd/portcheck@latest
 artifacts are signed with cosign and ship with SBOMs and SLSA provenance; see
 [verifying downloads](docs/install.md#verifying-downloads).
 
-> **Note:** until `v0.1.0` is released, use `go install`.
-
 ## Quickstart
 
 ```console
