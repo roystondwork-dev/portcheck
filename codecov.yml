@@ -1,0 +1,30 @@
+# Codecov settings. The authoritative coverage gate is .testcoverage.yml,
+# enforced in CI; Codecov provides the dashboard, badge and PR comments.
+codecov:
+  require_ci_to_pass: true
+
+coverage:
+  precision: 1
+  round: down
+  status:
+    project:
+      default:
+        target: 95%
+        threshold: 0.5%
+    patch:
+      default:
+        target: 95%
+
+# Go coverage profiles use import paths; map them to repository paths.
+fixes:
+  - "github.com/roystondwork-dev/portcheck/::"
+
+# Keep in sync with the exclusions in .testcoverage.yml.
+ignore:
+  - cmd/portcheck/main.go
+  - internal/testutil
+  - internal/cli/gendocs
+
+comment:
+  layout: "condensed_header, diff, flags, files"
+  require_changes: true

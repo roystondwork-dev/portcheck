@@ -8,6 +8,8 @@
 <p align="center">
   <a href="https://github.com/roystondwork-dev/portcheck/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/roystondwork-dev/portcheck/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/roystondwork-dev/portcheck/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/roystondwork-dev/portcheck/actions/workflows/codeql.yml/badge.svg"></a>
+  <a href="https://codecov.io/gh/roystondwork-dev/portcheck"><img alt="Coverage" src="https://codecov.io/gh/roystondwork-dev/portcheck/graph/badge.svg"></a>
+  <a href="https://github.com/roystondwork-dev/portcheck/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/roystondwork-dev/portcheck"></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/roystondwork-dev/portcheck"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/roystondwork-dev/portcheck/badge"></a>
   <a href="https://pkg.go.dev/github.com/roystondwork-dev/portcheck"><img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/roystondwork-dev/portcheck.svg"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
