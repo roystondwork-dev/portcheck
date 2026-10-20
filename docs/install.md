@@ -8,6 +8,14 @@ portcheck is a single static binary with no runtime dependencies.
     brew install roystondwork-dev/tap/portcheck
     ```
 
+=== "winget (Windows)"
+
+    ```powershell
+    winget install RoystonD.portcheck
+    ```
+
+    Open a new terminal afterwards so `portcheck` is on your `PATH`.
+
 === "Scoop (Windows)"
 
     ```powershell

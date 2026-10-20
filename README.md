@@ -39,6 +39,9 @@
 # Homebrew (macOS, Linux)
 brew install roystondwork-dev/tap/portcheck
 
+# winget (Windows)
+winget install RoystonD.portcheck
+
 # Scoop (Windows)
 scoop bucket add portcheck https://github.com/roystondwork-dev/scoop-bucket
 scoop install portcheck

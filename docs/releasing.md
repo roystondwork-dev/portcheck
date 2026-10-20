@@ -36,6 +36,11 @@ are hidden.
    [tap](https://github.com/roystondwork-dev/homebrew-tap) and
    [bucket](https://github.com/roystondwork-dev/scoop-bucket) received commits.
 4. Smoke-test: `brew install roystondwork-dev/tap/portcheck && portcheck version`.
+5. Follow the winget pull request opened on
+   [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+RoystonD.portcheck).
+   Microsoft's bots validate and scan it, then a moderator merges it, which can take a few
+   days the first time. Keep the fork's `master` branch in sync occasionally
+   (`gh repo sync roystondwork-dev/winget-pkgs`).
 
 To rebuild artifacts for an existing tag (for example, after fixing a publishing
 problem), run the **Release** workflow manually and enter the tag.
@@ -45,6 +50,7 @@ problem), run the **Release** workflow manually and enter the tag.
 | Secret | Required | Purpose |
 |---|---|---|
 | `HOMEBREW_TAP_GITHUB_TOKEN` | for Homebrew/Scoop | Fine-grained PAT with **Contents: read & write** on `homebrew-tap` and `scoop-bucket`. Without it, those publishers are skipped with a warning. |
+| `WINGET_GITHUB_TOKEN` | for winget | **Classic** PAT with the `public_repo` scope. GoReleaser pushes the manifest to the [`winget-pkgs` fork](https://github.com/roystondwork-dev/winget-pkgs) and opens a PR to `microsoft/winget-pkgs`; fine-grained tokens can't open PRs on repositories you don't own. Without it, the winget submission is skipped with a warning. |
 | `RELEASE_PLEASE_TOKEN` | recommended | Fine-grained PAT with **Contents** and **Pull requests: read & write** on this repo. PRs opened with the default `GITHUB_TOKEN` don't trigger CI, so required checks never run on the release PR. Without this token, a maintainer must merge the release PR with admin override. |
 | `CODECOV_TOKEN` | optional | Coverage upload; the coverage gate doesn't depend on it. |
 
