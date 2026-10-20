@@ -19,6 +19,8 @@ export interface ProcessInfo {
   name: string;
   user?: string;
   cmdline?: string;
+  /** RFC 3339 */
+  startTime?: string;
   ancestors?: ProcessRef[];
 }
 

@@ -4,7 +4,7 @@ The portcheck extension for **Chrome and Edge** (and Chromium, Brave) tells you 
 process serves the localhost page you're looking at, and what's wrong when localhost
 refuses to connect.
 
-![The portcheck popup for localhost:3000: served by node (pid 8447), started by node ← zsh, its command and user, a Stop button, and the ports listening on this machine](../assets/browser-popup.png){ width="360" }
+![The portcheck popup for localhost:3000: a green Running chip, node with its pid, a card with who started it, its command and user, Stop process and Copy PID buttons, and a filterable list of the ports listening on this machine](../assets/browser-popup.png){ width="380" }
 
 !!! note "Status"
     The extension isn't in the Chrome Web Store or Edge Add-ons yet (M17 in
@@ -17,11 +17,14 @@ refuses to connect.
   what serves the page; hover for the process, its PID and who started it
   (`npm ← zsh`). **`off`** in red means nothing is listening: the server isn't running,
   so "This site can't be reached" isn't a network problem.
-- **The popup** shows the details: who started the process, its command and user, or
-  for a Docker/Podman/WSL port the command that stops it. **Stop** asks first, then
-  stops the process with portcheck's [safety guards](kill.md#safety): it never stops
-  system processes or the browser itself. Below, every port listening on the machine,
-  one click to open.
+- **The popup** shows whether the page's port is **Running**, **Not running** or
+  **Hidden**, and a card with who started the process, its command, its user and how
+  long it has been running; for a Docker/Podman/WSL port, the command that stops it.
+  **Stop process** asks first, then stops it with portcheck's
+  [safety guards](kill.md#safety): it never stops system processes or the browser
+  itself. **Copy PID** copies the process ID. Below, every port listening on the
+  machine, filterable by port or process, one click to open; the current tab's port
+  comes first. Light and dark themes follow your system.
 
 It works on `localhost`, `*.localhost`, `127.0.0.1`, `[::1]` and `0.0.0.0`, on any port.
 

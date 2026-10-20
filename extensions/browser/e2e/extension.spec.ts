@@ -20,6 +20,24 @@ interface Browser {
   worker: Worker;
 }
 
+/**
+ * The binary the browser starts: a copy outside the repository, because macOS
+ * asks for permission when a browser starts a program inside ~/Desktop,
+ * ~/Documents or ~/Downloads, and the badge would wait for that prompt.
+ */
+const hostBinary = (() => {
+  let copy: string | undefined;
+  return () => {
+    if (copy === undefined) {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pc-host-"));
+      copy = path.join(dir, path.basename(BIN));
+      fs.copyFileSync(BIN, copy);
+      fs.chmodSync(copy, 0o755);
+    }
+    return copy;
+  };
+})();
+
 /** Starts Chromium with the extension; registers portcheck in its profile unless told not to. */
 async function launch(register: boolean): Promise<Browser> {
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "pc-chromium-"));
@@ -29,7 +47,7 @@ async function launch(register: boolean): Promise<Browser> {
     fs.mkdirSync(dir);
     fs.writeFileSync(
       path.join(dir, `${HOST}.json`),
-      JSON.stringify({ name: HOST, description: "portcheck (test)", path: BIN, type: "stdio", allowed_origins: [`chrome-extension://${EXT_ID}/`] }),
+      JSON.stringify({ name: HOST, description: "portcheck (test)", path: hostBinary(), type: "stdio", allowed_origins: [`chrome-extension://${EXT_ID}/`] }),
     );
   }
   const context = await chromium.launchPersistentContext(profile, {
@@ -143,16 +161,28 @@ test.describe("with portcheck registered", () => {
 
       const popup = await b.context.newPage();
       await popup.goto(`chrome-extension://${EXT_ID}/popup.html?tab=${id}`);
-      await expect(popup.locator("h1")).toHaveText(`127.0.0.1:${port} is served by node (pid ${child.pid})`);
-      await expect(popup.locator("dt", { hasText: "Started by" })).toBeVisible();
-      await expect(popup.locator("#port-list")).toContainText(`:${port}`);
+      await expect(popup.locator(".address")).toHaveText(`127.0.0.1:${port}`);
+      await expect(popup.locator(".chip")).toHaveText("Running");
+      await expect(popup.locator(".summary")).toHaveText(`node · pid ${child.pid}`);
+      await expect(popup.locator(".detail", { hasText: "Started by" })).toBeVisible();
+      await expect(popup.locator(".port-row", { hasText: `:${port}` })).toContainText("this tab");
 
-      await popup.getByRole("button", { name: "Stop node" }).click();
-      await expect(popup.getByText(`Stop node (pid ${child.pid})?`)).toBeVisible();
+      // Filtering the ports list.
+      await popup.locator("#filter").fill(String(port));
+      await expect(popup.locator(".port-row")).toHaveCount(1);
+      await popup.locator("#filter").fill("");
+
+      // Cancel, then stop for real.
+      await popup.getByRole("button", { name: "Stop process" }).click();
+      await expect(popup.locator(".confirm p")).toHaveText(`Stop node (pid ${child.pid})?`);
+      await popup.getByRole("button", { name: "Cancel" }).click();
+      await expect(popup.locator(".confirm")).toHaveCount(0);
+      expect(child.exitCode).toBeNull();
+      await popup.getByRole("button", { name: "Stop process" }).click();
       await popup.getByRole("button", { name: "Stop", exact: true }).click();
       await exited;
-      await expect(popup.locator(".message").last()).toHaveText(`node (pid ${child.pid}): terminated.`);
-      await expect(popup.locator("h1")).toHaveText(`Nothing is listening on 127.0.0.1:${port}`);
+      await expect(popup.locator(".notice")).toHaveText(`node (pid ${child.pid}): terminated.`);
+      await expect(popup.locator(".chip")).toHaveText("Not running");
       await popup.close();
       await page.close();
     } finally {
@@ -184,8 +214,10 @@ test("without portcheck, the popup explains how to set it up", async () => {
   try {
     const popup = await b.context.newPage();
     await popup.goto(`chrome-extension://${EXT_ID}/popup.html`);
-    await expect(popup.locator("h1")).toHaveText("Connect portcheck to this browser");
+    await expect(popup.locator(".address")).toHaveText("Connect portcheck");
+    await expect(popup.locator(".chip")).toHaveText("Not connected");
     await expect(popup.locator("code", { hasText: "portcheck browser install" })).toBeVisible();
+    await expect(popup.locator("#ports")).toBeHidden();
   } finally {
     await b.context.close();
   }
