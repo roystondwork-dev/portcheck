@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/roystondwork-dev/portcheck/internal/buildinfo"
+	"github.com/roystondwork-dev/portcheck/internal/nativehost"
 	"github.com/roystondwork-dev/portcheck/pkg/freeport"
 	"github.com/roystondwork-dev/portcheck/pkg/inspect"
 	"github.com/roystondwork-dev/portcheck/pkg/killer"
@@ -133,7 +134,12 @@ func newHarness() *harness {
 		Killer:        h.killer,
 		PrivilegeHint: func() string { return "re-run with sudo" },
 		Workdir:       func() (string, error) { return "/nonexistent/portcheck-test-dir", nil },
-		Build:         buildinfo.Info{Version: "v1.2.3", Commit: "abc", Date: "2026-10-20", GoVersion: "go1.27", Platform: "test/arch"},
+		BrowserEnv: func() (nativehost.Env, error) {
+			return nativehost.Env{GOOS: "linux", Home: "/nonexistent/portcheck-test-home"}, nil
+		},
+		Executable: func() (string, error) { return "/nonexistent/portcheck", nil },
+		LookPath:   func(string) (string, error) { return "", errors.New("not found") },
+		Build:      buildinfo.Info{Version: "v1.2.3", Commit: "abc", Date: "2026-10-20", GoVersion: "go1.27", Platform: "test/arch"},
 	}
 	return h
 }
@@ -544,7 +550,7 @@ func TestInterruptedIsSilent(t *testing.T) {
 func TestNewApp(t *testing.T) {
 	t.Parallel()
 	app := NewApp()
-	if app.Lister == nil || app.Ports == nil || app.Killer == nil || app.PrivilegeHint == nil || app.Scan == nil || app.Runner == nil || app.Workdir == nil || app.Dialer == nil || app.Resolver == nil || app.RunTUI == nil || app.Build.Version == "" {
+	if app.Lister == nil || app.Ports == nil || app.Killer == nil || app.PrivilegeHint == nil || app.Scan == nil || app.Runner == nil || app.Workdir == nil || app.Dialer == nil || app.Resolver == nil || app.RunTUI == nil || app.BrowserEnv == nil || app.Executable == nil || app.LookPath == nil || app.Build.Version == "" {
 		t.Errorf("NewApp left dependencies unset: %+v", app)
 	}
 	if app.Stdout != os.Stdout || app.Stderr != os.Stderr || app.Stdin != os.Stdin {

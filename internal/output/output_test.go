@@ -80,6 +80,10 @@ func docs() map[string]Document {
 			{Name: "web", Port: 3000, Proto: "tcp", Expect: "free", Status: "in-use", Detail: "in use by node (pid 4242), started by npm (4200)", Fix: "portcheck kill 3000"},
 			{Name: "db", Port: 5432, Proto: "tcp", Expect: "open", Host: "localhost", OK: true, Status: "ok"},
 		}),
+		"browser": BrowserDoc("io.github.roystondwork_dev.portcheck", []BrowserJSON{
+			{Browser: "chrome", Name: "Google Chrome", Detected: true, Registered: true, Manifest: "/home/alice/.config/google-chrome/NativeMessagingHosts/io.github.roystondwork_dev.portcheck.json", Path: "/usr/local/bin/portcheck", Extensions: []string{"fmocabgaaihiflefcdafnhoihcibgnhl"}},
+			{Browser: "edge", Name: "Microsoft Edge", Manifest: "/home/alice/.config/microsoft-edge/NativeMessagingHosts/io.github.roystondwork_dev.portcheck.json"},
+		}),
 		"wait": WaitDoc([]WaitResultJSON{
 			{Target: "5432", Host: "localhost", Port: 5432, Condition: "open", Ready: true, WaitedMs: 1250, Attempts: 6},
 			{Target: "db.internal:6379", Host: "db.internal", Port: 6379, Condition: "open", WaitedMs: 30000, Attempts: 120},

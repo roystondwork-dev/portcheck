@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "kind": "browser",
+  "data": {
+    "host": "io.github.roystondwork_dev.portcheck",
+    "browsers": [
+      {
+        "browser": "chrome",
+        "name": "Google Chrome",
+        "detected": true,
+        "registered": true,
+        "manifest": "/home/alice/.config/google-chrome/NativeMessagingHosts/io.github.roystondwork_dev.portcheck.json",
+        "path": "/usr/local/bin/portcheck",
+        "extensions": [
+          "fmocabgaaihiflefcdafnhoihcibgnhl"
+        ]
+      },
+      {
+        "browser": "edge",
+        "name": "Microsoft Edge",
+        "detected": false,
+        "registered": false,
+        "manifest": "/home/alice/.config/microsoft-edge/NativeMessagingHosts/io.github.roystondwork_dev.portcheck.json"
+      }
+    ]
+  }
+}

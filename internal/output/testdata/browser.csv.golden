@@ -1,0 +1,3 @@
+BROWSER,INSTALLED,PORTCHECK,MANIFEST
+Google Chrome,yes,registered,/home/alice/.config/google-chrome/NativeMessagingHosts/io.github.roystondwork_dev.portcheck.json
+Microsoft Edge,no,not registered,/home/alice/.config/microsoft-edge/NativeMessagingHosts/io.github.roystondwork_dev.portcheck.json

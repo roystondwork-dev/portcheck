@@ -11,6 +11,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"os/exec"
 	"os/signal"
 	"runtime"
 	"syscall"
@@ -18,6 +19,7 @@ import (
 	"golang.org/x/term"
 
 	"github.com/roystondwork-dev/portcheck/internal/buildinfo"
+	"github.com/roystondwork-dev/portcheck/internal/nativehost"
 	"github.com/roystondwork-dev/portcheck/internal/tui"
 	"github.com/roystondwork-dev/portcheck/pkg/containers"
 	"github.com/roystondwork-dev/portcheck/pkg/freeport"
@@ -72,6 +74,11 @@ type App struct {
 	Workdir       func() (string, error)
 	RunTUI        TUIFunc
 	Build         buildinfo.Info
+	// BrowserEnv describes where browsers look for native messaging hosts.
+	BrowserEnv func() (nativehost.Env, error)
+	// Executable returns the running binary's path; LookPath finds programs on PATH.
+	Executable func() (string, error)
+	LookPath   func(string) (string, error)
 }
 
 // NewApp returns an App wired to the real operating system. When a
@@ -106,6 +113,9 @@ func NewApp() *App {
 		Workdir:       os.Getwd,
 		RunTUI:        tui.Run,
 		Build:         buildinfo.Get(),
+		BrowserEnv:    nativehost.SystemEnv,
+		Executable:    os.Executable,
+		LookPath:      exec.LookPath,
 	}
 }
 
@@ -120,6 +130,9 @@ func Main(args []string) int {
 // Execute runs the command line in args and returns the exit code. Errors are
 // reported on app.Stderr.
 func Execute(ctx context.Context, app *App, args []string) int {
+	if nativehost.IsLaunch(args) {
+		return serveNativeHost(ctx, app)
+	}
 	root := NewRootCmd(app)
 	root.SetArgs(args)
 	cmd, err := root.ExecuteContextC(ctx)
