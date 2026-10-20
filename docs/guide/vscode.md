@@ -4,7 +4,13 @@ The portcheck extension shows what's using your ports and frees them safely, wit
 leaving the editor. It works in VS Code and in editors that use Open VSX (VSCodium,
 Cursor, Windsurf).
 
+![npm run dev fails with EADDRINUSE; the extension names the process holding port 3000, stops it and re-runs the command](../assets/portcheck-vscode-demo.gif)
+
 ## Install
+
+In VS Code, open **Extensions** and search **portcheck**, or install
+[Portcheck - Port in Use Fixer](https://marketplace.visualstudio.com/items?itemName=portcheck-vscode.portcheck-vscode) from the VS Code Marketplace. In VSCodium,
+Cursor and Windsurf, it's on [Open VSX](https://open-vsx.org/extension/portcheck-vscode/portcheck-vscode). portcheck is built in.
 
 Every [portcheck release](https://github.com/roystondwork-dev/portcheck/releases)
 has a `portcheck-vscode-<version>.vsix` with portcheck built in for macOS, Linux and
@@ -15,9 +21,7 @@ including remote machines, WSL and containers. Download it and install it:
 code --install-extension portcheck-vscode-0.5.0.vsix
 ```
 
-or use **Extensions → … → Install from VSIX…**. Publishing to the VS Code Marketplace
-and Open VSX is being set up (M16 in
-[TASKS.md](https://github.com/roystondwork-dev/portcheck/blob/main/TASKS.md)).
+or use **Extensions → … → Install from VSIX…**.
 
 The extension needs VS Code 1.98 or later. The `.vsix` has build provenance:
 `gh attestation verify <file> --repo roystondwork-dev/portcheck`.

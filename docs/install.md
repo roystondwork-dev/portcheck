@@ -16,6 +16,12 @@ portcheck is a single static binary with no runtime dependencies.
 
     Open a new terminal afterwards so `portcheck` is on your `PATH`.
 
+    !!! note
+        The package is waiting for review in
+        [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+roystondwork-dev.portcheck).
+        Until it's merged, use Scoop or the zip from the
+        [releases page](https://github.com/roystondwork-dev/portcheck/releases).
+
 === "Scoop (Windows)"
 
     ```powershell

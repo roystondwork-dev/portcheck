@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M16 — VS Code extension packaging & publishing (waiting on Marketplace/Open VSX accounts). Open: M15-05 demo GIF, manual WSL check (M11-04, deferred by maintainer), winget review (M7-06)
+**Current milestone:** none in progress (M14–M16 done). Open: manual WSL check (M11-04, deferred by maintainer), winget review (M7-06), Open VSX namespace claim (October 2027). Next: the maintainer's second feature, or M17 (browser extension, optional)
 **Last updated:** 2026-10-20
 **Latest release:** [v0.5.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.5.0)
 
@@ -28,8 +28,8 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M12 | `.portcheck.yaml` + `portcheck doctor` | 5 / 5 | ✅ |
 | M13 | Native macOS provider (no `lsof`) | 4 / 4 | ✅ (released in v0.4.0) |
 | M14 | VS Code extension — MVP (ports sidebar, commands) | 7 / 7 | ✅ |
-| M15 | VS Code extension — USP (terminal "port in use" → one-click fix; project ports) | 4 / 5 | 🟨 |
-| M16 | VS Code extension — packaging & publishing (per-platform VSIX, Marketplace, Open VSX) | 2 / 4 | 🟨 |
+| M15 | VS Code extension — USP (terminal "port in use" → one-click fix; project ports) | 5 / 5 | ✅ |
+| M16 | VS Code extension — packaging & publishing (VSIX, Marketplace, Open VSX) | 4 / 4 | ✅ |
 | M17 | Browser extension (optional, native messaging) | 0 / 3 | ⬜ |
 
 ---
@@ -243,15 +243,15 @@ Design: [ADR-0004](docs/adr/0004-vscode-extension.md). The extension is a thin c
 | M15-02 | Terminal link provider: matched lines become links to a fix menu | `src/terminal.ts` | integration | ✅ | Links on matched lines, plus a notification from live output via shell integration (`portcheck.terminal.notify`); tested in a real terminal |
 | M15-03 | Fix menu: stop holder and retry, run on next free port, container/WSL commands, details | `src/fixes.ts`, `src/terminal.ts` | unit + integration | ✅ | Stop and re-run, re-run on next free port (port replaced, tool flag added, or `PORT` per shell), container/WSL/elevated commands, copy, details. Verified end to end: re-run on 3001 → HTTP 200; stop holder and re-run → HTTP 200 |
 | M15-04 | Project ports: status bar (`doctor`), diagnostics for `.portcheck.yaml`, JSON Schema registration | `src/project.ts`, `src/projectModel.ts` | unit + integration | ✅ | Status bar + click-to-fix, Problems for failed checks and invalid files (with line numbers), project ports first in the view, schema bundled for the YAML extension. UDP hidden by default |
-| M15-05 | Docs + demo recording | `docs/guide/vscode.md` | strict docs build | 🟨 | Docs ✅. Demo GIF needs a screen recording on the maintainer's machine (this environment can't capture the screen) |
+| M15-05 | Docs + demo recording | `docs/guide/vscode.md` | strict docs build | ✅ | Demo GIF recorded in a real VS Code (`docs/assets/portcheck-vscode-demo.gif`): npm run dev fails, notification, fix menu, stop and re-run. In the README, docs and the store page |
 
 ## M16 — VS Code extension: packaging & publishing
 
 | ID | Task | Component / files | Tests required | Status | Notes |
 |---|---|---|---|---|---|
 | M16-01 | VSIX with the matching `portcheck` binaries from the release | `release.yml` (`vscode` job), `extensions/vscode/scripts/package-release.sh` | VSIX smoke test | ✅ | One universal VSIX (27 MB) with `bin/<platform>-<arch>/` for all 6 targets; the extension picks its own at runtime. Chosen over 6 per-platform VSIX because the Marketplace website uploads one file at a time and the CLI token (Azure DevOps) isn't available. Binaries from the signed release (cosign + checksums checked first), provenance attested, attached to the release. Tested with v0.5.0 assets: installed in VS Code, picks `darwin-arm64`, executable, used without settings |
-| M16-02 | Publish to VS Code Marketplace | release workflow | — | 🟨 | Publisher `portcheck-vscode`; extension ID `portcheck-vscode.portcheck-vscode` (an early upload named `portcheck` under the first publisher was removed, which reserves the name permanently). Releases are uploaded by hand on the website, one VSIX each (Azure DevOps sign-in failed for the maintainer, and global PATs retire 2026-12-01). The workflow publishes automatically if `VSCE_PAT` is ever set |
-| M16-03 | Publish to Open VSX (VSCodium, Cursor, Windsurf) | release workflow | — | ⛔ | Workflow ready (skips until `OVSX_PAT` is set). Blocked on the maintainer's account + token; the release job creates the `portcheck-vscode` namespace (it must match the publisher) |
+| M16-02 | Publish to VS Code Marketplace | release workflow | — | ✅ | [Live](https://marketplace.visualstudio.com/items?itemName=portcheck-vscode.portcheck-vscode) as `portcheck-vscode.portcheck-vscode`, "Portcheck - Port in Use Fixer". The first upload (`portcheck` under another publisher) was removed, which permanently reserves its name and title. Uploaded by hand (one VSIX per release): Azure DevOps sign-in failed for the maintainer and global PATs retire 2026-12-01; the workflow publishes automatically if `VSCE_PAT` is ever set |
+| M16-03 | Publish to Open VSX (VSCodium, Cursor, Windsurf) | release workflow | — | ✅ | [Live](https://open-vsx.org/extension/portcheck-vscode/portcheck-vscode); the release job created the `portcheck-vscode` namespace and publishes every release. Namespace shows as unverified until it's claimed: the claim needs a GitHub account at least a year old (`roystondwork-dev`: October 2027) |
 | M16-04 | Version sync with portcheck releases (release-please extra-files) | `release-please-config.json` | — | ✅ | `extra-files` bump `package.json` and `package-lock.json` (JSONPaths checked with release-please's jsonpath-plus); the packaging script fails if versions differ |
 
 ## M17 — Browser extension (optional)

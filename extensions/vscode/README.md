@@ -1,6 +1,8 @@
-# portcheck for VS Code
+# Portcheck - Port in Use Fixer
 
 See what's using your ports, and free them safely, without leaving the editor.
+
+![npm run dev fails with EADDRINUSE; portcheck names the process holding port 3000, stops it and re-runs the command](https://raw.githubusercontent.com/roystondwork-dev/portcheck/main/docs/assets/portcheck-vscode-demo.gif)
 
 - **"Port in use" → fixed in one click.** When `npm run dev`, `rails s`,
   `python -m http.server`, `go run .` (and many more) fail because the port is taken,
@@ -17,8 +19,8 @@ See what's using your ports, and free them safely, without leaving the editor.
 - **Check a port** and **find a free port** from the command palette.
 - Works in Remote-SSH, WSL and Dev Containers: it runs where your code runs.
 
-The extension uses the [portcheck](https://github.com/roystondwork-dev/portcheck) CLI.
-Release builds bundle it; otherwise install portcheck and make sure it's on your `PATH`,
-or set **portcheck.path**.
+The extension runs the [portcheck](https://github.com/roystondwork-dev/portcheck) CLI,
+which is built in for macOS, Linux and Windows (x64 and arm64). To use another copy, set
+**portcheck.path**. Needs VS Code 1.98 or later.
 
 Documentation: <https://roystondwork-dev.github.io/portcheck/guide/vscode/>

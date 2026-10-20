@@ -30,7 +30,20 @@
 | ▶️ | `portcheck run --port 3000 --next -- npm run dev` | Start a command on a free port (`$PORT`, `{port}`); take the next one or stop the holder |
 | 🩺 | `portcheck doctor` | Check the ports listed in `.portcheck.yaml` and get a fix for each problem |
 | 🖥️ | `portcheck` | Live, sortable, filterable TUI. Stop processes without leaving it |
-| 🧩 | VS Code extension | Listening ports in the sidebar with who started them; stop safely from the editor ([in development](docs/guide/vscode.md)) |
+| 🧩 | [VS Code extension](https://marketplace.visualstudio.com/items?itemName=portcheck-vscode.portcheck-vscode) | "Port in use" errors in the terminal become one-click fixes; listening ports in the sidebar ([guide](docs/guide/vscode.md)) |
+
+### VS Code extension
+
+When a dev server fails because its port is taken, the extension says who holds it and
+fixes it: stop it and re-run, or re-run on the next free port.
+
+![portcheck in VS Code: npm run dev fails with EADDRINUSE, the extension names the process holding port 3000, stops it and re-runs the command](docs/assets/portcheck-vscode-demo.gif)
+
+Install **Portcheck - Port in Use Fixer** from the
+[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=portcheck-vscode.portcheck-vscode) (search "portcheck" in VS Code) or
+[Open VSX](https://open-vsx.org/extension/portcheck-vscode/portcheck-vscode) (VSCodium, Cursor, Windsurf). portcheck is built in.
+
+### Highlights
 
 - **Same commands and output on every OS.** It replaces `lsof -i`, `netstat -ano`, `ss -ltnp` and `kill`.
 - **Built for scripts.** `--json` follows a [versioned schema](docs/json-schema.md), [exit codes](docs/exit-codes.md) are stable, and results go to stdout while messages go to stderr.
@@ -44,7 +57,7 @@
 # Homebrew (macOS, Linux)
 brew install roystondwork-dev/tap/portcheck
 
-# winget (Windows)
+# winget (Windows; the package is waiting for Microsoft's review)
 winget install roystondwork-dev.portcheck
 
 # Scoop (Windows)
