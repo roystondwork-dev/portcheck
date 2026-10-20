@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.6.0](https://github.com/roystondwork-dev/portcheck/compare/v0.5.0...v0.6.0) (2026-10-20)
+
+
+### Features
+
+* **vscode:** add an icon and Marketplace banner colour ([64e4876](https://github.com/roystondwork-dev/portcheck/commit/64e4876f2f9d3130cc3e83fb50a87bec75107d33))
+* **vscode:** expose the extension's own UI in its API ([034c379](https://github.com/roystondwork-dev/portcheck/commit/034c3797a1ff5d289b1feb1e8eb5011c48067482))
+* **vscode:** package the extension per platform with portcheck built in ([f214b84](https://github.com/roystondwork-dev/portcheck/commit/f214b842a240c1a6bffa2efa371097b4509cabcf))
+* **vscode:** ship one VSIX with portcheck for every platform ([1ae0768](https://github.com/roystondwork-dev/portcheck/commit/1ae0768348f8339ef46b0e93a03268ea7321df2f))
+
+
+### Bug Fixes
+
+* **vscode:** new display title, Portcheck - Port in Use Fixer ([789d1cd](https://github.com/roystondwork-dev/portcheck/commit/789d1cd2a365dc5d993d09452edf1b125c941328))
+* **vscode:** publish under the portcheck-vscode publisher ([7bbb019](https://github.com/roystondwork-dev/portcheck/commit/7bbb019686e228f9de2c24ccd408e78c6ddb5b72))
+* **vscode:** rename the extension to portcheck-vscode ([033936c](https://github.com/roystondwork-dev/portcheck/commit/033936ce86a1dae017594185ba49857c755cc838))
+
+
+### Documentation
+
+* installing the VS Code extension from a release; M16 status ([7d6299e](https://github.com/roystondwork-dev/portcheck/commit/7d6299eeec9a9551c5d56b98cdfaf629e8d387a7))
+* note the temporarily optional macOS checks ([deeeacb](https://github.com/roystondwork-dev/portcheck/commit/deeeacb900e3093c2968b8f6728e9bfe6ab06643))
+* VS Code extension demo, Marketplace and Open VSX links; M15 and M16 done ([1258d41](https://github.com/roystondwork-dev/portcheck/commit/1258d41cca009257c83cd1fa053493499d72fc45))
+
 ## [0.5.0](https://github.com/roystondwork-dev/portcheck/compare/v0.4.0...v0.5.0) (2026-10-20)
 
 
