@@ -16,6 +16,8 @@ LDFLAGS  := -s -w \
 	-X $(MODULE)/internal/buildinfo.commit=$(COMMIT) \
 	-X $(MODULE)/internal/buildinfo.date=$(DATE)
 
+MKDOCS   ?= $(shell test -x .venv/bin/mkdocs && echo .venv/bin/mkdocs || echo mkdocs)
+
 COVER_PROFILE := coverage.out
 FUZZTIME      ?= 30s
 
@@ -101,9 +103,17 @@ check: lint vuln cover-check ## Everything CI runs: lint, vuln, tests, coverage 
 docs-cli: ## Regenerate CLI reference markdown + man pages.
 	go run ./internal/cli/gendocs -out docs/commands -man man
 
+.PHONY: docs-setup
+docs-setup: ## Create .venv with the pinned docs toolchain.
+	python3 -m venv .venv && .venv/bin/pip install -q -r docs/requirements.txt
+
+.PHONY: docs-serve
+docs-serve: docs-cli ## Serve the docs site locally with live reload.
+	$(MKDOCS) serve
+
 .PHONY: docs
-docs: docs-cli ## Build the documentation site (requires mkdocs-material).
-	mkdocs build --strict
+docs: docs-cli ## Build the documentation site (strict).
+	$(MKDOCS) build --strict
 
 .PHONY: demo
 demo: build ## Render docs/assets/demo.gif with vhs.

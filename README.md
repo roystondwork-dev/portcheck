@@ -1,28 +1,105 @@
-# portcheck
+<h1 align="center">portcheck</h1>
 
-> See what's using your ports, find free ones, free them up, and check remote hosts. Works on macOS, Linux and Windows.
+<p align="center">
+  <b>See what's using your ports, find free ones, free them up, and check remote hosts.</b><br>
+  One static binary for macOS, Linux and Windows.
+</p>
 
-[![CI](https://github.com/roystondwork-dev/portcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/roystondwork-dev/portcheck/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+<p align="center">
+  <a href="https://github.com/roystondwork-dev/portcheck/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/roystondwork-dev/portcheck/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/roystondwork-dev/portcheck/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/roystondwork-dev/portcheck/actions/workflows/codeql.yml/badge.svg"></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/roystondwork-dev/portcheck"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/roystondwork-dev/portcheck/badge"></a>
+  <a href="https://pkg.go.dev/github.com/roystondwork-dev/portcheck"><img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/roystondwork-dev/portcheck.svg"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
+</p>
 
-> 🚧 **Status: pre-release, under active development.** See [TASKS.md](TASKS.md) for progress.
-> Install from source until the first release: `go install github.com/roystondwork-dev/portcheck/cmd/portcheck@latest`
+<p align="center"><img alt="portcheck demo" src="docs/assets/demo.gif" width="800"></p>
 
-## Planned features
+## Features
 
-- `portcheck list`: all open ports with their owning process (PID, name, user).
-- `portcheck check 3000`: is the port free? If not, shows who holds it.
-- `portcheck free`: finds the next free port.
-- `portcheck kill 3000`: safely stops the process holding a port.
-- `portcheck scan host -p 1-1024`: concurrent TCP connect checks, for hosts you're authorized to test.
-- `portcheck tui`: a live, interactive terminal UI.
-- `--json` output and meaningful exit codes for scripts and CI.
-- A reusable Go library under `pkg/`.
+| | Command | |
+|---|---|---|
+| 🔍 | `portcheck list -l` | Every listening socket with its process, PID and user |
+| ✅ | `portcheck 3000` | Is the port free? If not, who holds it? Exit code 0 or 1 for scripts |
+| 🆓 | `portcheck free 3000-3999 -n 3` | Free ports, verified by actually binding them |
+| 🛑 | `portcheck kill 8080` | Graceful SIGTERM, then SIGKILL; refuses PID 1, your shell and system processes |
+| 📡 | `portcheck scan db.internal -p 5432` | Rate-limited TCP connect checks of remote hosts. No root needed |
+| 🖥️ | `portcheck` | Live, sortable, filterable TUI. Stop processes without leaving it |
+
+- **Same commands and output on every OS.** It replaces `lsof -i`, `netstat -ano`, `ss -ltnp` and `kill`.
+- **Built for scripts.** `--json` follows a [versioned schema](docs/json-schema.md), [exit codes](docs/exit-codes.md) are stable, and results go to stdout while messages go to stderr.
+- **Honest about permissions.** Hidden owners are shown as hidden, with a hint on how to see them.
+- **A Go library too.** See [`pkg/`](https://pkg.go.dev/github.com/roystondwork-dev/portcheck).
+
+## Install
+
+```sh
+# Homebrew (macOS, Linux)
+brew install roystondwork-dev/tap/portcheck
+
+# Scoop (Windows)
+scoop bucket add portcheck https://github.com/roystondwork-dev/scoop-bucket
+scoop install portcheck
+
+# Go 1.26+
+go install github.com/roystondwork-dev/portcheck/cmd/portcheck@latest
+```
+
+`.deb`, `.rpm`, `.apk` and archives for amd64/arm64 are on the
+[releases page](https://github.com/roystondwork-dev/portcheck/releases). All
+artifacts are signed with cosign and ship with SBOMs and SLSA provenance; see
+[verifying downloads](docs/install.md#verifying-downloads).
+
+> **Note:** until `v0.1.0` is released, use `go install`.
+
+## Quickstart
+
+```console
+$ portcheck 3000
+PORT  PROTO  STATUS  PID    PROCESS  USER
+3000  tcp    in-use  42379  node     alice
+
+$ portcheck kill 3000
+About to terminate:
+  PID 42379  node  (port 3000)
+Proceed? [y/N] y
+PID    PROCESS  RESULT      DETAIL
+42379  node     terminated
+
+$ portcheck free 3000-3999 -n 2 -o plain
+PORT
+3000
+3001
+
+$ portcheck list -l --json | jq '.data.sockets[] | {port: .localPort, name: .process.name}'
+```
+
+📖 **Documentation:** <https://roystondwork-dev.github.io/portcheck/>
+([quickstart](docs/quickstart.md) · [guides](docs/guide/) · [CLI reference](docs/commands/portcheck.md) · [permissions by OS](docs/permissions.md) · [FAQ](docs/faq.md))
+
+## Use as a Go library
+
+```go
+res, _ := inspect.NewSystem().List(ctx, inspect.Filter{Ports: portspec.Single(3000), ListeningOnly: true})
+for _, s := range res.Sockets {
+	fmt.Println(s.PID, s.Process.Name)
+}
+```
+
+See the [library guide](docs/library.md) for `portspec`, `inspect`, `freeport`, `killer` and `scan`.
+
+## Responsible use
+
+`portcheck scan` makes ordinary TCP connections and has no stealth features. Only
+scan hosts and networks you own or are authorized to test.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Please read our [Code of Conduct](CODE_OF_CONDUCT.md)
-and report security issues as described in [SECURITY.md](SECURITY.md).
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and
+standards (every change is tested on Linux, macOS and Windows, with a 100% coverage
+gate on the library), and [TASKS.md](TASKS.md) for the roadmap and status.
+Please follow the [Code of Conduct](CODE_OF_CONDUCT.md), and report vulnerabilities
+privately as described in [SECURITY.md](SECURITY.md).
 
 ## License
 

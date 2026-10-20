@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M5 — Documentation
+**Current milestone:** M6 — Release & distribution
 **Last updated:** 2026-10-20
 **Target release:** v0.1.0
 
@@ -17,8 +17,8 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M1 | Core library (`pkg/*` except scan) | 7 / 7 | ✅ |
 | M2 | CLI | 11 / 11 | ✅ |
 | M3 | Remote scanner | 6 / 6 | ✅ |
-| M4 | Interactive TUI | 6 / 7 | ✅ (demo GIF rendered in M5) |
-| M5 | Documentation | 0 / 9 | ⬜ |
+| M4 | Interactive TUI | 7 / 7 | ✅ |
+| M5 | Documentation | 9 / 9 | ✅ |
 | M6 | Release & distribution | 0 / 10 | ⬜ |
 
 ---
@@ -90,21 +90,21 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M4-04 | Kill with confirm dialog (`k`) | `internal/tui` | unit + golden | ✅ | `x`/`k`/`delete` graceful, `K` force; verified killing a real server from the TUI over a PTY |
 | M4-05 | Help (`?`), keymap, adaptive colors | `internal/tui` | golden | ✅ | Hidden-owner rows dimmed, listeners green; `c` copies PID via OSC 52 |
 | M4-06 | `tui` command + default on bare TTY | `internal/cli/tui.go` | testscript | ✅ | Bare `portcheck` opens the TUI only when stdin and stdout are terminals; otherwise prints help |
-| M4-07 | Demo recording with vhs | `docs/assets` | — | 🟨 | `docs/assets/demo.tape` + `make demo` ready; GIF rendered in M5 (needs vhs) |
+| M4-07 | Demo recording with vhs | `docs/assets` | — | ✅ | `docs/assets/demo.gif` rendered with vhs (`make demo`); frames reviewed |
 
 ## M5 — Documentation
 
 | ID | Task | Component / files | Tests required | Status | Notes |
 |---|---|---|---|---|---|
-| M5-01 | README (badges, install, quickstart, demo) | `README.md` | links check | ⬜ | |
-| M5-02 | MkDocs Material site config + nav | `mkdocs.yml` | `mkdocs build --strict` | ⬜ | |
-| M5-03 | Install guide incl. signature verification | `docs/install.md` | — | ⬜ | |
-| M5-04 | Quickstart & per-command guides | `docs/` | — | ⬜ | |
-| M5-05 | Generated CLI reference + man pages | `docs/commands` | CI drift check | ⬜ | |
-| M5-06 | Library guide + runnable `Example_` tests | `docs/library.md`, `pkg/*/example_test.go` | examples run | ⬜ | |
-| M5-07 | Architecture doc + diagram | `docs/architecture.md` | — | ⬜ | |
-| M5-08 | Permissions per OS, troubleshooting, FAQ | `docs/` | — | ⬜ | |
-| M5-09 | Docs deploy workflow (GitHub Pages) | `.github/workflows/docs.yml` | — | ⬜ | |
+| M5-01 | README (badges, install, quickstart, demo) | `README.md` | links check | ✅ | Badges, demo GIF, features, install, quickstart, library snippet, responsible use |
+| M5-02 | MkDocs Material site config + nav | `mkdocs.yml` | `mkdocs build --strict` | ✅ | MkDocs Material 9.7 pinned (`docs/requirements.txt`); strict link + anchor validation |
+| M5-03 | Install guide incl. signature verification | `docs/install.md` | — | ✅ | Homebrew/Scoop/packages/Go; cosign bundle + checksum + `gh attestation` verification (finalized in M6) |
+| M5-04 | Quickstart & per-command guides | `docs/` | — | ✅ | Quickstart + guides for list/check/free/kill/scan/tui + scripting & CI recipes; port spec reference |
+| M5-05 | Generated CLI reference + man pages | `docs/commands` | CI drift check | ✅ | Generated in CI before every docs build |
+| M5-06 | Library guide + runnable `Example_` tests | `docs/library.md`, `pkg/*/example_test.go` | examples run | ✅ | `Example` tests in every `pkg/*`; one caught a wrong port count in the draft docs |
+| M5-07 | Architecture doc + diagram | `docs/architecture.md` | — | ✅ | Mermaid layer diagram + `kill` sequence diagram; design principles |
+| M5-08 | Permissions per OS, troubleshooting, FAQ | `docs/` | — | ✅ | Per-OS permission matrix (lsof / procfs / IP Helper), Windows excluded port ranges, FAQ |
+| M5-09 | Docs deploy workflow (GitHub Pages) | `.github/workflows/docs.yml` | — | ✅ | `docs.yml` builds on PRs, deploys `main` to https://roystondwork-dev.github.io/portcheck/ |
 
 ## M6 — Release & distribution
 
