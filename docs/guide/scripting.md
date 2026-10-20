@@ -46,10 +46,16 @@ Wait for services to come up (see [`wait`](wait.md)):
 portcheck wait db:5432 redis:6379 -t 60s
 ```
 
-Restart a dev server cleanly:
+Start a dev server on 3000, stopping whatever holds it first (see [`run`](run.md)):
 
 ```sh
-portcheck kill 3000 --yes; portcheck wait 3000 --free -t 10s && npm run dev
+portcheck run --port 3000 --kill --yes -- npm run dev
+```
+
+…or let it move to the next free port instead:
+
+```sh
+portcheck run --port 3000 --next -- npm run dev
 ```
 
 List listening processes as JSON objects:

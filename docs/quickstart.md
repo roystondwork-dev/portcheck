@@ -77,7 +77,16 @@ portcheck wait 5432 -t 60s
 Blocks until something accepts connections on port 5432, and exits `1` if
 nothing does within the timeout. See [`wait`](guide/wait.md).
 
-## 7. Watch it live
+## 7. Start a dev server on a free port
+
+```sh
+portcheck run --port 3000 --next -- npm run dev
+```
+
+Uses 3000 if it's free, otherwise the next free port, and passes it in `$PORT`.
+See [`run`](guide/run.md).
+
+## 8. Watch it live
 
 ```sh
 portcheck
@@ -86,7 +95,7 @@ portcheck
 Running `portcheck` with no arguments in a terminal opens the [interactive view](guide/tui.md).
 Press `?` for keys and `q` to quit.
 
-## 8. Use it from scripts
+## 9. Use it from scripts
 
 ```sh
 portcheck list -l --json | jq '.data.sockets[] | {port: .localPort, process: .process.name}'

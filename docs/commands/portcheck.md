@@ -31,6 +31,7 @@ portcheck [port...] [flags]
   portcheck kill 8080             # stop whatever listens on 8080
   portcheck scan db.internal -p 5432,6379
   portcheck wait 5432 -t 60s      # block until Postgres accepts connections
+  portcheck run --port 3000 --next -- npm start
 ```
 
 ### Options
@@ -51,6 +52,7 @@ portcheck [port...] [flags]
 * [portcheck free](portcheck_free.md)	 - Find free ports
 * [portcheck kill](portcheck_kill.md)	 - Stop the process listening on a port
 * [portcheck list](portcheck_list.md)	 - List sockets and the processes that own them
+* [portcheck run](portcheck_run.md)	 - Run a command on a free port (sets $PORT)
 * [portcheck scan](portcheck_scan.md)	 - Check which TCP ports are reachable on remote hosts
 * [portcheck tui](portcheck_tui.md)	 - Live, interactive view of ports (the default in a terminal)
 * [portcheck version](portcheck_version.md)	 - Print version and build information

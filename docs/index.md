@@ -50,6 +50,10 @@ PID    PROCESS  RESULT      DETAIL
 
     `portcheck wait db:5432 -t 60s`: block until services are up, or until a port is free. Built for CI.
 
+-   :material-play-circle-outline: **[Run on a free port](guide/run.md)**
+
+    `portcheck run --port 3000 --next -- npm run dev`: start your dev server on a usable port, with `$PORT` set.
+
 -   :material-monitor-dashboard: **[Interactive view](guide/tui.md)**
 
     `portcheck`: a live, sortable, filterable table. Stop processes without leaving it.

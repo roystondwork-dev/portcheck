@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** next feature (see "What's next"); winget review pending (M7-06)
+**Current milestone:** M9 — `portcheck run` (ready for release); winget review pending (M7-06)
 **Last updated:** 2026-10-20
 **Latest release:** [v0.2.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.2.0)
 
@@ -22,6 +22,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M6 | Release & distribution | 10 / 10 | ✅ |
 | M7 | Post-release hardening & distribution (v0.1.1 → v0.2.0) | 8 / 9 | 🟨 (winget awaiting Microsoft review) |
 | M8 | Docker attribution | 7 / 7 | ✅ |
+| M9 | `portcheck run` | 6 / 6 | ✅ |
 
 ---
 
@@ -153,12 +154,26 @@ never stops Docker's infrastructure by accident.
 | M8-06 | Integration test against a real Docker daemon | CI (Linux) | integration | ✅ | Real busybox container on a random port; passes on Docker Desktop (macOS) and runs on GitHub's Ubuntu runner |
 | M8-07 | Docs: guide section, permissions/troubleshooting, JSON schema | `docs/` | strict docs build | ✅ | New Containers guide incl. limitations (no-userland-proxy, socket permissions, WSL) |
 
+## M9 — `portcheck run`
+
+Goal: start a dev command on a usable port in one step: use `--port` if free,
+otherwise explain, pick the next free port (`--next`) or stop the holder (`--kill`),
+then run the command with `$PORT` set and its exit code passed through.
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M9-01 | Port selection: `--port`, `--next`, `--kill` (reusing kill's guards), `--range` default 3000-9999 | `internal/cli/run.go` | unit with fakes | ✅ | Busy without flags explains holder (process, container or pid) and exits 1; `--kill` waits up to 10s for the port to free |
+| M9-02 | Child process runner: inherit stdio, `$PORT`/`--env`, `{port}` substitution, exit-code passthrough (incl. 126/127, 128+signal) | `internal/cli/runner*.go` | unit with a real child process | ✅ | Test binary doubles as the child (exit codes, env, args, SIGTERM death = 143, 126/127) |
+| M9-03 | Signal forwarding (SIGTERM/SIGHUP; Ctrl+C reaches the child via the terminal) | `internal/cli/runner_unix.go` | unit | ✅ | Ctrl+C is deliberately not relayed (the child already gets it from the terminal) |
+| M9-04 | `--wait`: report when the command accepts connections | `internal/cli/run.go` | unit | ✅ | Verified on macOS: "ready on localhost:8791 (253ms)" for a real HTTP server |
+| M9-05 | End-to-end scenarios against the built binary | `testdata/script/run.txtar` | testscript (3 OS) | ✅ | Auto port, busy, `--next`, `--kill`, exit-code passthrough, not found |
+| M9-06 | Docs: guide, scripting recipes, exit codes, README | `docs/` | strict docs build | ✅ | New `run` guide; quickstart, scripting, exit codes, README, home page |
+
 ## What's next (candidates, not yet scheduled)
 
 | Candidate | Notes |
 |---|---|
 | Announce v0.2.0 (r/golang) | Draft prepared; maintainer posts |
-| `portcheck run --port N -- <cmd>` | Free or pick a port, then exec with `$PORT` |
 | Parent process in `list`/TUI | "started by VS Code / npm run dev" |
 | WSL distro attribution | `wsl:Ubuntu` instead of `wslrelay.exe` |
 | `.portcheck.yaml` + `doctor` | Project port manifest |
@@ -175,6 +190,7 @@ never stops Docker's infrastructure by accident.
 | 2026-10-20 | Go CLI + Bubble Tea TUI; MIT license; name `portcheck` | plan |
 | 2026-10-20 | gopsutil behind `inspect.Provider` | [ADR-0001](docs/adr/0001-gopsutil-provider.md) |
 | 2026-10-20 | Scanner is TCP-connect only, no stealth features | [ADR-0002](docs/adr/0002-tcp-connect-only-scanning.md) |
+| 2026-10-20 | `run` exits with the child's status; Ctrl+C is not relayed (the terminal delivers it), SIGTERM/SIGHUP are | M9 |
 | 2026-10-20 | Container attribution via the Engine API (no Docker SDK); `kill` never stops container proxies | M8 |
 | 2026-10-20 | winget package ID `roystondwork-dev.portcheck` (chosen by maintainer; permanent once accepted) | #10 |
 | 2026-10-20 | `wait` checks TCP accept, not application health; documented | #11 |
