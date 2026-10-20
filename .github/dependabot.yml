@@ -13,6 +13,15 @@ updates:
     directory: /extensions/vscode
     schedule:
       interval: weekly
+    ignore:
+      # Must match the minimum VS Code in engines.vscode (vsce rejects newer types).
+      - dependency-name: "@types/vscode"
+      # Must match the Node.js major that VS Code's extension host runs.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # Mocha 12 is ESM-only; the extension host of older VS Code can't load it.
+      - dependency-name: "mocha"
+        update-types: ["version-update:semver-major"]
     groups:
       npm-deps:
         patterns: ["*"]
