@@ -1,0 +1,119 @@
+site_name: portcheck
+site_description: See what's using your ports, find free ones, free them up, and check remote hosts.
+site_url: https://roystondwork-dev.github.io/portcheck/
+repo_url: https://github.com/roystondwork-dev/portcheck
+repo_name: roystondwork-dev/portcheck
+edit_uri: edit/main/docs/
+copyright: Copyright &copy; 2026 Royston D and portcheck contributors — MIT License
+
+strict: true
+exclude_docs: |
+  requirements.txt
+  *.tape
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+theme:
+  name: material
+  icon:
+    logo: material/lan-connect
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle: { icon: material/weather-night, name: Switch to dark mode }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle: { icon: material/weather-sunny, name: Switch to light mode }
+  features:
+    - content.code.copy
+    - content.action.edit
+    - content.tabs.link
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - search.suggest
+    - toc.follow
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/roystondwork-dev/portcheck
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - Install: install.md
+      - Quickstart: quickstart.md
+  - Guides:
+      - Inspect ports (list): guide/list.md
+      - Check a port (check): guide/check.md
+      - Find free ports (free): guide/free.md
+      - Stop a process (kill): guide/kill.md
+      - Scan remote hosts (scan): guide/scan.md
+      - Interactive view (tui): guide/tui.md
+      - Scripting & CI: guide/scripting.md
+  - Reference:
+      - Commands:
+          - portcheck: commands/portcheck.md
+          - check: commands/portcheck_check.md
+          - completion: commands/portcheck_completion.md
+          - completion bash: commands/portcheck_completion_bash.md
+          - completion fish: commands/portcheck_completion_fish.md
+          - completion powershell: commands/portcheck_completion_powershell.md
+          - completion zsh: commands/portcheck_completion_zsh.md
+          - free: commands/portcheck_free.md
+          - kill: commands/portcheck_kill.md
+          - list: commands/portcheck_list.md
+          - scan: commands/portcheck_scan.md
+          - tui: commands/portcheck_tui.md
+          - version: commands/portcheck_version.md
+      - JSON output: json-schema.md
+      - Exit codes: exit-codes.md
+      - Port specs: port-specs.md
+  - Platform notes:
+      - Permissions by OS: permissions.md
+      - Troubleshooting: troubleshooting.md
+      - FAQ: faq.md
+  - Go library: library.md
+  - Project:
+      - Architecture: architecture.md
+      - Development & testing: development.md
+      - Decision records:
+          - Overview: adr/index.md
+          - "0001: gopsutil provider": adr/0001-gopsutil-provider.md
+          - "0002: TCP connect scanning": adr/0002-tcp-connect-only-scanning.md

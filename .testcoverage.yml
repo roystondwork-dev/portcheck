@@ -1,5 +1,5 @@
 # Coverage gate enforced by `make cover-check` and CI.
-# See docs/contributing/testing.md for the policy.
+# See docs/development.md#coverage-policy for the policy.
 profile: coverage.out
 local-prefix: github.com/roystondwork-dev/portcheck
 
