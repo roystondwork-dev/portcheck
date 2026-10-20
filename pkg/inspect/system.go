@@ -1,0 +1,153 @@
+package inspect
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"io/fs"
+	"net/netip"
+	"strings"
+	"syscall"
+	"time"
+
+	gnet "github.com/shirou/gopsutil/v4/net"
+	"github.com/shirou/gopsutil/v4/process"
+)
+
+// processHandle is the subset of *process.Process used by systemProvider.
+type processHandle interface {
+	NameWithContext(ctx context.Context) (string, error)
+	UsernameWithContext(ctx context.Context) (string, error)
+	CmdlineWithContext(ctx context.Context) (string, error)
+	ExeWithContext(ctx context.Context) (string, error)
+	CreateTimeWithContext(ctx context.Context) (int64, error)
+}
+
+// systemProvider implements Provider using gopsutil. See ADR-0001.
+type systemProvider struct {
+	connections func(ctx context.Context, kind string) ([]gnet.ConnectionStat, error)
+	newProcess  func(ctx context.Context, pid int32) (processHandle, error)
+}
+
+// NewSystemProvider returns a Provider backed by the operating system.
+//
+// On macOS it relies on lsof (preinstalled); without root it only sees
+// sockets of the current user. On Linux and Windows, sockets of all users are
+// listed but process details may require elevated privileges.
+func NewSystemProvider() Provider {
+	return &systemProvider{
+		connections: gnet.ConnectionsWithContext,
+		newProcess: func(ctx context.Context, pid int32) (processHandle, error) {
+			return process.NewProcessWithContext(ctx, pid)
+		},
+	}
+}
+
+func (p *systemProvider) Sockets(ctx context.Context) ([]RawSocket, error) {
+	stats, err := p.connections(ctx, "inet")
+	if err != nil {
+		return nil, fmt.Errorf("query connections: %w", classify(err))
+	}
+	out := make([]RawSocket, 0, len(stats))
+	for _, c := range stats {
+		if s, ok := fromConnectionStat(c); ok {
+			out = append(out, s)
+		}
+	}
+	return out, nil
+}
+
+func (p *systemProvider) Process(ctx context.Context, pid int32) (*ProcessInfo, error) {
+	h, err := p.newProcess(ctx, pid)
+	if err != nil {
+		return nil, fmt.Errorf("pid %d: %w", pid, classify(err))
+	}
+	name, err := h.NameWithContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("pid %d name: %w", pid, classify(err))
+	}
+	info := &ProcessInfo{PID: pid, Name: name}
+	// The remaining fields are best effort: they commonly fail for processes
+	// of other users without elevated privileges.
+	if v, err := h.UsernameWithContext(ctx); err == nil {
+		info.User = v
+	}
+	if v, err := h.CmdlineWithContext(ctx); err == nil {
+		info.Cmdline = v
+	}
+	if v, err := h.ExeWithContext(ctx); err == nil {
+		info.Exe = v
+	}
+	if ms, err := h.CreateTimeWithContext(ctx); err == nil && ms > 0 {
+		info.CreateTime = time.UnixMilli(ms)
+	}
+	return info, nil
+}
+
+// classify maps OS/gopsutil errors to this package's sentinel errors while
+// keeping the original error in the chain.
+func classify(err error) error {
+	switch {
+	case errors.Is(err, process.ErrorProcessNotRunning):
+		return fmt.Errorf("%w: %w", ErrProcessNotFound, err)
+	case errors.Is(err, fs.ErrPermission):
+		return fmt.Errorf("%w: %w", ErrAccessDenied, err)
+	default:
+		return err
+	}
+}
+
+func fromConnectionStat(c gnet.ConnectionStat) (RawSocket, bool) {
+	var proto Proto
+	switch c.Type {
+	case syscall.SOCK_STREAM:
+		proto = TCP
+	case syscall.SOCK_DGRAM:
+		proto = UDP
+	default:
+		return RawSocket{}, false
+	}
+	local, ok := toAddrPort(c.Laddr, c.Family)
+	if !ok {
+		return RawSocket{}, false
+	}
+	remote, _ := toAddrPort(c.Raddr, c.Family)
+	return RawSocket{
+		Proto:  proto,
+		Local:  local,
+		Remote: remote,
+		State:  normalizeState(c.Status),
+		PID:    max(c.Pid, 0),
+	}, true
+}
+
+// toAddrPort converts a gopsutil address. lsof (macOS) reports wildcard
+// addresses as "*", so the family decides between 0.0.0.0 and ::.
+func toAddrPort(a gnet.Addr, family uint32) (netip.AddrPort, bool) {
+	if (a.IP == "" && a.Port == 0) || a.Port > 65535 {
+		return netip.AddrPort{}, false
+	}
+	var addr netip.Addr
+	switch ip := strings.Trim(a.IP, "[]"); ip {
+	case "", "*":
+		addr = netip.IPv4Unspecified()
+		if family == syscall.AF_INET6 {
+			addr = netip.IPv6Unspecified()
+		}
+	default:
+		parsed, err := netip.ParseAddr(ip)
+		if err != nil {
+			return netip.AddrPort{}, false
+		}
+		addr = parsed.Unmap()
+	}
+	return netip.AddrPortFrom(addr, uint16(a.Port)), true
+}
+
+func normalizeState(s string) State {
+	s = strings.ToUpper(strings.TrimSpace(s))
+	if s == "" {
+		return StateNone
+	}
+	return State(s)
+}
