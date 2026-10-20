@@ -471,3 +471,45 @@ func WaitDoc(results []WaitResultJSON) Document {
 	}
 	return d
 }
+
+// DoctorCheckJSON is the result for one .portcheck.yaml entry.
+type DoctorCheckJSON struct {
+	Name        string `json:"name"`
+	Port        uint16 `json:"port"`
+	Proto       string `json:"proto"`
+	Expect      string `json:"expect"` // free | open
+	Host        string `json:"host,omitempty"`
+	Description string `json:"description,omitempty"`
+	OK          bool   `json:"ok"`
+	Status      string `json:"status"` // ok | in-use | denied | closed | error
+	Detail      string `json:"detail,omitempty"`
+	Fix         string `json:"fix,omitempty"`
+}
+
+// DoctorJSON is the payload of `portcheck doctor`.
+type DoctorJSON struct {
+	Config string            `json:"config"`
+	OK     bool              `json:"ok"`
+	Checks []DoctorCheckJSON `json:"checks"`
+}
+
+// DoctorDoc renders the result of `portcheck doctor`.
+func DoctorDoc(config string, checks []DoctorCheckJSON) Document {
+	data := DoctorJSON{Config: config, OK: true, Checks: append([]DoctorCheckJSON{}, checks...)}
+	d := Document{
+		Kind:    "doctor",
+		Headers: []string{"NAME", "PORT", "EXPECT", "STATUS", "DETAIL", "FIX"},
+	}
+	for _, c := range checks {
+		data.OK = data.OK && c.OK
+		status := T(c.Status, ToneGood)
+		if !c.OK {
+			status = T(c.Status, ToneBad)
+		}
+		d.Rows = append(d.Rows, []Cell{
+			C(c.Name), C(strconv.Itoa(int(c.Port))), C(c.Expect), status, C(c.Detail), T(c.Fix, ToneInfo),
+		})
+	}
+	d.Data = data
+	return d
+}

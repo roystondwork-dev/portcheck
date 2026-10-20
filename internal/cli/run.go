@@ -34,7 +34,7 @@ var runFreeTimeout = 10 * time.Second
 var envNameRE = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
 
 type runFlags struct {
-	port        int
+	port        string
 	portRange   string
 	next        bool
 	kill        bool
@@ -73,7 +73,7 @@ messages go to stderr.`,
 	}
 	fl := cmd.Flags()
 	fl.SetInterspersed(false) // everything after the command name belongs to the command
-	fl.IntVarP(&f.port, "port", "p", 0, "port to use (default: first free port in --range)")
+	fl.StringVarP(&f.port, "port", "p", "", "port number, or a name from .portcheck.yaml (default: first free port in --range)")
 	fl.StringVar(&f.portRange, "range", defaultRunRange, "ports to choose from when --port is not given")
 	fl.BoolVar(&f.next, "next", false, "if --port is taken, use the next free port above it")
 	fl.BoolVar(&f.kill, "kill", false, "if --port is taken, stop the process holding it (asks first)")
@@ -89,11 +89,9 @@ messages go to stderr.`,
 
 func (f runFlags) validate() error {
 	switch {
-	case f.port < 0 || f.port > math.MaxUint16:
-		return usageError("--port must be between 1 and 65535")
 	case f.next && f.kill:
 		return usageError("--next and --kill can't be combined")
-	case (f.next || f.kill) && f.port == 0:
+	case (f.next || f.kill) && f.port == "":
 		return usageError("--next and --kill need --port")
 	case !envNameRE.MatchString(f.env):
 		return usageError("--env %q is not a valid environment variable name", f.env)
@@ -117,7 +115,11 @@ func (c *cli) runRun(cmd *cobra.Command, args []string, f runFlags) error {
 		}
 	}
 
-	port, err := c.choosePort(cmd, f, say)
+	requested, err := c.resolveRunPort(f.port)
+	if err != nil {
+		return err
+	}
+	port, err := c.choosePort(cmd, f, requested, say)
 	if err != nil {
 		return err
 	}
@@ -154,10 +156,33 @@ func (c *cli) runRun(cmd *cobra.Command, args []string, f runFlags) error {
 	return nil
 }
 
+// resolveRunPort turns --port into a number: a literal port, or a name looked
+// up in .portcheck.yaml. 0 means "pick one".
+func (c *cli) resolveRunPort(v string) (uint16, error) {
+	if v == "" {
+		return 0, nil
+	}
+	if n, err := strconv.Atoi(v); err == nil {
+		if n < 1 || n > math.MaxUint16 {
+			return 0, usageError("--port must be between 1 and 65535")
+		}
+		return uint16(n), nil
+	}
+	cfg, err := c.loadProject("")
+	if err != nil {
+		return 0, err
+	}
+	p, ok := cfg.Lookup(v)
+	if !ok {
+		return 0, &ExitError{Code: ExitUsage, Err: fmt.Errorf("--port %s: %w in %s (known: %s)", v, errNoProjectPort, cfg.Path, strings.Join(cfg.Names(), ", "))}
+	}
+	return uint16(p.Port), nil
+}
+
 // choosePort applies --port/--next/--kill/--range.
-func (c *cli) choosePort(cmd *cobra.Command, f runFlags, say func(string, ...any)) (uint16, error) {
+func (c *cli) choosePort(cmd *cobra.Command, f runFlags, requested uint16, say func(string, ...any)) (uint16, error) {
 	ctx := cmd.Context()
-	if f.port == 0 {
+	if requested == 0 {
 		spec, err := portspec.Parse(f.portRange)
 		if err != nil {
 			return 0, &ExitError{Code: ExitUsage, Err: err}
@@ -165,7 +190,7 @@ func (c *cli) choosePort(cmd *cobra.Command, f runFlags, say func(string, ...any
 		return c.firstFree(ctx, spec, say)
 	}
 
-	port := uint16(f.port)
+	port := requested
 	sts, err := c.app.Ports.CheckAll(ctx, portspec.Single(port), inspect.TCP)
 	if err != nil {
 		return 0, err

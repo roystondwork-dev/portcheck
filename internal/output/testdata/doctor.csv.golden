@@ -1,0 +1,3 @@
+NAME,PORT,EXPECT,STATUS,DETAIL,FIX
+web,3000,free,in-use,"in use by node (pid 4242), started by npm (4200)",portcheck kill 3000
+db,5432,open,ok,,
