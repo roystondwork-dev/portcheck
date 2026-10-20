@@ -63,4 +63,11 @@ jobs:
           fi
       - name: Package (smoke test)
         if: matrix.vscode == 'stable'
-        run: npx vsce package --no-dependencies --out portcheck.vsix
+        shell: bash
+        run: |
+          npx vsce package --no-dependencies --out portcheck.vsix
+          # Files the extension needs at runtime must be in the package.
+          files=$(npx vsce ls --no-dependencies)
+          for f in dist/extension.js dist/portcheck.schema.json package.json; do
+            grep -qx "$f" <<<"$files" || { echo "::error::$f is missing from the VSIX"; exit 1; }
+          done
