@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M14 — VS Code extension MVP. Open: manual WSL check (M11-04, deferred by maintainer), winget review (M7-06)
+**Current milestone:** M15 — VS Code extension USP (terminal "port in use" → fix). Open: manual WSL check (M11-04, deferred by maintainer), winget review (M7-06)
 **Last updated:** 2026-10-20
 **Latest release:** [v0.4.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.4.0)
 
@@ -27,7 +27,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M11 | WSL distro attribution | 3 / 4 | 🟨 (needs a test on a Windows machine with WSL) |
 | M12 | `.portcheck.yaml` + `portcheck doctor` | 5 / 5 | ✅ |
 | M13 | Native macOS provider (no `lsof`) | 4 / 4 | ✅ (released in v0.4.0) |
-| M14 | VS Code extension — MVP (ports sidebar, commands) | 0 / 7 | 🟨 |
+| M14 | VS Code extension — MVP (ports sidebar, commands) | 7 / 7 | ✅ |
 | M15 | VS Code extension — USP (terminal "port in use" → one-click fix; project ports) | 0 / 5 | ⬜ |
 | M16 | VS Code extension — packaging & publishing (per-platform VSIX, Marketplace, Open VSX) | 0 / 4 | ⬜ |
 | M17 | Browser extension (optional, native messaging) | 0 / 3 | ⬜ |
@@ -227,13 +227,13 @@ Design: [ADR-0004](docs/adr/0004-vscode-extension.md). The extension is a thin c
 
 | ID | Task | Component / files | Tests required | Status | Notes |
 |---|---|---|---|---|---|
-| M14-01 | Scaffold: strict TypeScript, esbuild bundle, ESLint, Vitest, npm lockfile | `extensions/vscode/` | `npm run check` | ⬜ | |
-| M14-02 | CLI client: binary resolution (setting → bundled → PATH), run with timeout, JSON envelope + `schemaVersion` check, typed results | `src/cli.ts`, `src/schema.ts` | unit (fake exec), 100% | ⬜ | |
-| M14-03 | View model: group/sort sockets, labels, tooltips (pure, no `vscode` import) | `src/model.ts` | unit, 100% | ⬜ | Containers/WSL/hidden owners distinguished |
-| M14-04 | Ports sidebar: tree view, refresh while visible, context actions | `src/portsView.ts` | integration | ⬜ | |
-| M14-05 | Commands: check port, find free port (copy/insert), stop process (modal confirm, CLI guards), copy PID, open in browser | `src/commands.ts` | integration | ⬜ | Container/WSL ports show the stop hint instead |
-| M14-06 | Integration tests in a real VS Code (`@vscode/test-electron`) + CI job (3 OS) | `src/test/`, `.github/workflows/vscode.yml` | CI green | ⬜ | |
-| M14-07 | Docs: extension guide | `docs/guide/vscode.md` | strict docs build | ⬜ | |
+| M14-01 | Scaffold: strict TypeScript, esbuild bundle, ESLint, Vitest, npm lockfile | `extensions/vscode/` | `npm run check` | ✅ | TypeScript 6.0 (typescript-eslint doesn't support 7.x yet), strict + `exactOptionalPropertyTypes`; npm install scripts explicitly allowed/denied |
+| M14-02 | CLI client: binary resolution (setting → bundled → PATH), run with timeout, JSON envelope + `schemaVersion` check, typed results | `src/cli.ts`, `src/schema.ts` | unit (fake exec), 100% | ✅ | Tests use the Go CLI's golden JSON, so schema drift breaks them |
+| M14-03 | View model: group/sort sockets, labels, tooltips (pure, no `vscode` import) | `src/model.ts` | unit, 100% | ✅ | Merges IPv4/IPv6 listeners per owner; containers with hidden proxies handled |
+| M14-04 | Ports sidebar: tree view, refresh while visible, context actions | `src/portsView.ts` | integration | ✅ | Refreshes only while visible; errors and "owners hidden" shown as view messages |
+| M14-05 | Commands: check port, find free port (copy/insert), stop process (modal confirm, CLI guards), copy PID, open in browser | `src/commands.ts` | integration | ✅ | Container/WSL rows never call kill; container JSON gained `stopHint` (Go) so logic stays in one place |
+| M14-06 | Integration tests in a real VS Code (`@vscode/test-electron`) + CI job (3 OS) | `src/test/`, `.github/workflows/vscode.yml` | CI green | ✅ | 15 tests in real VS Code 1.142 (macOS); CI on 3 OS + VS Code 1.95 (minimum) |
+| M14-07 | Docs: extension guide | `docs/guide/vscode.md` | strict docs build | ✅ | `docs/guide/vscode.md`, README, CONTRIBUTING, architecture |
 
 ## M15 — VS Code extension: USP
 

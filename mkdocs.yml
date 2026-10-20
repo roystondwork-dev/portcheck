@@ -89,6 +89,7 @@ nav:
       - Run on a free port (run): guide/run.md
       - Project ports (doctor): guide/doctor.md
       - Interactive view (tui): guide/tui.md
+      - VS Code extension: guide/vscode.md
       - Containers & WSL: guide/containers.md
       - Scripting & CI: guide/scripting.md
   - Reference:
