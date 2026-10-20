@@ -7,6 +7,8 @@ export interface Holder {
   pid?: number;
   user?: string;
   cmdline?: string;
+  /** When the process started (RFC 3339). */
+  startTime?: string;
   /** "npm (4200) ← zsh (900)", or "" */
   ancestry: string;
   container?: ContainerInfo;
@@ -43,6 +45,9 @@ function holder(s: Socket): Holder {
   }
   if (s.process?.cmdline !== undefined) {
     h.cmdline = s.process.cmdline;
+  }
+  if (s.process?.startTime !== undefined) {
+    h.startTime = s.process.startTime;
   }
   if (s.container !== undefined) {
     h.container = s.container;

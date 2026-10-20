@@ -6,11 +6,24 @@
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <header><img src="icons/32.png" alt="" width="20" height="20" /> <span>portcheck</span></header>
-    <section id="tab" aria-live="polite"></section>
+    <header class="bar">
+      <img src="icons/32.png" alt="" width="22" height="22" />
+      <span class="brand">portcheck</span>
+      <span class="spacer"></span>
+      <button id="refresh" class="icon-btn" type="button" title="Refresh" aria-label="Refresh"></button>
+      <a id="help" class="icon-btn" href="https://roystondwork-dev.github.io/portcheck/guide/browser/" target="_blank" rel="noopener" title="Help" aria-label="Help"></a>
+    </header>
+    <main id="tab" aria-live="polite"></main>
     <section id="ports">
-      <h2>Listening on this machine</h2>
-      <ul id="port-list"><li class="muted">Loading…</li></ul>
+      <div class="section-head">
+        <h2>Listening ports</h2>
+        <span id="port-count" class="count"></span>
+      </div>
+      <label class="search">
+        <span id="search-icon"></span>
+        <input id="filter" type="search" placeholder="Filter by port or process" autocomplete="off" />
+      </label>
+      <ul id="port-list"></ul>
     </section>
     <script src="popup.js"></script>
   </body>
