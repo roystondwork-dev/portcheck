@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Portcheck - Localhost Port Inspector",
+  "short_name": "portcheck",
+  "description": "See which process serves a localhost page (and who started it), stop it safely, and know why localhost refuses to connect.",
+  "version": "0.0.0",
+  "minimum_chrome_version": "116",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvES7J5DaRtWGFvf/YWytyJWEhMi4kf2VAB24kO8jF+wU3+e5UnIbqe0IIv9UwUtSfE6TeAqRzNj9cRGcemKJ920vl0PDv4DXz0gzu4cIOzcjk8huUNupEX5wBBVRzrkY+Y57f3dKYtQ+kwmmmnqIJeaqDBp4HMEVSVSTg4iTz8wDbF0Xnz8mRjl9EperbZnQ7yXVlzt6dOUE77D7sl/5AHuoz+E6S9q/ouRXnbcyh4mfQY6PWBla+968e0WFJ16weu1BLNZHoIHAW6dhScgQ5DJPZ6QckSu5dnzlKJR/DVaZKiPWkKW/H9Qg4EUbetpkuo8x5Ruk0ezVUBWmmb6xkwIDAQAB",
+  "permissions": ["nativeMessaging"],
+  "host_permissions": [
+    "http://localhost/*",
+    "https://localhost/*",
+    "http://*.localhost/*",
+    "https://*.localhost/*",
+    "http://127.0.0.1/*",
+    "https://127.0.0.1/*",
+    "http://0.0.0.0/*",
+    "http://[::1]/*"
+  ],
+  "background": { "service_worker": "background.js" },
+  "action": {
+    "default_title": "portcheck",
+    "default_popup": "popup.html",
+    "default_icon": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" }
+  },
+  "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" },
+  "homepage_url": "https://roystondwork-dev.github.io/portcheck/guide/browser/"
+}
