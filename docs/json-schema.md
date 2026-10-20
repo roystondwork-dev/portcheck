@@ -1,7 +1,9 @@
 # JSON output
 
 Every command that prints results (`list`, `check`, `free`, `kill`, `scan`, `wait`,
-`version`) accepts `--json` (or `-o json`) and prints one JSON document:
+`version`) accepts `--json` (or `-o json`) and prints one JSON document. (`run`
+hands stdout to the command it starts; with `--kill`, its kill report goes to
+stderr in the requested format.)
 
 ```json
 {
