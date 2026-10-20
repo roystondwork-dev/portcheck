@@ -3,9 +3,9 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M15 — VS Code extension USP (terminal "port in use" → fix). Open: manual WSL check (M11-04, deferred by maintainer), winget review (M7-06)
+**Current milestone:** M16 — VS Code extension packaging & publishing (waiting on Marketplace/Open VSX accounts). Open: M15-05 demo GIF, manual WSL check (M11-04, deferred by maintainer), winget review (M7-06)
 **Last updated:** 2026-10-20
-**Latest release:** [v0.4.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.4.0)
+**Latest release:** [v0.5.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.5.0)
 
 Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 
@@ -29,7 +29,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M13 | Native macOS provider (no `lsof`) | 4 / 4 | ✅ (released in v0.4.0) |
 | M14 | VS Code extension — MVP (ports sidebar, commands) | 7 / 7 | ✅ |
 | M15 | VS Code extension — USP (terminal "port in use" → one-click fix; project ports) | 4 / 5 | 🟨 |
-| M16 | VS Code extension — packaging & publishing (per-platform VSIX, Marketplace, Open VSX) | 0 / 4 | ⬜ |
+| M16 | VS Code extension — packaging & publishing (per-platform VSIX, Marketplace, Open VSX) | 2 / 4 | 🟨 |
 | M17 | Browser extension (optional, native messaging) | 0 / 3 | ⬜ |
 
 ---
@@ -141,7 +141,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M7-03 | Codecov upload, config and badges | `codecov.yml`, `README.md` | upload verified | ✅ | Targets mirror `.testcoverage.yml` (#9) |
 | M7-04 | Enforce branch protection for admins | GitHub settings | — | ✅ | All changes via PR with 6 required checks |
 | M7-05 | winget publishing | `.goreleaser.yaml`, `release.yml` | snapshot manifest | ✅ | Package ID `roystondwork-dev.portcheck`; fork `roystondwork-dev/winget-pkgs` (#10) |
-| M7-06 | First winget submission accepted | microsoft/winget-pkgs#456630 (0.1.1), #456654 (0.2.0), #456707 (0.3.0), #456732 (0.4.0) | Microsoft validation | 🟨 | 0.1.1 fully validated, waiting for a moderator. 0.4.0: CLA agreed, validation running. 0.2.0/0.3.0 are superseded by 0.4.0 (close them, or comment the CLA agreement) |
+| M7-06 | First winget submission accepted | microsoft/winget-pkgs#456772 (0.5.0) | Microsoft validation | 🟨 | Older submissions (0.1.1–0.4.0) closed as superseded. 0.5.0 validated; needs the maintainer's CLA comment, then a moderator |
 | M7-09 | Release **v0.2.0** (`wait`, container attribution, kill safety fix, docs audit) | GitHub | signatures + brew install | ✅ | [v0.2.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.2.0): 20 assets; cosign, checksums, provenance verified; Homebrew upgrade verified against a real container |
 | M7-07 | `portcheck wait` + `pkg/waitfor` | `internal/cli/wait.go`, `pkg/waitfor` | unit + testscript, 100% | ✅ | Open or `--free`; parallel targets; replaces scan loops in CI docs (#11) |
 | M7-08 | Independent accuracy audit of README, docs site and contributor docs against code and binary | `docs/`, `README.md`, `CONTRIBUTING.md`, `SECURITY.md` | strict docs build | ✅ | 27 findings fixed (5 factual errors incl. package filenames, check output order, unsafe README snippet, signing scope); `--no-color` now reaches the TUI (#13) |
@@ -249,10 +249,10 @@ Design: [ADR-0004](docs/adr/0004-vscode-extension.md). The extension is a thin c
 
 | ID | Task | Component / files | Tests required | Status | Notes |
 |---|---|---|---|---|---|
-| M16-01 | Per-platform VSIX with the matching `portcheck` binary from the release | `release.yml` | VSIX smoke test | ⬜ | |
-| M16-02 | Publish to VS Code Marketplace | release workflow | — | ⬜ | Needs maintainer publisher account + token |
-| M16-03 | Publish to Open VSX (VSCodium, Cursor, Windsurf) | release workflow | — | ⬜ | Needs maintainer account + token |
-| M16-04 | Version sync with portcheck releases (release-please extra-files) | `release-please-config.json` | — | ⬜ | |
+| M16-01 | Per-platform VSIX with the matching `portcheck` binary from the release | `release.yml` (`vscode` job), `extensions/vscode/scripts/package-platforms.sh` | VSIX smoke test | ✅ | 6 VSIX per release, binaries from the signed release (cosign + checksums checked before packaging), provenance attested, attached to the release. Tested with v0.5.0 assets: installed in VS Code, bundled binary is executable and used without settings |
+| M16-02 | Publish to VS Code Marketplace | release workflow | — | ⛔ | Workflow ready (skips with a warning until `VSCE_PAT` is set). Blocked on the maintainer's publisher account + token |
+| M16-03 | Publish to Open VSX (VSCodium, Cursor, Windsurf) | release workflow | — | ⛔ | Workflow ready (skips until `OVSX_PAT` is set). Blocked on the maintainer's account + token; then create the `roystondwork-dev` namespace |
+| M16-04 | Version sync with portcheck releases (release-please extra-files) | `release-please-config.json` | — | ✅ | `extra-files` bump `package.json` and `package-lock.json` (JSONPaths checked with release-please's jsonpath-plus); the packaging script fails if versions differ |
 
 ## M17 — Browser extension (optional)
 
