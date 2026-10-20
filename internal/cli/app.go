@@ -23,6 +23,7 @@ import (
 	"github.com/roystondwork-dev/portcheck/pkg/killer"
 	"github.com/roystondwork-dev/portcheck/pkg/portspec"
 	"github.com/roystondwork-dev/portcheck/pkg/scan"
+	"github.com/roystondwork-dev/portcheck/pkg/waitfor"
 )
 
 // SocketLister lists sockets; implemented by *inspect.Inspector.
@@ -63,6 +64,7 @@ type App struct {
 	PrivilegeHint func() string
 	Resolver      scan.Resolver
 	Scan          ScanFunc
+	Dialer        waitfor.Dialer
 	RunTUI        TUIFunc
 	Build         buildinfo.Info
 }
@@ -84,6 +86,7 @@ func NewApp() *App {
 		PrivilegeHint: inspect.PrivilegeHint,
 		Resolver:      net.DefaultResolver,
 		Scan:          scan.Scan,
+		Dialer:        &net.Dialer{},
 		RunTUI:        tui.Run,
 		Build:         buildinfo.Get(),
 	}

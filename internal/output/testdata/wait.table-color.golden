@@ -1,0 +1,5 @@
+[1mTARGET[m            [1mCONDITION[m  [1mSTATUS[m   [1mWAITED[m  [1mATTEMPTS[m
+[90m──────────────────[m[90m───────────[m[90m─────────[m[90m────────[m[90m────────[m
+5432              open       [32mready[m    [90m1.25s[m   6
+db.internal:6379  open       [1;31mtimeout[m  [90m30s[m     120
+3000              free       [32mready[m    [90m0s[m      1

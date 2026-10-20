@@ -85,6 +85,7 @@ nav:
       - Find free ports (free): guide/free.md
       - Stop a process (kill): guide/kill.md
       - Scan remote hosts (scan): guide/scan.md
+      - Wait for ports (wait): guide/wait.md
       - Interactive view (tui): guide/tui.md
       - Scripting & CI: guide/scripting.md
   - Reference:
@@ -102,6 +103,7 @@ nav:
           - scan: commands/portcheck_scan.md
           - tui: commands/portcheck_tui.md
           - version: commands/portcheck_version.md
+          - wait: commands/portcheck_wait.md
       - JSON output: json-schema.md
       - Exit codes: exit-codes.md
       - Port specs: port-specs.md

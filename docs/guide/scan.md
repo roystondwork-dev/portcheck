@@ -76,7 +76,4 @@ results gathered so far are still printed.
 | `3` | a hostname did not resolve |
 | `130` | interrupted (partial results printed) |
 
-```sh
-# Wait until a database accepts connections (e.g. in CI)
-until portcheck scan localhost -p 5432 --open >/dev/null 2>&1; do sleep 1; done
-```
+To block until a service accepts connections, use [`portcheck wait`](wait.md) instead of a loop.

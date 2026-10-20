@@ -68,6 +68,11 @@ func docs() map[string]Document {
 		"version":    VersionDoc(version),
 		"scan":       ScanDoc(scanResults, scanSummary, 1500*time.Millisecond),
 		"scan-empty": ScanDoc(nil, scan.Summary{}, 0),
+		"wait": WaitDoc([]WaitResultJSON{
+			{Target: "5432", Host: "localhost", Port: 5432, Condition: "open", Ready: true, WaitedMs: 1250, Attempts: 6},
+			{Target: "db.internal:6379", Host: "db.internal", Port: 6379, Condition: "open", WaitedMs: 30000, Attempts: 120},
+			{Target: "3000", Host: "localhost", Port: 3000, Condition: "free", Ready: true, Attempts: 1},
+		}),
 	}
 }
 
@@ -143,6 +148,9 @@ func TestJSONEnvelope(t *testing.T) {
 	}
 	if out := render(t, ScanDoc(nil, scan.Summary{}, 0), JSON, Options{}); !bytes.Contains(out, []byte(`"results": []`)) {
 		t.Errorf("empty scan must encode results as [], got %s", out)
+	}
+	if out := render(t, WaitDoc(nil), JSON, Options{}); !bytes.Contains(out, []byte(`"targets": []`)) {
+		t.Errorf("empty wait must encode targets as [], got %s", out)
 	}
 	if out := render(t, KillDoc(nil), JSON, Options{}); !bytes.Contains(out, []byte(`"results": []`)) {
 		t.Errorf("empty kill must encode results as [], got %s", out)

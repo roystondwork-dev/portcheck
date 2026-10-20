@@ -26,6 +26,7 @@
 | 🆓 | `portcheck free 3000-3999 -n 3` | Free ports, verified by actually binding them |
 | 🛑 | `portcheck kill 8080` | Graceful SIGTERM, then SIGKILL; refuses PID 1, your shell and system processes |
 | 📡 | `portcheck scan db.internal -p 5432` | Rate-limited TCP connect checks of remote hosts. No root needed |
+| ⏳ | `portcheck wait db:5432 -t 60s` | Block until services accept connections, or until a port is free. Built for CI |
 | 🖥️ | `portcheck` | Live, sortable, filterable TUI. Stop processes without leaving it |
 
 - **Same commands and output on every OS.** It replaces `lsof -i`, `netstat -ano`, `ss -ltnp` and `kill`.

@@ -13,7 +13,7 @@ Every command accepts `--json` (or `-o json`) and prints one JSON document:
 | Field | Meaning |
 |---|---|
 | `schemaVersion` | Version of this schema. It only increases when a field is removed or changes meaning. New optional fields can appear in any release. |
-| `kind` | Which command produced the document: `list`, `check`, `free`, `kill`, `scan`, `version`. |
+| `kind` | Which command produced the document: `list`, `check`, `free`, `kill`, `scan`, `wait`, `version`. |
 | `data` | The payload, described below. |
 
 With `list --watch`, one document is printed per refresh.
@@ -97,6 +97,19 @@ or `failed`. A failed entry has an `error` message.
 an `error` message. `service` is the port's well-known name, not something
 detected on the wire. With `--open`, `results` contains only open ports, but
 `summary` still counts every probe.
+
+## `wait`
+
+```json
+{
+  "targets": [
+    { "target": "db:5432", "host": "db", "port": 5432, "condition": "open",
+      "ready": true, "waitedMs": 1250, "attempts": 6 }
+  ]
+}
+```
+
+`condition` is `open` or `free`. `target` is the argument as given; `ready: false` means it timed out.
 
 ## `version`
 

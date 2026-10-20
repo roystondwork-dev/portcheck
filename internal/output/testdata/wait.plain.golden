@@ -1,0 +1,4 @@
+TARGET            CONDITION  STATUS   WAITED  ATTEMPTS
+5432              open       ready    1.25s   6
+db.internal:6379  open       timeout  30s     120
+3000              free       ready    0s      1

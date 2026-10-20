@@ -39,10 +39,16 @@ Pick a free port for a test server:
 PORT=$(portcheck free --random 20000-40000 --json | jq '.data.ports[0]')
 ```
 
-Wait for a service to come up:
+Wait for services to come up (see [`wait`](wait.md)):
 
 ```sh
-timeout 60 sh -c 'until portcheck scan localhost -p 5432 --open >/dev/null 2>&1; do sleep 1; done'
+portcheck wait db:5432 redis:6379 -t 60s
+```
+
+Restart a dev server cleanly:
+
+```sh
+portcheck kill 3000 --yes; portcheck wait 3000 --free -t 10s && npm run dev
 ```
 
 List listening processes as JSON objects:
@@ -61,7 +67,7 @@ portcheck list -l --json | jq -c '.data.sockets[] | {port: .localPort, pid, name
   run: portcheck check 5432 6379
 
 - name: Wait for Postgres
-  run: timeout 60 sh -c 'until portcheck scan localhost -p 5432 --open; do sleep 1; done'
+  run: portcheck wait 5432 -t 60s
 ```
 
 ## Debugging

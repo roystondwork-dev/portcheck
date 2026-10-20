@@ -30,6 +30,7 @@ portcheck [port...] [flags]
   portcheck free -n 3             # three free ports
   portcheck kill 8080             # stop whatever listens on 8080
   portcheck scan db.internal -p 5432,6379
+  portcheck wait 5432 -t 60s      # block until Postgres accepts connections
 ```
 
 ### Options
@@ -53,4 +54,5 @@ portcheck [port...] [flags]
 * [portcheck scan](portcheck_scan.md)	 - Check which TCP ports are reachable on remote hosts
 * [portcheck tui](portcheck_tui.md)	 - Live, interactive view of ports (the default in a terminal)
 * [portcheck version](portcheck_version.md)	 - Print version and build information
+* [portcheck wait](portcheck_wait.md)	 - Wait until ports accept connections (or become free)
 
