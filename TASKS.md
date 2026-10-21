@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M17 — browser extension (Chrome, Edge). Open: restore the macOS jobs and the coverage gate as required checks on `main` (made optional on 2026-10-20 while GitHub had no macOS runner capacity), manual WSL check (M11-04, deferred by maintainer), winget review (M7-06), Open VSX namespace claim (October 2027)
+**Current milestone:** none in progress (M14–M17 done). Open: restore the macOS jobs and the coverage gate as required checks on `main` (made optional on 2026-10-20 while GitHub had no macOS runner capacity), manual WSL check (M11-04, deferred by maintainer), winget review (M7-06), Open VSX namespace claim (October 2027)
 **Last updated:** 2026-10-20
 **Latest release:** [v0.8.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.8.0)
 
@@ -30,7 +30,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M14 | VS Code extension — MVP (ports sidebar, commands) | 7 / 7 | ✅ |
 | M15 | VS Code extension — USP (terminal "port in use" → one-click fix; project ports) | 5 / 5 | ✅ |
 | M16 | VS Code extension — packaging & publishing (VSIX, Marketplace, Open VSX) | 4 / 4 | ✅ |
-| M17 | Browser extension (Chrome, Edge; native messaging) | 7 / 8 | 🟨 |
+| M17 | Browser extension (Chrome, Edge; native messaging) | 8 / 8 | ✅ |
 
 ---
 
@@ -268,7 +268,7 @@ messaging host; the extension can only ask for `version`, `list`, `check` and `k
 | M17-05 | Popup: process details, who started it, Stop (confirm), local ports list; setup help when portcheck isn't registered | `src/popup.ts` | unit 100% | ✅ | Inline confirmation (Stop / Force kill / Cancel); containers get their stop command; setup steps with copy buttons |
 | M17-06 | "Connection refused" on localhost: say whether anything listens | `src/background.ts` | unit | ✅ | Via the badge: `off` on error pages such as ERR_CONNECTION_REFUSED |
 | M17-07 | End-to-end test in real Chromium (Playwright) with the real binary + CI | `extensions/browser/e2e/`, `.github/workflows/browser.yml` | CI green | ✅ | 5 tests: badge, `off`, popup + real Stop, startup race, setup help; native host registered in the test profile. CI on Linux and macOS (Windows registration covered by Go tests) |
-| M17-08 | Docs, release zip, store publishing (Edge Add-ons free; Chrome Web Store has a one-time fee) | `docs/guide/browser.md`, `release.yml` | strict docs build | 🟨 | Docs ✅; release zip ✅ and store zip (`portcheck-browser-store-X.Y.Z.zip`, no manifest key) ✅. **Edge Add-ons** (free): listing kit in `extensions/browser/store/` (text, privacy answers, tester notes, images rendered from the real extension), privacy policy page ✅; submitted 2026-10-20 (v0.7.0, in review, Store ID 0RDCKGQR44VR); its ID `jenlahoamefdpfmpodhidkgcceikheee` (checked against the store's public key) is allowed by default since v0.8.0. Until then, store builds show the `--extension-id` command for their own ID (e2e-tested). Chrome Web Store deferred until ~100 users |
+| M17-08 | Docs, release zip, store publishing (Edge Add-ons free; Chrome Web Store has a one-time fee) | `docs/guide/browser.md`, `release.yml` | strict docs build | ✅ | Docs, release zip and store zip (no manifest key) in every release. **Live on [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/jenlahoamefdpfmpodhidkgcceikheee)** since 2026-10-21 (Store ID 0RDCKGQR44VR, ID `jenlahoamefdpfmpodhidkgcceikheee`, allowed by default since v0.8.0); store updates are uploaded by hand from `portcheck-browser-store-X.Y.Z.zip`. Listing kit: `extensions/browser/store/`. Chrome Web Store deferred until ~100 users (one-time fee) |
 
 ## What's next (candidates, not yet scheduled)
 
