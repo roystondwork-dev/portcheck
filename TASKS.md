@@ -5,7 +5,7 @@
 
 **Current milestone:** M17 — browser extension (Chrome, Edge). Open: restore the macOS jobs and the coverage gate as required checks on `main` (made optional on 2026-10-20 while GitHub had no macOS runner capacity), manual WSL check (M11-04, deferred by maintainer), winget review (M7-06), Open VSX namespace claim (October 2027)
 **Last updated:** 2026-10-20
-**Latest release:** [v0.5.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.5.0)
+**Latest release:** [v0.8.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.8.0)
 
 Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 
@@ -141,7 +141,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M7-03 | Codecov upload, config and badges | `codecov.yml`, `README.md` | upload verified | ✅ | Targets mirror `.testcoverage.yml` (#9) |
 | M7-04 | Enforce branch protection for admins | GitHub settings | — | ✅ | All changes via PR with 6 required checks |
 | M7-05 | winget publishing | `.goreleaser.yaml`, `release.yml` | snapshot manifest | ✅ | Package ID `roystondwork-dev.portcheck`; fork `roystondwork-dev/winget-pkgs` (#10) |
-| M7-06 | First winget submission accepted | microsoft/winget-pkgs#457119 (0.7.0) | Microsoft validation | 🟨 | Older submissions (0.1.1–0.6.0) closed as superseded. 0.7.0: CLA agreed, waiting for validation and a moderator |
+| M7-06 | First winget submission accepted | microsoft/winget-pkgs#457169 (0.8.0) | Microsoft validation | 🟨 | Older submissions (0.1.1–0.7.0) closed as superseded. 0.8.0: needs the maintainer's CLA comment, then validation and a moderator |
 | M7-09 | Release **v0.2.0** (`wait`, container attribution, kill safety fix, docs audit) | GitHub | signatures + brew install | ✅ | [v0.2.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.2.0): 20 assets; cosign, checksums, provenance verified; Homebrew upgrade verified against a real container |
 | M7-07 | `portcheck wait` + `pkg/waitfor` | `internal/cli/wait.go`, `pkg/waitfor` | unit + testscript, 100% | ✅ | Open or `--free`; parallel targets; replaces scan loops in CI docs (#11) |
 | M7-08 | Independent accuracy audit of README, docs site and contributor docs against code and binary | `docs/`, `README.md`, `CONTRIBUTING.md`, `SECURITY.md` | strict docs build | ✅ | 27 findings fixed (5 factual errors incl. package filenames, check output order, unsafe README snippet, signing scope); `--no-color` now reaches the TUI (#13) |
@@ -268,7 +268,7 @@ messaging host; the extension can only ask for `version`, `list`, `check` and `k
 | M17-05 | Popup: process details, who started it, Stop (confirm), local ports list; setup help when portcheck isn't registered | `src/popup.ts` | unit 100% | ✅ | Inline confirmation (Stop / Force kill / Cancel); containers get their stop command; setup steps with copy buttons |
 | M17-06 | "Connection refused" on localhost: say whether anything listens | `src/background.ts` | unit | ✅ | Via the badge: `off` on error pages such as ERR_CONNECTION_REFUSED |
 | M17-07 | End-to-end test in real Chromium (Playwright) with the real binary + CI | `extensions/browser/e2e/`, `.github/workflows/browser.yml` | CI green | ✅ | 5 tests: badge, `off`, popup + real Stop, startup race, setup help; native host registered in the test profile. CI on Linux and macOS (Windows registration covered by Go tests) |
-| M17-08 | Docs, release zip, store publishing (Edge Add-ons free; Chrome Web Store has a one-time fee) | `docs/guide/browser.md`, `release.yml` | strict docs build | 🟨 | Docs ✅; release zip ✅ and store zip (`portcheck-browser-store-X.Y.Z.zip`, no manifest key) ✅. **Edge Add-ons** (free): listing kit in `extensions/browser/store/` (text, privacy answers, tester notes, images rendered from the real extension), privacy policy page ✅; submitted 2026-10-20 (v0.7.0, in review, Store ID 0RDCKGQR44VR); its ID `jenlahoamefdpfmpodhidkgcceikheee` (checked against the store's public key) is allowed by default from v0.7.1. Until then, store builds show the `--extension-id` command for their own ID (e2e-tested). Chrome Web Store deferred until ~100 users |
+| M17-08 | Docs, release zip, store publishing (Edge Add-ons free; Chrome Web Store has a one-time fee) | `docs/guide/browser.md`, `release.yml` | strict docs build | 🟨 | Docs ✅; release zip ✅ and store zip (`portcheck-browser-store-X.Y.Z.zip`, no manifest key) ✅. **Edge Add-ons** (free): listing kit in `extensions/browser/store/` (text, privacy answers, tester notes, images rendered from the real extension), privacy policy page ✅; submitted 2026-10-20 (v0.7.0, in review, Store ID 0RDCKGQR44VR); its ID `jenlahoamefdpfmpodhidkgcceikheee` (checked against the store's public key) is allowed by default since v0.8.0. Until then, store builds show the `--extension-id` command for their own ID (e2e-tested). Chrome Web Store deferred until ~100 users |
 
 ## What's next (candidates, not yet scheduled)
 
