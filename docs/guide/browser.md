@@ -6,9 +6,7 @@ refuses to connect.
 
 ![The portcheck popup for localhost:3000: a green Running chip, node with its pid, a card with who started it, its command and user, Stop process and Copy PID buttons, and a filterable list of the ports listening on this machine](../assets/browser-popup.png){ width="380" }
 
-!!! note "Status"
-    The extension has been submitted to **Microsoft Edge Add-ons** and is in review; it
-    isn't in the Chrome Web Store yet. Until then, install it from a release as below.
+[Get it from Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/jenlahoamefdpfmpodhidkgcceikheee){ .md-button .md-button--primary }
 
 ## What it does
 
@@ -29,10 +27,17 @@ It works on `localhost`, `*.localhost`, `127.0.0.1`, `[::1]` and `0.0.0.0`, on a
 
 ## Install
 
+**Microsoft Edge:** install
+[Portcheck - Localhost Port Inspector](https://microsoftedge.microsoft.com/addons/detail/jenlahoamefdpfmpodhidkgcceikheee) from Edge Add-ons, then do the
+[setup](#setup) below.
+
+**Chrome, Brave, Chromium:** the extension isn't in the Chrome Web Store yet. Install it
+from a release:
+
 1. Download `portcheck-browser-<version>.zip` from the
    [latest release](https://github.com/roystondwork-dev/portcheck/releases/latest) and
    unzip it into a folder you'll keep (the browser loads the extension from there).
-2. Open `chrome://extensions` (Edge: `edge://extensions`), turn on **Developer mode**,
+2. Open `chrome://extensions` (or `brave://extensions`), turn on **Developer mode**,
    click **Load unpacked** and choose that folder.
 
 ## Setup
@@ -41,7 +46,8 @@ The extension asks the `portcheck` program on your machine, through the browser'
 [native messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging).
 Connect them once:
 
-1. [Install portcheck](../install.md) (0.7 or later).
+1. [Install portcheck](../install.md) (0.8 or later; 0.7 also works, with the
+   `--extension-id` command the popup shows).
 2. Run:
 
     ```sh
@@ -52,13 +58,15 @@ Connect them once:
     `--browser edge` picks one. No administrator rights are needed. Check with
     `portcheck browser status`; undo with `portcheck browser uninstall`.
 
-If the popup says *Connect portcheck to this browser*, step 2 hasn't been done for this
-browser (or portcheck moved: run it again).
+If the popup says *Connect portcheck*, step 2 hasn't been done for this browser (or
+portcheck moved: run it again). *Reconnect portcheck* means portcheck doesn't know this
+copy of the extension yet: update portcheck, or run the exact command the popup shows.
 
 ## Troubleshooting
 
-- **The popup says "Connect portcheck to this browser".** Run `portcheck browser install`
-  (again, if portcheck moved or was installed differently), then reopen the popup.
+- **The popup says "Connect portcheck" or "Reconnect portcheck".** Run the command it
+  shows (`portcheck browser install`, perhaps with `--extension-id`), then reopen the
+  popup.
 - **macOS asks "portcheck would like to access files in your Desktop folder"** (or
   Documents, Downloads). The registered portcheck binary lives in that folder, for
   example a build from source; the browser waits for your answer before the badge can

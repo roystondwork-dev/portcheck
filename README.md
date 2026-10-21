@@ -30,7 +30,7 @@
 | ▶️ | `portcheck run --port 3000 --next -- npm run dev` | Start a command on a free port (`$PORT`, `{port}`); take the next one or stop the holder |
 | 🩺 | `portcheck doctor` | Check the ports listed in `.portcheck.yaml` and get a fix for each problem |
 | 🖥️ | `portcheck` | Live, sortable, filterable TUI. Stop processes without leaving it |
-| 🌐 | Browser extension | Chrome/Edge: which process serves a localhost tab, `off` when nothing listens, stop it from the popup ([in development](docs/guide/browser.md)) |
+| 🌐 | [Browser extension](https://microsoftedge.microsoft.com/addons/detail/jenlahoamefdpfmpodhidkgcceikheee) | Edge (and Chrome): which process serves a localhost tab, `off` when nothing listens, stop it from the popup ([guide](docs/guide/browser.md)) |
 | 🧩 | [VS Code extension](https://marketplace.visualstudio.com/items?itemName=portcheck-vscode.portcheck-vscode) | "Port in use" errors in the terminal become one-click fixes; listening ports in the sidebar ([guide](docs/guide/vscode.md)) |
 
 ### VS Code extension
@@ -43,6 +43,19 @@ fixes it: stop it and re-run, or re-run on the next free port.
 Install **Portcheck - Port in Use Fixer** from the
 [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=portcheck-vscode.portcheck-vscode) (search "portcheck" in VS Code) or
 [Open VSX](https://open-vsx.org/extension/portcheck-vscode/portcheck-vscode) (VSCodium, Cursor, Windsurf). portcheck is built in.
+
+### Browser extension
+
+On every localhost tab, a badge names the process serving it, or says `off` when nothing
+is listening; the popup shows who started it and stops it safely.
+
+<img src="docs/assets/browser-popup.png" alt="The portcheck browser popup for localhost:3000: Running, node with its pid, who started it, its command and user, Stop process, and the ports listening on the machine" width="320">
+
+Install **Portcheck - Localhost Port Inspector** from
+[Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/jenlahoamefdpfmpodhidkgcceikheee), then run `portcheck browser install` once.
+For Chrome, Brave and Chromium, load the zip from the
+[latest release](https://github.com/roystondwork-dev/portcheck/releases/latest)
+([guide](docs/guide/browser.md)).
 
 ### Highlights
 
