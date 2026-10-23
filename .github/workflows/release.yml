@@ -125,6 +125,9 @@ jobs:
       attestations: write
     env:
       TAG: ${{ needs.release-please.outputs.tag_name || inputs.tag }}
+      # Set: publish to the VS Code Marketplace as the portcheck-release app in
+      # Microsoft Entra ID (GitHub signs in with OIDC; no stored password).
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
     defaults:
       run:
         working-directory: extensions/vscode
@@ -159,15 +162,24 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "$TAG" "$RUNNER_TEMP"/vsix/*.vsix --clobber
+      - name: Sign in to Microsoft Entra ID (for the Marketplace)
+        if: env.AZURE_CLIENT_ID != ''
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
       - name: Publish to the VS Code Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
-          if [ -z "$VSCE_PAT" ]; then
-            echo "::warning::VSCE_PAT is not set; skipping the VS Code Marketplace"
-            exit 0
+          if [ -n "$AZURE_CLIENT_ID" ]; then
+            npx vsce publish --azure-credential --packagePath "$RUNNER_TEMP"/vsix/*.vsix
+          elif [ -n "$VSCE_PAT" ]; then
+            npx vsce publish --packagePath "$RUNNER_TEMP"/vsix/*.vsix
+          else
+            echo "::warning::Neither AZURE_CLIENT_ID nor VSCE_PAT is set; upload the VSIX to the Marketplace by hand"
           fi
-          npx vsce publish --packagePath "$RUNNER_TEMP"/vsix/*.vsix
       - name: Publish to Open VSX
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}

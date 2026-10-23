@@ -39,11 +39,17 @@ are hidden.
 5. Check that the release has `portcheck-vscode-X.Y.Z.vsix`. The **vscode** job
    verifies the signed `checksums.txt`, puts the binary for every platform into one
    extension package (`bin/<platform>-<arch>/`; the extension picks its own at runtime),
-   attaches it, and publishes it to the VS Code Marketplace and Open VSX when their
-   tokens are set. Without `VSCE_PAT`, upload that one file on
+   attaches it, and publishes it to the VS Code Marketplace and Open VSX. The
+   extension's version comes from the same release PR (`extra-files` in
+   `release-please-config.json`).
+
+   The Marketplace upload signs in as the `portcheck-release` app in Microsoft Entra ID
+   (secrets `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`; GitHub signs in with OIDC from `main`,
+   so nothing expires). The app is a Contributor of the `portcheck-vscode` publisher;
+   the **Marketplace identity** workflow prints the ID to add if that's ever needed
+   again. Without those secrets, upload the VSIX on
    [the Marketplace's management page](https://marketplace.visualstudio.com/manage)
-   (**⋯ → Update**). The extension's version comes
-   from the same release PR (`extra-files` in `release-please-config.json`).
+   (**⋯ → Update**).
 6. Check that the release has the browser extension, built by the **browser** job (its
    version also comes from the release PR): `portcheck-browser-X.Y.Z.zip` (load
    unpacked), `portcheck-browser-store-X.Y.Z.zip` (Edge Add-ons),

@@ -1,0 +1,29 @@
+name: Marketplace identity
+
+# Run once (Actions → Marketplace identity → Run workflow) after creating the
+# portcheck-release app in Microsoft Entra ID: it signs in the way the release
+# does and prints the ID to add as a member of the Marketplace publisher.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # sign in to Microsoft Entra ID
+
+jobs:
+  identity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+      - name: Print the Marketplace member ID
+        run: |
+          # 499b84ac-…: the Azure DevOps resource, which the Marketplace uses.
+          token=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query accessToken -o tsv)
+          id=$(curl -fsS -H "Authorization: Bearer $token" \
+            "https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=7.1-preview.3" | jq -r .id)
+          echo "Add this ID as a Contributor of the portcheck-vscode publisher: $id"
+          echo "### Marketplace member ID: \`$id\`" >>"$GITHUB_STEP_SUMMARY"
