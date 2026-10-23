@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.9.0](https://github.com/roystondwork-dev/portcheck/compare/v0.8.0...v0.9.0) (2026-10-23)
+
+
+### Features
+
+* **browser:** Firefox build of the extension ([1aeb6bc](https://github.com/roystondwork-dev/portcheck/commit/1aeb6bcfa3311293021fed740dac3775fff00cec))
+* **cli:** register portcheck with Firefox ([1378f0a](https://github.com/roystondwork-dev/portcheck/commit/1378f0a983f55ddfbe101391ab645a2c4fb66efb))
+* one-command setup, and an extension that works before it ([ae5715b](https://github.com/roystondwork-dev/portcheck/commit/ae5715b36f746bc07876332846190bcdad13df5a))
+* **release:** attach the Firefox add-on and its source to releases ([43a8c43](https://github.com/roystondwork-dev/portcheck/commit/43a8c43f1f399f988b073ac4d5747d218bf32c0a))
+* **release:** Mozilla-signed Firefox download that updates itself ([965437f](https://github.com/roystondwork-dev/portcheck/commit/965437f1d504e206a062a4c58651b66ae78ae192))
+
+
+### Bug Fixes
+
+* **install:** find the latest release without GitHub's API ([326c2d1](https://github.com/roystondwork-dev/portcheck/commit/326c2d1391f95e7b3d576f40b42e158a52296aa9))
+* **install:** read checksums as text on Windows; test: grant localhost access in Firefox ([5f8e681](https://github.com/roystondwork-dev/portcheck/commit/5f8e6817d1f98e526227546276fac3e7f800b51d))
+* **release:** use Homebrew install steps for the cask's quarantine hook ([0939115](https://github.com/roystondwork-dev/portcheck/commit/0939115c2d0a7e3a239586bac1f124ba2921972b))
+
+
+### Documentation
+
+* **browser:** Firefox Add-ons listing kit ([1467be5](https://github.com/roystondwork-dev/portcheck/commit/1467be52b42829c8b969a69b5a9a6981fe2ee492))
+* **browser:** one-command setup in the browser guide; Firefox in the intro ([f6433e9](https://github.com/roystondwork-dev/portcheck/commit/f6433e94395dd8320a3cac59106860289761804b))
+* **tasks:** plan Safari (M20) for after 100 users ([edb6cfd](https://github.com/roystondwork-dev/portcheck/commit/edb6cfd68f1e9999902259d20cb13fe75915de14))
+* the browser extension is on Microsoft Edge Add-ons ([262fdb3](https://github.com/roystondwork-dev/portcheck/commit/262fdb33546937e1b30a1be99856b068659d7501))
+* the macOS checks are required again ([9ee2674](https://github.com/roystondwork-dev/portcheck/commit/9ee2674f3678d3159a17598fe45846a0486b9ddd))
+* winget 0.8.0 submission; latest release v0.8.0 ([58925af](https://github.com/roystondwork-dev/portcheck/commit/58925af8b52df3fa2fd65ecda48c2c56f8c598cc))
+
 ## [0.8.0](https://github.com/roystondwork-dev/portcheck/compare/v0.7.0...v0.8.0) (2026-10-20)
 
 
