@@ -1,11 +1,12 @@
 // The toolbar popup: the current local page's port, and the machine's ports.
+import { ext } from "./api";
 import { call, HostError, KNOWN_IDS, type SendNative } from "./host";
 import { type LocalTarget, localTarget } from "./local";
 import { listedPorts, portState } from "./model";
 import type { CheckData, KillData, ListData } from "./schema";
 import { type Action, filterPorts, type Icon, type PortView, portView, setupHelp } from "./view";
 
-const send: SendNative = (host, message) => chrome.runtime.sendNativeMessage(host, message);
+const send: SendNative = (host, message) => ext.runtime.sendNativeMessage(host, message);
 
 type IconName = Icon | "refresh" | "help" | "stop" | "copy" | "check" | "external" | "search";
 
@@ -28,9 +29,10 @@ const ICONS: Record<IconName, string> = {
 };
 
 function icon(name: IconName): SVGSVGElement {
-  const t = document.createElement("template");
-  t.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
-  return t.content.firstElementChild as SVGSVGElement;
+  // Parsed as SVG from the fixed markup above (no innerHTML).
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
+  const doc = new DOMParser().parseFromString(svg, "image/svg+xml");
+  return document.importNode(doc.documentElement, true) as unknown as SVGSVGElement;
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(
@@ -55,9 +57,9 @@ async function currentTab(): Promise<chrome.tabs.Tab | undefined> {
   // ?tab=<id> lets tests open the popup as a page for a given tab.
   const id = Number(new URLSearchParams(location.search).get("tab"));
   if (id > 0) {
-    return chrome.tabs.get(id);
+    return ext.tabs.get(id);
   }
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const [tab] = await ext.tabs.query({ active: true, currentWindow: true });
   return tab;
 }
 
@@ -97,7 +99,7 @@ function hero(address: string, chip?: { text: string; status: string }, summary?
 
 function showSetup(section: HTMLElement, err: unknown): void {
   const e = err instanceof HostError ? err : new HostError(String(err), "failed");
-  const help = setupHelp(e.problem, e.message, chrome.runtime.id, KNOWN_IDS);
+  const help = setupHelp(e.problem, e.message, ext.runtime.id, KNOWN_IDS);
   const steps = el(
     "ol",
     { className: "steps" },
@@ -207,14 +209,45 @@ function renderPortList(): void {
       a.append(icon("external"));
       a.addEventListener("click", (e) => {
         e.preventDefault();
-        void chrome.tabs.create({ url: p.url });
+        void ext.tabs.create({ url: p.url });
       });
       return el("li", {}, a);
     }),
   );
 }
 
+/** The localhost patterns in the manifest's host_permissions. */
+const LOCAL_ORIGINS: string[] = (ext.runtime.getManifest() as chrome.runtime.ManifestV3).host_permissions ?? [];
+
+/**
+ * Firefox treats host permissions as optional, so the user may not have
+ * allowed localhost access yet; without it the extension can't see tab
+ * addresses. Returns true if access is granted (always, in Chrome and Edge).
+ */
+async function checkAccess(section: HTMLElement): Promise<boolean> {
+  if (await ext.permissions.contains({ origins: LOCAL_ORIGINS })) {
+    return true;
+  }
+  const allow = button("Allow access to localhost pages", "primary");
+  allow.addEventListener("click", () => {
+    void ext.permissions.request({ origins: LOCAL_ORIGINS }).then((granted) => {
+      if (granted) {
+        void refresh();
+      }
+    });
+  });
+  section.replaceChildren(
+    hero("Allow localhost access", { text: "Permission needed", status: "denied" }),
+    el("p", { className: "muted", textContent: "portcheck reads the address of localhost tabs only, to know which port a page uses. It can't see other sites." }),
+    el("div", { className: "actions" }, allow),
+  );
+  return false;
+}
+
 async function renderTab(section: HTMLElement): Promise<void> {
+  if (!(await checkAccess(section))) {
+    return;
+  }
   if (!currentTarget) {
     section.replaceChildren(hero("No local page", undefined, "Open a localhost page to see which process serves it."));
     return;

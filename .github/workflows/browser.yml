@@ -53,3 +53,29 @@ jobs:
           name: playwright-${{ matrix.os }}
           path: extensions/browser/test-results/
           retention-days: 7
+
+  firefox:
+    name: Browser extension (Firefox)
+    # Selenium drives the system Firefox; GitHub's Ubuntu images include it.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: Build portcheck
+        working-directory: .
+        run: go build -o bin/portcheck ./cmd/portcheck
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: extensions/browser/package-lock.json
+      - run: npm ci
+      - name: Build the Firefox add-on and validate it with Mozilla's linter
+        run: |
+          npm run build:firefox
+          npx --yes web-ext@10.8.0 lint --source-dir dist-firefox
+      - name: End-to-end tests in Firefox
+        run: node --test e2e-firefox/firefox.test.mjs
+
