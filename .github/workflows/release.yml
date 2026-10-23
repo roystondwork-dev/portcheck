@@ -77,6 +77,10 @@ jobs:
         env:
           TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
           WINGET_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
+          # winget submissions are paused while the first one waits for Microsoft's
+          # review (each release would open a new PR); set this variable to "true"
+          # to resume. See docs/releasing.md.
+          WINGET_SUBMIT: ${{ vars.WINGET_SUBMIT }}
         run: |
           skip=""
           if [ -z "$TAP_TOKEN" ]; then
@@ -85,6 +89,9 @@ jobs:
           fi
           if [ -z "$WINGET_TOKEN" ]; then
             echo "::warning::WINGET_GITHUB_TOKEN is not set; skipping the winget submission"
+            skip="${skip:+$skip,}winget"
+          elif [ "$WINGET_SUBMIT" != "true" ]; then
+            echo "::notice::winget submissions are paused (repository variable WINGET_SUBMIT is not \"true\")"
             skip="${skip:+$skip,}winget"
           fi
           if [ -n "$skip" ]; then echo "args=--skip=$skip" >> "$GITHUB_OUTPUT"; fi
