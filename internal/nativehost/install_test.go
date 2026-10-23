@@ -1,10 +1,12 @@
 package nativehost
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 
@@ -72,6 +74,7 @@ func TestTargetsUnix(t *testing.T) {
 		"edge .config/microsoft-edge/NativeMessagingHosts/io.github.roystondwork_dev.portcheck.json detected",
 		"chromium .config/chromium/NativeMessagingHosts/io.github.roystondwork_dev.portcheck.json -",
 		"brave .config/BraveSoftware/Brave-Browser/NativeMessagingHosts/io.github.roystondwork_dev.portcheck.json -",
+		"firefox .mozilla/native-messaging-hosts/io.github.roystondwork_dev.portcheck.json -",
 	}
 	if !cmp.Equal(got, want) {
 		t.Error(cmp.Diff(want, got))
@@ -80,6 +83,15 @@ func TestTargetsUnix(t *testing.T) {
 	mac, err := Targets(Env{GOOS: "darwin", Home: home})
 	if err != nil || !strings.HasSuffix(filepath.ToSlash(mac[0].Manifest), "Library/Application Support/Google/Chrome/NativeMessagingHosts/"+HostName+".json") {
 		t.Errorf("darwin chrome = %+v, %v", mac[0], err)
+	}
+	// Firefox reads manifests from Mozilla's directory, apart from its profile directory.
+	if err := os.MkdirAll(filepath.Join(home, "Library", "Application Support", "Firefox"), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	mac, _ = Targets(Env{GOOS: "darwin", Home: home})
+	ff := mac[len(mac)-1]
+	if ff.Browser.ID != "firefox" || !ff.Detected || !strings.HasSuffix(filepath.ToSlash(ff.Manifest), "Library/Application Support/Mozilla/NativeMessagingHosts/"+HostName+".json") {
+		t.Errorf("darwin firefox = %+v", ff)
 	}
 }
 
@@ -131,8 +143,8 @@ func TestSelect(t *testing.T) {
 	if got, _ := Select(targets[1:2], nil); got != nil {
 		t.Errorf("none detected = %v", got)
 	}
-	if _, err := Select(targets, []string{"firefox"}); err == nil || !strings.Contains(err.Error(), "unknown browser") {
-		t.Errorf("firefox: %v", err)
+	if _, err := Select(targets, []string{"safari"}); err == nil || !strings.Contains(err.Error(), "unknown browser") {
+		t.Errorf("safari: %v", err)
 	}
 }
 
@@ -144,7 +156,7 @@ func TestInstallUnix(t *testing.T) {
 	if m, err := Installed(env, tg); m != nil || err != nil {
 		t.Fatalf("before install: %v, %v", m, err)
 	}
-	m := NewManifest("/usr/local/bin/portcheck", []string{"aaaabbbbccccddddeeeeffffgggghhhh", "pppppppppppppppppppppppppppppppp"})
+	m := NewManifest(tg.Browser, "/usr/local/bin/portcheck", []string{"aaaabbbbccccddddeeeeffffgggghhhh", "pppppppppppppppppppppppppppppppp"}, GeckoIDs)
 	if err := Install(env, tg, m); err != nil {
 		t.Fatal(err)
 	}
@@ -184,7 +196,7 @@ func TestInstallWindows(t *testing.T) {
 	if m, err := Installed(env, tg); m != nil || err != nil {
 		t.Fatalf("before install: %v, %v", m, err)
 	}
-	if err := Install(env, tg, NewManifest(`C:\bin\portcheck.exe`, ExtensionIDs)); err != nil {
+	if err := Install(env, tg, NewManifest(tg.Browser, `C:\bin\portcheck.exe`, ExtensionIDs, GeckoIDs)); err != nil {
 		t.Fatal(err)
 	}
 	if reg.keys[tg.RegistryKey] != tg.Manifest {
@@ -205,7 +217,7 @@ func TestInstallErrors(t *testing.T) {
 	if err := os.WriteFile(file, nil, 0o600); err != nil {
 		t.Fatal(err)
 	}
-	m := NewManifest("/bin/portcheck", ExtensionIDs)
+	m := NewManifest(Browsers[0], "/bin/portcheck", ExtensionIDs, GeckoIDs)
 	b := Browsers[0]
 
 	// The manifest's directory can't be created, or the manifest can't be written.
@@ -283,5 +295,42 @@ func TestHostPath(t *testing.T) {
 	}
 	if got := HostPath(exe, link); got != link {
 		t.Errorf("PATH symlink to this binary: got %s, want %s", got, link)
+	}
+}
+
+func TestGeckoManifest(t *testing.T) {
+	t.Parallel()
+	var ff Browser
+	for _, b := range Browsers {
+		if b.Gecko {
+			ff = b
+		}
+	}
+	m := NewManifest(ff, "/usr/local/bin/portcheck", ExtensionIDs, []string{"a@b.c", "{d}"})
+	if m.AllowedOrigins != nil || !slices.Equal(m.AllowedExtensions, []string{"a@b.c", "{d}"}) {
+		t.Errorf("manifest = %+v", m)
+	}
+	data, _ := json.Marshal(m)
+	if strings.Contains(string(data), "allowed_origins") || !strings.Contains(string(data), `"allowed_extensions":["a@b.c","{d}"]`) {
+		t.Errorf("json = %s", data)
+	}
+	if got := m.AllowedIDs(); !slices.Equal(got, []string{"a@b.c", "{d}"}) {
+		t.Errorf("AllowedIDs = %v", got)
+	}
+	c := NewManifest(Browsers[0], "/p", []string{"aaaabbbbccccddddeeeeffffgggghhhh"}, GeckoIDs)
+	if got := c.AllowedIDs(); !slices.Equal(got, []string{"aaaabbbbccccddddeeeeffffgggghhhh"}) || c.AllowedExtensions != nil {
+		t.Errorf("chromium AllowedIDs = %v, %+v", got, c)
+	}
+}
+
+func TestTargetsWindowsFirefox(t *testing.T) {
+	t.Parallel()
+	targets, err := Targets(Env{GOOS: "windows", DataDir: `C:\d`, Registry: newFakeRegistry(`Software\Mozilla`)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ff := targets[len(targets)-1]
+	if ff.RegistryKey != `Software\Mozilla\NativeMessagingHosts\`+HostName || !ff.Detected {
+		t.Errorf("firefox = %+v", ff)
 	}
 }
