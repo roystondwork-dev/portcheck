@@ -1,6 +1,6 @@
 # Browser extension
 
-The portcheck extension for **Chrome and Edge** (and Chromium, Brave) tells you which
+The portcheck extension for **Edge, Chrome and Firefox** (and Chromium, Brave) tells you which
 process serves the localhost page you're looking at, and what's wrong when localhost
 refuses to connect.
 
@@ -24,6 +24,8 @@ refuses to connect.
   comes first. Light and dark themes follow your system.
 
 It works on `localhost`, `*.localhost`, `127.0.0.1`, `[::1]` and `0.0.0.0`, on any port.
+Even before the portcheck app is connected, the badge says whether the page's server is
+running (`on` or `off`).
 
 ## Install
 
@@ -42,31 +44,39 @@ from a release:
 
 ## Setup
 
-The extension asks the `portcheck` program on your machine, through the browser's
+Browsers don't let extensions see or stop processes, so the extension asks the free
+`portcheck` app on your computer, through the browser's
 [native messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging).
-Connect them once:
+One command installs the app and connects it; the popup shows the one for your system:
 
-1. [Install portcheck](../install.md) (0.8 or later; 0.7 also works, with the
-   `--extension-id` command the popup shows).
-2. Run:
+=== "macOS, Linux"
 
     ```sh
-    portcheck browser install
+    curl -fsSL https://roystondwork-dev.github.io/portcheck/install.sh | sh
     ```
 
-    This registers portcheck with every supported browser installed for your user;
-    `--browser edge` picks one. No administrator rights are needed. Check with
-    `portcheck browser status`; undo with `portcheck browser uninstall`.
+=== "Windows (PowerShell)"
 
-If the popup says *Connect portcheck*, step 2 hasn't been done for this browser (or
-portcheck moved: run it again). *Reconnect portcheck* means portcheck doesn't know this
-copy of the extension yet: update portcheck, or run the exact command the popup shows.
+    ```powershell
+    irm https://roystondwork-dev.github.io/portcheck/install.ps1 | iex
+    ```
+
+The open popup notices by itself and switches to the full view. ([What the installer
+does](../install.md#one-command).)
+
+Already have portcheck (Homebrew, Scoop, …)? Run `portcheck browser install` instead.
+It registers portcheck with every supported browser installed for your user
+(`--browser edge` picks one), without administrator rights. Check with
+`portcheck browser status`; undo with `portcheck browser uninstall`.
+
+*Reconnect portcheck* in the popup means portcheck doesn't know this copy of the
+extension yet: run the installer again to update it, or the exact command the popup
+shows.
 
 ## Troubleshooting
 
 - **The popup says "Connect portcheck" or "Reconnect portcheck".** Run the command it
-  shows (`portcheck browser install`, perhaps with `--extension-id`), then reopen the
-  popup.
+  shows; the popup updates by itself.
 - **macOS asks "portcheck would like to access files in your Desktop folder"** (or
   Documents, Downloads). The registered portcheck binary lives in that folder, for
   example a build from source; the browser waits for your answer before the badge can
@@ -86,8 +96,9 @@ The extension also runs in **Firefox 140 or later** (desktop). Two ways to insta
   [portcheck-firefox.xpi](https://github.com/roystondwork-dev/portcheck/releases/latest/download/portcheck-firefox.xpi)
   in Firefox and click **Add**. Mozilla has signed it, and it updates itself.
 
-Setup is the same: `portcheck browser install` registers portcheck with Firefox too
-(`--browser firefox` to pick it). If the popup shows **Allow localhost access**, click
+Setup is the same (portcheck 0.9 or later): the one-command installer, or
+`portcheck browser install`, registers portcheck with Firefox too (`--browser firefox`
+to pick it). If the popup shows **Allow localhost access**, click
 the button: Firefox lets you decide whether add-ons may read localhost addresses.
 
 ## Privacy and permissions
