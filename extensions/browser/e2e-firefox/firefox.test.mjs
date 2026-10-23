@@ -43,13 +43,14 @@ after(() => {
 
 async function launch(grantLocalhost) {
   const opts = new firefox.Options()
-    // System access lets the test open the add-on's pages (see openAddonPage).
-    .addArguments("-headless", "-remote-allow-system-access")
+    .addArguments("-headless")
     .setPreference("extensions.webextensions.uuids", JSON.stringify({ [ADDON_ID]: UUID }))
     // Firefox treats Manifest V3 host permissions as optional; the add-on asks for
     // them in its popup. This pref grants them like an accepted install prompt.
     .setPreference("extensions.originControls.grantByDefault", grantLocalhost);
-  const driver = await new Builder().forBrowser(Browser.FIREFOX).setFirefoxOptions(opts).build();
+  // System access lets the test open the add-on's pages (see openAddonPage).
+  const service = new firefox.ServiceBuilder().addArguments("--allow-system-access");
+  const driver = await new Builder().forBrowser(Browser.FIREFOX).setFirefoxOptions(opts).setFirefoxService(service).build();
   await driver.installAddon(xpi, true);
   return driver;
 }
