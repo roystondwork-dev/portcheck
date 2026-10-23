@@ -129,7 +129,8 @@ test("Firefox: badge, popup and Stop with the real portcheck", async () => {
     let badge = "";
     for (let i = 0; i < 60 && badge !== "node"; i++) {
       [tab, badge] = await inExtension(driver, async (u) => {
-        const [t] = await browser.tabs.query({ url: u });
+        // Firefox's URL patterns can't contain a port, so match the URL here.
+        const t = (await browser.tabs.query({})).find((x) => x.url === u);
         return t ? [t.id, await browser.action.getBadgeText({ tabId: t.id })] : [-1, ""];
       }, url);
       if (badge !== "node") await sleep(250);
