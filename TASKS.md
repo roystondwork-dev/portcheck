@@ -33,6 +33,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M17 | Browser extension (Chrome, Edge; native messaging) | 8 / 8 | ✅ |
 | M18 | Browser extension for Firefox; one-command setup | 5 / 6 | 🟨 |
 | M19 | JetBrains plugin (IntelliJ, WebStorm, PyCharm, …) | 0 / ? | ⬜ (planned) |
+| M20 | Safari extension (Mac app wrapper + Swift bridge to portcheck; signed with Developer ID) | 0 / ? | ⬜ (after 100 users: Apple Developer Program $99/yr) |
 
 ---
 
