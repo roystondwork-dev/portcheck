@@ -6,3 +6,5 @@ playwright-report/
 *.zip
 dist-store/
 store/out/
+dist-firefox/
+*.xpi

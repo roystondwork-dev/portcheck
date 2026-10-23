@@ -26,6 +26,8 @@ describe("call", () => {
   it.each([
     ["Specified native messaging host not found.", "not-installed"],
     ["Access to the specified native messaging host is forbidden.", "forbidden"],
+    ["No such native application io.github.roystondwork_dev.portcheck", "not-installed"],
+    ["This extension does not have permission to use native application io.github.roystondwork_dev.portcheck (or the application is not installed)", "forbidden"],
     ["Native host has exited.", "failed"],
   ])("explains %j", async (message, problem) => {
     const err = await call(failing(message), { op: "version" }, "version").catch((e: unknown) => e);

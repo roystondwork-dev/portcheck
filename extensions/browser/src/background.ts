@@ -1,17 +1,18 @@
 // Sets the toolbar badge for local pages: which process serves the page, or
 // "off" when nothing listens (e.g. on "This site can't be reached").
+import { ext } from "./api";
 import { call, HostError, type SendNative } from "./host";
 import { localTarget } from "./local";
 import { badge, portState } from "./model";
 import type { CheckData } from "./schema";
 
-const send: SendNative = (host, message) => chrome.runtime.sendNativeMessage(host, message);
+const send: SendNative = (host, message) => ext.runtime.sendNativeMessage(host, message);
 
 async function setBadge(tabId: number, text: string, color: string, title: string): Promise<void> {
   await Promise.all([
-    chrome.action.setBadgeText({ tabId, text }),
-    chrome.action.setBadgeBackgroundColor({ tabId, color }),
-    chrome.action.setTitle({ tabId, title }),
+    ext.action.setBadgeText({ tabId, text }),
+    ext.action.setBadgeBackgroundColor({ tabId, color }),
+    ext.action.setTitle({ tabId, title }),
   ]);
 }
 
@@ -44,14 +45,14 @@ async function update(tabId: number, url: string | undefined): Promise<void> {
 
 /** Updates every open tab: events from before the worker started are lost. */
 async function updateAll(): Promise<void> {
-  for (const tab of await chrome.tabs.query({})) {
+  for (const tab of await ext.tabs.query({})) {
     if (tab.id !== undefined) {
       void update(tab.id, tab.url).catch(() => undefined);
     }
   }
 }
 
-chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
+ext.tabs.onUpdated.addListener((tabId, info, tab) => {
   // Chrome resets a tab's badge when a navigation commits, so update once the
   // page has loaded. "complete" also fires for error pages such as
   // ERR_CONNECTION_REFUSED.
@@ -60,11 +61,11 @@ chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
   }
 });
 
-chrome.tabs.onActivated.addListener(({ tabId }) => {
-  void chrome.tabs.get(tabId).then((tab) => update(tabId, tab.url)).catch(() => undefined);
+ext.tabs.onActivated.addListener(({ tabId }) => {
+  void ext.tabs.get(tabId).then((tab) => update(tabId, tab.url)).catch(() => undefined);
 });
 
-chrome.tabs.onRemoved.addListener((tabId) => {
+ext.tabs.onRemoved.addListener((tabId) => {
   latest.delete(tabId);
 });
 

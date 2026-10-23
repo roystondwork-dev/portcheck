@@ -63,10 +63,14 @@ export async function call<T>(send: SendNative, req: Request, kind: string): Pro
     raw = await send(HOST, req);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    if (/not found/i.test(msg)) {
+    // Chrome/Edge: "Specified native messaging host not found."
+    // Firefox: "No such native application io.github.roystondwork_dev.portcheck"
+    if (/not found|no such native application/i.test(msg)) {
       throw new HostError("portcheck isn't set up for this browser.", "not-installed");
     }
-    if (/forbidden/i.test(msg)) {
+    // Chrome/Edge: "Access to the specified native messaging host is forbidden."
+    // Firefox: "This extension does not have permission to use native application …"
+    if (/forbidden|does not have permission/i.test(msg)) {
       throw new HostError("portcheck is set up, but not for this extension.", "forbidden");
     }
     throw new HostError(`portcheck couldn't be started: ${msg}`, "failed");
