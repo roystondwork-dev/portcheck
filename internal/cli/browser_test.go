@@ -309,7 +309,7 @@ func TestBrowserInstallFirefox(t *testing.T) {
 	if err := json.Unmarshal(data, &m); err != nil {
 		t.Fatal(err)
 	}
-	if !slices.Equal(m.AllowedExtensions, []string{nativehost.GeckoIDs[0], "dev@example.org"}) || m.AllowedOrigins != nil {
+	if !slices.Equal(m.AllowedExtensions, append(slices.Clone(nativehost.GeckoIDs), "dev@example.org")) || m.AllowedOrigins != nil {
 		t.Errorf("firefox manifest = %s", data)
 	}
 	st := browserStatus(t, h)

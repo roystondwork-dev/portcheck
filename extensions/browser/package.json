@@ -9,6 +9,7 @@
     "build": "node esbuild.mjs",
     "build:store": "node esbuild.mjs --store",
     "build:firefox": "node esbuild.mjs --firefox",
+    "build:firefox-direct": "node esbuild.mjs --firefox-direct",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test:unit": "vitest run --coverage",

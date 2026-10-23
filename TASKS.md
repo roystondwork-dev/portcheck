@@ -31,6 +31,8 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M15 | VS Code extension — USP (terminal "port in use" → one-click fix; project ports) | 5 / 5 | ✅ |
 | M16 | VS Code extension — packaging & publishing (VSIX, Marketplace, Open VSX) | 4 / 4 | ✅ |
 | M17 | Browser extension (Chrome, Edge; native messaging) | 8 / 8 | ✅ |
+| M18 | Browser extension for Firefox; one-command setup | 5 / 6 | 🟨 |
+| M19 | JetBrains plugin (IntelliJ, WebStorm, PyCharm, …) | 0 / ? | ⬜ (planned) |
 
 ---
 
@@ -279,8 +281,9 @@ Design: [ADR-0005](docs/adr/0005-browser-extension.md), amendment "Firefox".
 | M18-01 | `portcheck browser install --browser firefox`: Mozilla manifest locations, `allowed_extensions`, Firefox's launch form | `internal/nativehost/`, `internal/cli/browser.go` | unit 100% | ✅ | Launch detection splits paths on `/` and `\` so it works the same on every OS |
 | M18-02 | Firefox build: gecko ID, background scripts, data-collection declaration, `browser` API, Firefox error messages, localhost permission prompt | `extensions/browser/` (`npm run build:firefox`) | unit; Mozilla addons-linter (0 errors) | ✅ | ID `portcheck@roystondwork-dev.github.io` (ours; AMO keeps it) |
 | M18-03 | End-to-end in a real Firefox (Selenium) with the real `portcheck browser install --browser firefox` | `e2e-firefox/`, CI job | CI green | ✅ | Runs on Linux CI (the local sandbox can't start Firefox) |
-| M18-04 | Release assets: Firefox zip + source zip with build instructions for AMO reviewers | `release.yml` | — | ⬜ | |
+| M18-04 | Release assets: Firefox zip + source zip for AMO reviewers; Mozilla-signed direct `.xpi` with an update feed | `release.yml`, `docs/firefox-updates.json` | rebuild from source is byte-identical | ✅ | Signing needs the `AMO_JWT_ISSUER`/`AMO_JWT_SECRET` secrets (free Mozilla account) |
 | M18-05 | AMO listing kit and submission (free) | `extensions/browser/store/` | — | ⬜ | Needs portcheck with Firefox support released first |
+| M18-06 | One-command setup (`install.sh`, `install.ps1`); popup shows the OS command and connects by itself; on/off badge before the app is connected | `docs/install.*`, `src/probe.ts`, `src/popup.ts` | unit 100%; Chromium e2e; Installer workflow on 3 OSes | ✅ | Installer verifies release checksums |
 
 ## What's next (candidates, not yet scheduled)
 

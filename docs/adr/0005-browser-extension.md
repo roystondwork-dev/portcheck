@@ -54,6 +54,12 @@ build:firefox`):
   optional; the popup asks for localhost access when it's missing.
 - Firefox's reviewers rebuild bundled add-ons from source, so each release attaches the
   source with build instructions.
+- Firefox only installs add-ons signed by Mozilla. Besides the Firefox Add-ons listing,
+  each release has Mozilla sign a direct download (unlisted channel, minutes instead of
+  a review queue). Mozilla signs a version number once per add-on ID, so the direct
+  download is its own add-on, `portcheck-direct@roystondwork-dev.github.io`, which
+  portcheck also allows by default. It updates itself from
+  `docs/firefox-updates.json`, whose version release-please bumps.
 
 ## Consequences
 

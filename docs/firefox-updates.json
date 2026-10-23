@@ -1,0 +1,12 @@
+{
+  "addons": {
+    "portcheck-direct@roystondwork-dev.github.io": {
+      "updates": [
+        {
+          "version": "0.8.0",
+          "update_link": "https://github.com/roystondwork-dev/portcheck/releases/latest/download/portcheck-firefox.xpi"
+        }
+      ]
+    }
+  }
+}

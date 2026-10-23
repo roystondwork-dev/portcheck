@@ -78,12 +78,13 @@ copy of the extension yet: update portcheck, or run the exact command the popup 
 
 ## Firefox
 
-The extension also runs in **Firefox 140 or later**. It's on its way to
-[Firefox Add-ons](https://addons.mozilla.org/); until it's listed there, Firefox only
-loads it as a temporary add-on: download `portcheck-firefox-<version>.zip` from the
-[latest release](https://github.com/roystondwork-dev/portcheck/releases/latest), open
-`about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on…** and choose
-the zip (Firefox removes temporary add-ons when it restarts).
+The extension also runs in **Firefox 140 or later** (desktop). Two ways to install it:
+
+- **From Firefox Add-ons** (on its way): search for portcheck on
+  [addons.mozilla.org](https://addons.mozilla.org/) and click **Add to Firefox**.
+- **Directly**: open
+  [portcheck-firefox.xpi](https://github.com/roystondwork-dev/portcheck/releases/latest/download/portcheck-firefox.xpi)
+  in Firefox and click **Add**. Mozilla has signed it, and it updates itself.
 
 Setup is the same: `portcheck browser install` registers portcheck with Firefox too
 (`--browser firefox` to pick it). If the popup shows **Allow localhost access**, click
