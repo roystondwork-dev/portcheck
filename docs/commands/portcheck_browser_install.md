@@ -21,8 +21,8 @@ portcheck browser install [flags]
 ### Options
 
 ```
-      --browser strings        browsers to register with: chrome, edge, chromium, brave (default: those installed)
-      --extension-id strings   also allow these extension IDs (e.g. a development build)
+      --browser strings        browsers to register with: chrome, edge, chromium, brave, firefox (default: those installed)
+      --extension-id strings   also allow these extension IDs (Chromium) or add-on IDs (Firefox), e.g. a development build
   -h, --help                   help for install
       --path string            portcheck binary to register (default: this one)
 ```

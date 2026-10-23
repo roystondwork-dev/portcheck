@@ -76,6 +76,19 @@ copy of the extension yet: update portcheck, or run the exact command the popup 
 - **No badge on a localhost tab.** The badge only appears once the page has loaded;
   reload it. `portcheck browser status` shows whether this browser is registered.
 
+## Firefox
+
+The extension also runs in **Firefox 140 or later**. It's on its way to
+[Firefox Add-ons](https://addons.mozilla.org/); until it's listed there, Firefox only
+loads it as a temporary add-on: download `portcheck-firefox-<version>.zip` from the
+[latest release](https://github.com/roystondwork-dev/portcheck/releases/latest), open
+`about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on…** and choose
+the zip (Firefox removes temporary add-ons when it restarts).
+
+Setup is the same: `portcheck browser install` registers portcheck with Firefox too
+(`--browser firefox` to pick it). If the popup shows **Allow localhost access**, click
+the button: Firefox lets you decide whether add-ons may read localhost addresses.
+
 ## Privacy and permissions
 
 - The extension can only read the address of **localhost** tabs; it can't see other

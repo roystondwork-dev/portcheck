@@ -37,6 +37,24 @@ Windows) that lists which extension IDs may start it.
    with Playwright and checks the badge for a real local server. Its ID is pinned with
    the manifest `key`, so the host manifest can name it.
 
+## Amendment (2026-10-23): Firefox
+
+Firefox followed in M18 with the same code and a separate build (`npm run
+build:firefox`):
+
+- Firefox starts a host with two arguments, the host manifest's path and the add-on
+  ID, so portcheck also recognises that launch form. Its host manifests list add-on IDs
+  in `allowed_extensions` and live in Mozilla's directory (registry key
+  `HKCU\Software\Mozilla\NativeMessagingHosts` on Windows); `portcheck browser install`
+  writes them for `--browser firefox`.
+- The add-on ID is chosen by us (`portcheck@roystondwork-dev.github.io`) and kept by
+  addons.mozilla.org, so the default registration allows the store version.
+- Firefox runs Manifest V3 background scripts as an event page (no service worker),
+  requires a data-collection declaration (none), and treats host permissions as
+  optional; the popup asks for localhost access when it's missing.
+- Firefox's reviewers rebuild bundled add-ons from source, so each release attaches the
+  source with build instructions.
+
 ## Consequences
 
 - ✅ One implementation of port logic and safety guards for the CLI, the TUI, VS Code

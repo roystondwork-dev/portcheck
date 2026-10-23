@@ -270,6 +270,18 @@ messaging host; the extension can only ask for `version`, `list`, `check` and `k
 | M17-07 | End-to-end test in real Chromium (Playwright) with the real binary + CI | `extensions/browser/e2e/`, `.github/workflows/browser.yml` | CI green | ✅ | 5 tests: badge, `off`, popup + real Stop, startup race, setup help; native host registered in the test profile. CI on Linux and macOS (Windows registration covered by Go tests) |
 | M17-08 | Docs, release zip, store publishing (Edge Add-ons free; Chrome Web Store has a one-time fee) | `docs/guide/browser.md`, `release.yml` | strict docs build | ✅ | Docs, release zip and store zip (no manifest key) in every release. **Live on [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/jenlahoamefdpfmpodhidkgcceikheee)** since 2026-10-21 (Store ID 0RDCKGQR44VR, ID `jenlahoamefdpfmpodhidkgcceikheee`, allowed by default since v0.8.0); store updates are uploaded by hand from `portcheck-browser-store-X.Y.Z.zip`. Listing kit: `extensions/browser/store/`. Chrome Web Store deferred until ~100 users (one-time fee) |
 
+## M18 — Browser extension for Firefox
+
+Design: [ADR-0005](docs/adr/0005-browser-extension.md), amendment "Firefox".
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M18-01 | `portcheck browser install --browser firefox`: Mozilla manifest locations, `allowed_extensions`, Firefox's launch form | `internal/nativehost/`, `internal/cli/browser.go` | unit 100% | ✅ | Launch detection splits paths on `/` and `\` so it works the same on every OS |
+| M18-02 | Firefox build: gecko ID, background scripts, data-collection declaration, `browser` API, Firefox error messages, localhost permission prompt | `extensions/browser/` (`npm run build:firefox`) | unit; Mozilla addons-linter (0 errors) | ✅ | ID `portcheck@roystondwork-dev.github.io` (ours; AMO keeps it) |
+| M18-03 | End-to-end in a real Firefox (Selenium) with the real `portcheck browser install --browser firefox` | `e2e-firefox/`, CI job | CI green | ✅ | Runs on Linux CI (the local sandbox can't start Firefox) |
+| M18-04 | Release assets: Firefox zip + source zip with build instructions for AMO reviewers | `release.yml` | — | ⬜ | |
+| M18-05 | AMO listing kit and submission (free) | `extensions/browser/store/` | — | ⬜ | Needs portcheck with Firefox support released first |
+
 ## What's next (candidates, not yet scheduled)
 
 | Candidate | Notes |

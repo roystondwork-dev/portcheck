@@ -10,8 +10,8 @@ Connect portcheck to the browser extension
 
 ### Synopsis
 
-Register portcheck with Chromium browsers (Chrome, Edge, Chromium, Brave) so
-the portcheck browser extension can ask it which process serves a localhost
+Register portcheck with your browsers (Chrome, Edge, Chromium, Brave, Firefox)
+so the portcheck browser extension can ask it which process serves a localhost
 page, and stop it.
 
 Registration is per user and needs no administrator rights. The browser can
