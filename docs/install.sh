@@ -78,7 +78,9 @@ install_from_release() {
   fetch "$base/checksums.txt" >"$tmp/checksums.txt"
   want="$(awk -v n="$archive" '$2 == n { print $1 }' "$tmp/checksums.txt")"
   got="$(sha256 "$tmp/$archive")"
-  [ -n "$want" ] && [ "$want" = "$got" ] || fail "checksum mismatch for $archive"
+  if [ -z "$want" ] || [ "$want" != "$got" ]; then
+    fail "checksum mismatch for $archive"
+  fi
   tar -xzf "$tmp/$archive" -C "$tmp" portcheck
 
   dir="${PORTCHECK_INSTALL_DIR:-$HOME/.local/bin}"
