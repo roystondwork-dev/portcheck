@@ -46,11 +46,16 @@ are hidden.
    from the same release PR (`extra-files` in `release-please-config.json`).
 6. Check that the release has `portcheck-browser-X.Y.Z.zip`, the browser extension
    built by the **browser** job (its version also comes from the release PR).
-7. Follow the winget pull request opened on
-   [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+roystondwork-dev.portcheck).
-   Microsoft's bots validate and scan it, then a moderator merges it, which can take a few
-   days the first time. Keep the fork's `master` branch in sync occasionally
-   (`gh repo sync roystondwork-dev/winget-pkgs`).
+7. **winget submissions are paused** while the first one,
+   [microsoft/winget-pkgs#457169](https://github.com/microsoft/winget-pkgs/pull/457169)
+   (0.8.0), waits for a Microsoft moderator: each release would otherwise open a new PR
+   and lose its place in the queue. The release skips winget unless the repository
+   variable `WINGET_SUBMIT` is `true`. Once the package is accepted, resume with
+   `gh variable set WINGET_SUBMIT --body true --repo roystondwork-dev/portcheck`;
+   after that, follow the PR each release opens on
+   [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+roystondwork-dev.portcheck)
+   (comment the CLA agreement if asked) and keep the fork's `master` branch in sync
+   occasionally (`gh repo sync roystondwork-dev/winget-pkgs`).
 
 To rebuild artifacts for an existing tag (for example, after fixing a publishing
 problem), run the **Release** workflow manually and enter the tag. Tick **vscode_only**
@@ -63,7 +68,7 @@ Its `package.json` version must equal the tag's.
 | Secret | Required | Purpose |
 |---|---|---|
 | `HOMEBREW_TAP_GITHUB_TOKEN` | for Homebrew/Scoop | Fine-grained PAT with **Contents: read & write** on `homebrew-tap` and `scoop-bucket`. Without it, those publishers are skipped with a warning. |
-| `WINGET_GITHUB_TOKEN` | for winget | **Classic** PAT with the `public_repo` scope. GoReleaser pushes the manifest to the [`winget-pkgs` fork](https://github.com/roystondwork-dev/winget-pkgs) and opens a PR to `microsoft/winget-pkgs`; fine-grained tokens can't open PRs on repositories you don't own. Without it, the winget submission is skipped with a warning. |
+| `WINGET_GITHUB_TOKEN` | for winget | **Classic** PAT with the `public_repo` scope. GoReleaser pushes the manifest to the [`winget-pkgs` fork](https://github.com/roystondwork-dev/winget-pkgs) and opens a PR to `microsoft/winget-pkgs`; fine-grained tokens can't open PRs on repositories you don't own. Without it, the winget submission is skipped with a warning. Submissions also need the repository **variable** `WINGET_SUBMIT=true` (paused for now, see above). |
 | `RELEASE_PLEASE_TOKEN` | recommended | Fine-grained PAT with **Contents** and **Pull requests: read & write** on this repo. PRs opened with the default `GITHUB_TOKEN` don't trigger CI, so required checks never run on the release PR. Without this token, a maintainer must merge the release PR with admin override. |
 | `VSCE_PAT` | for the VS Code Marketplace | Azure DevOps personal access token with the **Marketplace: Manage** scope for *All accessible organizations*, from the account that owns the `portcheck-vscode` publisher. Without it, Marketplace publishing is skipped with a warning. |
 | `OVSX_PAT` | for Open VSX | Access token from [open-vsx.org](https://open-vsx.org) (user settings), for the account that owns the `portcheck-vscode` namespace and has signed the publisher agreement. Without it, Open VSX publishing is skipped with a warning. |
