@@ -109,11 +109,12 @@ homebrew_casks:
     manpages:
       - manpages/portcheck.1.gz
     # Binaries are not notarized by Apple; clear the quarantine flag on install.
+    # Homebrew's declarative install-steps DSL (GoReleaser 2.19+), not Ruby.
     hooks:
       post:
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/portcheck"]
+        install_steps: |
+          on_macos do
+            run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/portcheck"]
           end
 
 scoops:
