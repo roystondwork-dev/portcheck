@@ -44,8 +44,17 @@ are hidden.
    [the Marketplace's management page](https://marketplace.visualstudio.com/manage)
    (**⋯ → Update**). The extension's version comes
    from the same release PR (`extra-files` in `release-please-config.json`).
-6. Check that the release has `portcheck-browser-X.Y.Z.zip`, the browser extension
-   built by the **browser** job (its version also comes from the release PR).
+6. Check that the release has the browser extension, built by the **browser** job (its
+   version also comes from the release PR): `portcheck-browser-X.Y.Z.zip` (load
+   unpacked), `portcheck-browser-store-X.Y.Z.zip` (Edge Add-ons upload),
+   `portcheck-firefox-X.Y.Z.zip` (Firefox Add-ons upload) and
+   `portcheck-firefox-source-X.Y.Z.zip` (its source, which Firefox's reviewers rebuild;
+   see `extensions/browser/BUILD-FIREFOX.md`).
+7. Follow the winget pull request opened on
+   [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+roystondwork-dev.portcheck).
+   Microsoft's bots validate and scan it, then a moderator merges it, which can take a few
+   days the first time. Keep the fork's `master` branch in sync occasionally
+   (`gh repo sync roystondwork-dev/winget-pkgs`).
 7. **winget submissions are paused** while the first one,
    [microsoft/winget-pkgs#457169](https://github.com/microsoft/winget-pkgs/pull/457169)
    (0.8.0), waits for a Microsoft moderator: each release would otherwise open a new PR
