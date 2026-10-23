@@ -134,7 +134,22 @@ test("Firefox: badge, popup and Stop with the real portcheck", async () => {
       }, url);
       if (badge !== "node") await sleep(250);
     }
-    assert.equal(badge, "node", "badge on the localhost tab");
+    if (badge !== "node") {
+      // What the add-on sees, for the failure message.
+      const seen = await inExtension(driver, async () => {
+        const tabs = await browser.tabs.query({});
+        const native = await browser.runtime.sendNativeMessage("io.github.roystondwork_dev.portcheck", { op: "version" }).then(
+          (r) => JSON.stringify(r).slice(0, 120),
+          (e) => "ERROR " + e.message,
+        );
+        return JSON.stringify({
+          access: await browser.permissions.getAll(),
+          tabs: await Promise.all(tabs.map(async (t) => [t.id, t.url, await browser.action.getBadgeText({ tabId: t.id })])),
+          native,
+        });
+      });
+      assert.fail(`badge on the localhost tab is "${badge}"; the add-on sees ${seen}`);
+    }
     const title = await inExtension(driver, (t) => browser.action.getTitle({ tabId: t }), tab);
     assert.match(title, new RegExp(`localhost:${port} is served by node \\(pid ${child.pid}\\)`));
 

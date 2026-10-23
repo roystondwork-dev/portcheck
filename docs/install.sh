@@ -63,19 +63,23 @@ install_from_release() {
   esac
 
   version="${PORTCHECK_VERSION:-}"
-  if [ -z "$version" ]; then
-    version="$(fetch "https://api.github.com/repos/$REPO/releases/latest" | sed -n 's/.*"tag_name": *"v\{0,1\}\([^"]*\)".*/\1/p' | head -n 1)"
-    [ -n "$version" ] || fail "couldn't find the latest release"
+  if [ -n "$version" ]; then
+    base="https://github.com/$REPO/releases/download/v${version#v}"
+  else
+    # No API call (rate-limited per IP): the latest release's checksums name
+    # its archives, which carry the version.
+    base="https://github.com/$REPO/releases/latest/download"
   fi
-  version="${version#v}"
-  archive="portcheck_${version}_${os}_${arch}.tar.gz"
-  base="https://github.com/$REPO/releases/download/v$version"
 
   tmp="$(mktemp -d)"
   trap 'rm -rf "$tmp"' EXIT
+  fetch "$base/checksums.txt" >"$tmp/checksums.txt"
+  archive="$(awk -v s="_${os}_${arch}.tar.gz" '{ n = $2; sub(/^\*/, "", n) } index(n, "portcheck_") == 1 && substr(n, length(n) - length(s) + 1) == s { print n; exit }' "$tmp/checksums.txt")"
+  [ -n "$archive" ] || fail "no portcheck build for ${os}/${arch} in this release"
+  version="${archive#portcheck_}"
+  version="${version%"_${os}_${arch}.tar.gz"}"
   say "Downloading portcheck ${version} for ${os}/${arch}..."
   fetch "$base/$archive" >"$tmp/$archive"
-  fetch "$base/checksums.txt" >"$tmp/checksums.txt"
   want="$(awk -v n="$archive" '$2 == n { print $1 }' "$tmp/checksums.txt")"
   got="$(sha256 "$tmp/$archive")"
   if [ -z "$want" ] || [ "$want" != "$got" ]; then

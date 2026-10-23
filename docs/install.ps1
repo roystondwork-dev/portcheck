@@ -22,23 +22,27 @@ $arch = switch ($env:PROCESSOR_ARCHITECTURE) {
     default { throw "portcheck installer: unsupported CPU $($env:PROCESSOR_ARCHITECTURE)" }
 }
 
-$version = $env:PORTCHECK_VERSION
-if (-not $version) {
-    $version = (Invoke-RestMethod "https://api.github.com/repos/$repo/releases/latest").tag_name
+if ($env:PORTCHECK_VERSION) {
+    $base = "https://github.com/$repo/releases/download/v$($env:PORTCHECK_VERSION.TrimStart('v'))"
+} else {
+    # No API call (rate-limited per IP): the latest release's checksums name
+    # its archives, which carry the version.
+    $base = "https://github.com/$repo/releases/latest/download"
 }
-$version = $version.TrimStart('v')
-$archive = "portcheck_${version}_windows_${arch}.zip"
-$base = "https://github.com/$repo/releases/download/v$version"
 
 $tmp = Join-Path ([IO.Path]::GetTempPath()) ("portcheck-" + [Guid]::NewGuid())
 New-Item -ItemType Directory -Path $tmp | Out-Null
 try {
-    Write-Host "Downloading portcheck $version for windows/$arch..."
-    Invoke-WebRequest "$base/$archive" -OutFile (Join-Path $tmp $archive) -UseBasicParsing
     # Saved to a file: GitHub serves it as binary, which Content would return as bytes.
     Invoke-WebRequest "$base/checksums.txt" -OutFile (Join-Path $tmp 'checksums.txt') -UseBasicParsing
-    $sums = Get-Content (Join-Path $tmp 'checksums.txt') -Raw
-    $want = ($sums -split "`n" | Where-Object { $_ -match "\s$([regex]::Escape($archive))\s*$" } | ForEach-Object { ($_ -split '\s+')[0] }) | Select-Object -First 1
+    $line = Get-Content (Join-Path $tmp 'checksums.txt') | Where-Object { $_ -match "\s\*?(portcheck_(.+)_windows_${arch}\.zip)\s*$" } | Select-Object -First 1
+    if (-not $line) { throw "portcheck installer: no portcheck build for windows/$arch in this release" }
+    $null = $line -match "\s\*?(portcheck_(.+)_windows_${arch}\.zip)\s*$"
+    $archive = $Matches[1]
+    $version = $Matches[2]
+    $want = ($line -split '\s+')[0]
+    Write-Host "Downloading portcheck $version for windows/$arch..."
+    Invoke-WebRequest "$base/$archive" -OutFile (Join-Path $tmp $archive) -UseBasicParsing
     $got = (Get-FileHash (Join-Path $tmp $archive) -Algorithm SHA256).Hash.ToLower()
     if (-not $want -or $want.ToLower() -ne $got) { throw "portcheck installer: checksum mismatch for $archive" }
     Expand-Archive (Join-Path $tmp $archive) -DestinationPath (Join-Path $tmp 'x') -Force
