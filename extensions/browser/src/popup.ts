@@ -4,6 +4,7 @@ import { call, HostError, KNOWN_IDS, type SendNative } from "./host";
 import { type LocalTarget, localTarget } from "./local";
 import { listedPorts, portState } from "./model";
 import type { CheckData, KillData, ListData } from "./schema";
+import { isUp } from "./probe";
 import { type Action, filterPorts, type Icon, type PortView, portView, setupHelp } from "./view";
 
 const send: SendNative = (host, message) => ext.runtime.sendNativeMessage(host, message);
@@ -97,9 +98,27 @@ function hero(address: string, chip?: { text: string; status: string }, summary?
   return el("div", { className: "hero" }, el("div", { className: "address", textContent: address }), status);
 }
 
-function showSetup(section: HTMLElement, err: unknown): void {
+/** Checks every 2 s whether portcheck answers, while the setup steps show. */
+let waiting: ReturnType<typeof setInterval> | undefined;
+
+function waitForConnection(): void {
+  if (waiting !== undefined) {
+    return;
+  }
+  waiting = setInterval(() => {
+    void call(send, { op: "version" }, "version").then(() => {
+      clearInterval(waiting);
+      waiting = undefined;
+      void ext.runtime.sendMessage("refresh").catch(() => undefined); // update the badges
+      void refresh();
+    }, () => undefined);
+  }, 2000);
+}
+
+async function showSetup(section: HTMLElement, err: unknown): Promise<void> {
   const e = err instanceof HostError ? err : new HostError(String(err), "failed");
-  const help = setupHelp(e.problem, e.message, ext.runtime.id, KNOWN_IDS);
+  const { os } = await ext.runtime.getPlatformInfo();
+  const help = setupHelp(e.problem, e.message, ext.runtime.id, KNOWN_IDS, os);
   const steps = el(
     "ol",
     { className: "steps" },
@@ -118,11 +137,21 @@ function showSetup(section: HTMLElement, err: unknown): void {
       return li;
     }),
   );
-  section.replaceChildren(
-    hero(help.headline, { text: "Not connected", status: "stopped" }),
-    el("p", { className: "muted", textContent: help.intro }),
-    steps,
-  );
+  const parts: HTMLElement[] = [];
+  if (currentTarget && e.problem !== "failed") {
+    // Without the app, the page's server can still be checked by connecting to it.
+    const up = await isUp((u, init) => fetch(u, init), `${new URL(currentURL ?? "").origin}/`);
+    parts.push(hero(currentTarget.label, up ? { text: "Running", status: "running" } : { text: "Not running", status: "stopped" }));
+    parts.push(el("h2", { className: "setup-title", textContent: help.headline }));
+  } else {
+    parts.push(hero(help.headline, { text: "Not connected", status: "stopped" }));
+  }
+  parts.push(el("p", { className: "muted", textContent: help.intro }), steps);
+  if (e.problem !== "failed") {
+    parts.push(el("p", { className: "waiting", textContent: "Waiting for portcheck… this updates by itself." }));
+    waitForConnection();
+  }
+  section.replaceChildren(...parts);
 }
 
 function renderView(section: HTMLElement, v: PortView, onStopped: (message: string, ok: boolean) => void): void {
@@ -191,6 +220,7 @@ function stopButton(a: Action, v: PortView, row: HTMLElement, onStopped: (messag
 
 let allPorts: { port: number; owners: string; url: string }[] = [];
 let currentTarget: LocalTarget | undefined;
+let currentURL: string | undefined;
 
 function renderPortList(): void {
   const list = byId("port-list");
@@ -277,7 +307,7 @@ async function refresh(): Promise<void> {
     await Promise.all([renderTab(section), renderPorts()]);
     byId("ports").hidden = false;
   } catch (err) {
-    showSetup(section, err);
+    await showSetup(section, err);
     byId("ports").hidden = true;
   } finally {
     r.classList.remove("spin");
@@ -291,6 +321,7 @@ byId("refresh").addEventListener("click", () => void refresh());
 byId("filter").addEventListener("input", renderPortList);
 
 void currentTab().then((tab) => {
-  currentTarget = localTarget(tab?.url);
+  currentURL = tab?.url;
+  currentTarget = localTarget(currentURL);
   return refresh();
 });

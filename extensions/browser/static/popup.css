@@ -119,8 +119,8 @@ code, .code {
   content: counter(step); grid-row: span 2; width: 22px; height: 22px; border-radius: 50%;
   display: grid; place-items: center; font-size: 11px; font-weight: 700; background: var(--brand); color: var(--brand-fg);
 }
-.cmd { display: flex; gap: 4px; align-items: center; min-width: 0; }
-.cmd .code { flex: 1; min-width: 0; padding: 6px 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: thin; }
+.cmd { display: flex; gap: 4px; align-items: flex-start; min-width: 0; }
+.cmd .code { flex: 1; min-width: 0; padding: 6px 8px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.45; user-select: all; }
 .cmd .icon-btn { width: 28px; height: 28px; }
 
 /* Ports */
@@ -145,3 +145,7 @@ ul { list-style: none; margin: 0; padding: 0; max-height: 230px; overflow: auto;
 .port-row svg { color: var(--muted); opacity: 0; }
 .port-row:hover svg { opacity: 1; }
 .empty { padding: 8px; color: var(--muted); }
+.setup-title { margin: 14px 0 2px; font-size: 13px; font-weight: 600; }
+.waiting { margin-top: 10px; font-size: 12px; color: var(--muted); }
+.waiting::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--muted); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .25; } }

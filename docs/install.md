@@ -2,6 +2,38 @@
 
 portcheck is a single static binary with no runtime dependencies.
 
+## One command
+
+Installs portcheck and connects it to your browsers for the
+[browser extension](guide/browser.md):
+
+=== "macOS, Linux"
+
+    ```sh
+    curl -fsSL https://roystondwork-dev.github.io/portcheck/install.sh | sh
+    ```
+
+    With Homebrew, it installs the Homebrew package. Otherwise it downloads the latest
+    release, checks it against the release's checksums, and installs it to
+    `~/.local/bin` (`PORTCHECK_INSTALL_DIR=/somewhere` to choose).
+    [Read the script](https://github.com/roystondwork-dev/portcheck/blob/main/docs/install.sh).
+
+=== "Windows (PowerShell)"
+
+    ```powershell
+    irm https://roystondwork-dev.github.io/portcheck/install.ps1 | iex
+    ```
+
+    It downloads the latest release, checks it against the release's checksums,
+    installs it to `%LOCALAPPDATA%\Programs\portcheck` and adds that folder to your
+    user `PATH`. No administrator rights are needed.
+    [Read the script](https://github.com/roystondwork-dev/portcheck/blob/main/docs/install.ps1).
+
+Both finish with `portcheck browser install`; set `PORTCHECK_NO_BROWSER=1` to skip it,
+or `PORTCHECK_VERSION=0.9.0` for a specific version.
+
+## Package managers
+
 === "Homebrew (macOS, Linux)"
 
     ```sh
@@ -112,6 +144,8 @@ sudo "$(command -v portcheck)" list -l
 
 ## Uninstall
 
-Remove the binary, or use your package manager (`brew uninstall portcheck`,
-`scoop uninstall portcheck`, `apt remove portcheck`, …). portcheck writes no
-configuration or cache files.
+Run `portcheck browser uninstall` first if you connected browsers. Then remove the
+binary (the one-command installer put it in `~/.local/bin` or
+`%LOCALAPPDATA%\Programs\portcheck`), or use your package manager
+(`brew uninstall portcheck`, `scoop uninstall portcheck`, `apt remove portcheck`, …).
+portcheck writes no other configuration or cache files.

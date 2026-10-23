@@ -1,0 +1,54 @@
+name: Installer
+
+# Runs the one-line installers (docs/install.sh, docs/install.ps1) against the
+# latest release, the way users run them from the docs site.
+on:
+  push:
+    branches: [main]
+    paths: [docs/install.sh, docs/install.ps1, .github/workflows/installer.yml]
+  pull_request:
+    paths: [docs/install.sh, docs/install.ps1, .github/workflows/installer.yml]
+  schedule:
+    - cron: "17 6 * * 1" # weekly: releases change what "latest" installs
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unix:
+    name: install.sh (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install from the GitHub release
+        env:
+          PORTCHECK_INSTALL_DIR: ${{ runner.temp }}/bin
+        run: sh docs/install.sh
+      - name: Check
+        run: |
+          "$RUNNER_TEMP/bin/portcheck" version
+          "$RUNNER_TEMP/bin/portcheck" browser status -o plain
+      - name: Shellcheck
+        if: runner.os == 'Linux'
+        run: shellcheck docs/install.sh
+
+  windows:
+    name: install.ps1 (windows-latest)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install from the GitHub release
+        shell: pwsh
+        run: ./docs/install.ps1
+      - name: Check
+        shell: pwsh
+        run: |
+          $exe = Join-Path $env:LOCALAPPDATA 'Programs\portcheck\portcheck.exe'
+          & $exe version
+          & $exe browser status -o plain
+          if (-not ([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' -contains (Split-Path $exe))) { throw 'not on the user PATH' }
