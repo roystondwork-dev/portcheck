@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** none in progress (M14–M17 done). Open: restore the macOS jobs and the coverage gate as required checks on `main` (made optional on 2026-10-20 while GitHub had no macOS runner capacity), manual WSL check (M11-04, deferred by maintainer), winget review (M7-06), Open VSX namespace claim (October 2027)
+**Current milestone:** none in progress (M14–M17 done). Open: manual WSL check (M11-04, deferred by maintainer), winget review (M7-06), Open VSX namespace claim (October 2027)
 **Last updated:** 2026-10-20
 **Latest release:** [v0.8.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.8.0)
 
