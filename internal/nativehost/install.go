@@ -21,7 +21,10 @@ var ExtensionIDs = []string{
 
 // GeckoIDs are the Firefox add-on IDs allowed to start the host by default
 // (browser_specific_settings.gecko.id in the Firefox build).
-var GeckoIDs = []string{"portcheck@roystondwork-dev.github.io"}
+var GeckoIDs = []string{
+	"portcheck@roystondwork-dev.github.io",        // Firefox Add-ons
+	"portcheck-direct@roystondwork-dev.github.io", // the signed .xpi on GitHub releases
+}
 
 // Browser is a browser portcheck can register with.
 type Browser struct {

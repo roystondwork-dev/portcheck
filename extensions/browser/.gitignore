@@ -7,4 +7,5 @@ playwright-report/
 dist-store/
 store/out/
 dist-firefox/
+dist-firefox-direct/
 *.xpi

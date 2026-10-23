@@ -192,6 +192,8 @@ jobs:
       attestations: write
     env:
       TAG: ${{ needs.release-please.outputs.tag_name || inputs.tag }}
+      # Set: sign the Firefox direct download (see the step below).
+      AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
     defaults:
       run:
         working-directory: extensions/browser
@@ -222,12 +224,33 @@ jobs:
           npm run build:firefox
           (cd dist-firefox && zip -qr "$RUNNER_TEMP/portcheck-firefox-$version.zip" .)
           git archive --format=zip -o "$RUNNER_TEMP/portcheck-firefox-source-$version.zip" HEAD:extensions/browser
+      - name: Have Mozilla sign the Firefox direct download
+        # A separate, unlisted add-on (its own ID): Mozilla signs it in minutes,
+        # so users can install the .xpi from the release page and it updates
+        # itself from docs/firefox-updates.json. Skipped without the AMO keys.
+        if: env.AMO_JWT_ISSUER != ''
+        env:
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: |
+          version=${TAG#v}
+          npm run build:firefox-direct
+          npx --yes web-ext@10.8.0 sign --channel unlisted \
+            --source-dir dist-firefox-direct --artifacts-dir "$RUNNER_TEMP/signed" \
+            --upload-source-code "$RUNNER_TEMP/portcheck-firefox-source-$version.zip" \
+            --api-key "$AMO_JWT_ISSUER" --api-secret "$AMO_JWT_SECRET" --approval-timeout 1800000
+          xpi=$(find "$RUNNER_TEMP/signed" -name '*.xpi' | head -n 1)
+          [ -n "$xpi" ] || { echo "::error::Mozilla returned no signed .xpi"; exit 1; }
+          cp "$xpi" "$RUNNER_TEMP/portcheck-firefox-$version.xpi"
+          # The update feed links to this fixed name on the latest release.
+          cp "$xpi" "$RUNNER_TEMP/portcheck-firefox.xpi"
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: |
             ${{ runner.temp }}/portcheck-browser-*.zip
-            ${{ runner.temp }}/portcheck-firefox-*.zip
+            ${{ runner.temp }}/portcheck-firefox-*
       - name: Attach to the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$TAG" "$RUNNER_TEMP"/portcheck-browser-*.zip "$RUNNER_TEMP"/portcheck-firefox-*.zip --clobber
+        run: |
+          shopt -s nullglob
+          gh release upload "$TAG" "$RUNNER_TEMP"/portcheck-browser-*.zip "$RUNNER_TEMP"/portcheck-firefox-*.zip "$RUNNER_TEMP"/portcheck-firefox*.xpi --clobber
