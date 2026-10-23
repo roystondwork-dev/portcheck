@@ -118,7 +118,7 @@ func TestBrowserErrors(t *testing.T) {
 	t.Parallel()
 	envErr := errors.New("no home")
 	cases := []runCase{
-		{name: "unknown browser", args: []string{"browser", "install", "--browser", "firefox"}, wantCode: ExitUsage, wantErr: []string{`unknown browser "firefox"`}},
+		{name: "unknown browser", args: []string{"browser", "install", "--browser", "opera"}, wantCode: ExitUsage, wantErr: []string{`unknown browser "opera"`}},
 		{name: "unknown browser uninstall", args: []string{"browser", "uninstall", "--browser", "safari"}, wantCode: ExitUsage, wantErr: []string{`unknown browser "safari"`}},
 		{name: "bad extension id", args: []string{"browser", "install", "--extension-id", "xyz"}, wantCode: ExitUsage, wantErr: []string{`invalid extension ID "xyz"`}},
 		{name: "bad extension id letters", args: []string{"browser", "install", "--extension-id", "zzzzbbbbccccddddeeeeffffgggghhhh"}, wantCode: ExitUsage, wantErr: []string{"invalid extension ID"}},
@@ -287,5 +287,72 @@ func TestNativeHostBadInput(t *testing.T) {
 	h.app.Stdin = bytes.NewReader([]byte{5, 0})
 	if code := h.run(t, "chrome-extension://"+nativehost.ExtensionIDs[0]+"/"); code != ExitRuntime || !strings.Contains(h.stderr.String(), "native messaging") {
 		t.Errorf("exit %d, stderr %s", code, h.stderr)
+	}
+}
+
+func TestBrowserInstallFirefox(t *testing.T) {
+	t.Parallel()
+	h, home := browserHarness(t)
+	if err := os.MkdirAll(filepath.Join(home, ".mozilla"), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	// A Firefox development build's ID, alongside a Chromium one.
+	code := h.run(t, "browser", "install", "--extension-id", "dev@example.org", "--extension-id", "aaaabbbbccccddddeeeeffffgggghhhh")
+	if code != ExitOK || !strings.Contains(h.stderr.String(), "Registered with Mozilla Firefox.") {
+		t.Fatalf("exit %d: %s", code, h.stderr)
+	}
+	data, err := os.ReadFile(filepath.Join(home, ".mozilla", "native-messaging-hosts", nativehost.HostName+".json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var m nativehost.Manifest
+	if err := json.Unmarshal(data, &m); err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(m.AllowedExtensions, []string{nativehost.GeckoIDs[0], "dev@example.org"}) || m.AllowedOrigins != nil {
+		t.Errorf("firefox manifest = %s", data)
+	}
+	st := browserStatus(t, h)
+	ff := st.Browsers[len(st.Browsers)-1]
+	if ff.Browser != "firefox" || !ff.Registered || !slices.Equal(ff.Extensions, m.AllowedExtensions) {
+		t.Errorf("firefox status = %+v", ff)
+	}
+	// The Chromium manifest got the Chromium ID, not the Firefox one.
+	if c := st.Browsers[0]; !slices.Contains(c.Extensions, "aaaabbbbccccddddeeeeffffgggghhhh") || slices.Contains(c.Extensions, "dev@example.org") {
+		t.Errorf("chrome status = %+v", c)
+	}
+}
+
+func TestValidGeckoID(t *testing.T) {
+	t.Parallel()
+	for id, want := range map[string]bool{
+		"portcheck@roystondwork-dev.github.io":   true,
+		"@my-addon":                              true, // allowed by Firefox (MDN uses "@extension-without-data-collection")
+		"{12345678-1234-1234-1234-123456789abc}": true,
+		"{not-a-guid}":                           false,
+		"no-at-sign":                             false,
+		"a b@c.d":                                false,
+	} {
+		if got := validGeckoID(id); got != want {
+			t.Errorf("validGeckoID(%q) = %v", id, got)
+		}
+	}
+}
+
+func TestNativeHostFirefoxLaunch(t *testing.T) {
+	t.Parallel()
+	h := newHarness()
+	var in bytes.Buffer
+	if err := nativehost.WriteMessage(&in, []byte(`{"id":1,"op":"version"}`)); err != nil {
+		t.Fatal(err)
+	}
+	h.app.Stdin = &in
+	manifest := filepath.Join("home", ".mozilla", "native-messaging-hosts", nativehost.HostName+".json")
+	if code := h.run(t, manifest, nativehost.GeckoIDs[0]); code != ExitOK {
+		t.Fatalf("exit %d: %s", code, h.stderr)
+	}
+	raw, err := nativehost.ReadMessage(h.stdout)
+	if err != nil || !strings.Contains(string(raw), `"kind":"version"`) {
+		t.Errorf("response = %s, %v", raw, err)
 	}
 }

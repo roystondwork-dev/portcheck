@@ -31,10 +31,19 @@ const (
 )
 
 // IsLaunch reports whether args (without the program name) are those a
-// Chromium browser uses to start a native messaging host: the extension origin,
-// followed on Windows by --parent-window.
+// browser uses to start a native messaging host. Chromium browsers pass the
+// extension origin (followed on Windows by --parent-window); Firefox passes
+// the path of the host manifest and the add-on ID.
 func IsLaunch(args []string) bool {
-	return len(args) > 0 && strings.HasPrefix(args[0], "chrome-extension://")
+	if len(args) > 0 && strings.HasPrefix(args[0], "chrome-extension://") {
+		return true
+	}
+	if len(args) < 2 {
+		return false
+	}
+	// The manifest path's last element, whichever separator the OS uses.
+	name := args[0][strings.LastIndexAny(args[0], `/\`)+1:]
+	return name == HostName+".json"
 }
 
 // ReadMessage reads one length-prefixed message. It returns io.EOF when the

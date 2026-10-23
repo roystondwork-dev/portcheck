@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -45,8 +46,8 @@ func (c *cli) newBrowserCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "browser",
 		Short: "Connect portcheck to the browser extension",
-		Long: `Register portcheck with Chromium browsers (Chrome, Edge, Chromium, Brave) so
-the portcheck browser extension can ask it which process serves a localhost
+		Long: `Register portcheck with your browsers (Chrome, Edge, Chromium, Brave, Firefox)
+so the portcheck browser extension can ask it which process serves a localhost
 page, and stop it.
 
 Registration is per user and needs no administrator rights. The browser can
@@ -73,8 +74,8 @@ in every supported browser installed for this user (or those given with
 		Args: usageArgs(cobra.NoArgs),
 		RunE: func(*cobra.Command, []string) error { return c.runBrowserInstall(f) },
 	}
-	cmd.Flags().StringSliceVar(&f.browsers, "browser", nil, "browsers to register with: chrome, edge, chromium, brave (default: those installed)")
-	cmd.Flags().StringSliceVar(&f.extensionIDs, "extension-id", nil, "also allow these extension IDs (e.g. a development build)")
+	cmd.Flags().StringSliceVar(&f.browsers, "browser", nil, "browsers to register with: chrome, edge, chromium, brave, firefox (default: those installed)")
+	cmd.Flags().StringSliceVar(&f.extensionIDs, "extension-id", nil, "also allow these extension IDs (Chromium) or add-on IDs (Firefox), e.g. a development build")
 	cmd.Flags().StringVar(&f.path, "path", "", "portcheck binary to register (default: this one)")
 	return cmd
 }
@@ -110,9 +111,15 @@ func (c *cli) browserTargets() (nativehost.Env, []nativehost.Target, error) {
 }
 
 func (c *cli) runBrowserInstall(f browserFlags) error {
+	var extraChromium, extraGecko []string
 	for _, id := range f.extensionIDs {
-		if !validExtensionID(id) {
-			return usageError("invalid extension ID %q (32 letters a-p)", id)
+		switch {
+		case validExtensionID(id):
+			extraChromium = append(extraChromium, id)
+		case validGeckoID(id):
+			extraGecko = append(extraGecko, id)
+		default:
+			return usageError("invalid extension ID %q (Chromium: 32 letters a-p; Firefox: name@domain or {GUID})", id)
 		}
 	}
 	env, targets, err := c.browserTargets()
@@ -124,15 +131,16 @@ func (c *cli) runBrowserInstall(f browserFlags) error {
 		return &ExitError{Code: ExitUsage, Err: err}
 	}
 	if len(selected) == 0 {
-		return errors.New("found no supported browser (Chrome, Edge, Chromium, Brave) for this user; use --browser to register anyway")
+		return errors.New("found no supported browser (Chrome, Edge, Chromium, Brave, Firefox) for this user; use --browser to register anyway")
 	}
 	path, err := c.hostPath(f.path)
 	if err != nil {
 		return err
 	}
-	m := nativehost.NewManifest(path, slices.Concat(nativehost.ExtensionIDs, f.extensionIDs))
+	chromium := slices.Concat(nativehost.ExtensionIDs, extraChromium)
+	gecko := slices.Concat(nativehost.GeckoIDs, extraGecko)
 	for _, t := range selected {
-		if err := nativehost.Install(env, t, m); err != nil {
+		if err := nativehost.Install(env, t, nativehost.NewManifest(t.Browser, path, chromium, gecko)); err != nil {
 			return err
 		}
 		fmt.Fprintf(c.app.Stderr, "Registered with %s.\n", t.Browser.Name)
@@ -178,9 +186,7 @@ func (c *cli) printBrowsers(env nativehost.Env, targets []nativehost.Target) err
 		if m != nil {
 			row.Registered = true
 			row.Path = m.Path
-			for _, o := range m.AllowedOrigins {
-				row.Extensions = append(row.Extensions, strings.TrimSuffix(strings.TrimPrefix(o, "chrome-extension://"), "/"))
-			}
+			row.Extensions = m.AllowedIDs()
 		}
 		rows = append(rows, row)
 	}
@@ -207,6 +213,12 @@ func (c *cli) hostPath(flag string) (string, error) {
 	}
 	return nativehost.HostPath(exe, onPath), nil
 }
+
+// geckoID matches Firefox add-on IDs: email-like (name@domain) or a {GUID}.
+var geckoID = regexp.MustCompile(`^([A-Za-z0-9._+-]*@[A-Za-z0-9.-]+|\{[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\})$`)
+
+// validGeckoID reports whether id looks like a Firefox add-on ID.
+func validGeckoID(id string) bool { return geckoID.MatchString(id) }
 
 // validExtensionID reports whether id looks like a Chromium extension ID.
 func validExtensionID(id string) bool {

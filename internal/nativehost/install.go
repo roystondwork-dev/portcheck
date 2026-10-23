@@ -8,9 +8,10 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 )
 
-// ExtensionIDs are the portcheck extension IDs allowed to start the host by
+// ExtensionIDs are the Chromium extension IDs allowed to start the host by
 // default: the ID pinned by the manifest key in extensions/browser (release
 // zips, loaded unpacked), then the store builds' IDs.
 var ExtensionIDs = []string{
@@ -18,17 +19,27 @@ var ExtensionIDs = []string{
 	"jenlahoamefdpfmpodhidkgcceikheee", // Microsoft Edge Add-ons
 }
 
-// Browser is a Chromium browser portcheck can register with.
+// GeckoIDs are the Firefox add-on IDs allowed to start the host by default
+// (browser_specific_settings.gecko.id in the Firefox build).
+var GeckoIDs = []string{"portcheck@roystondwork-dev.github.io"}
+
+// Browser is a browser portcheck can register with.
 type Browser struct {
-	// ID is used on the command line: chrome, chromium, edge, brave.
+	// ID is used on the command line: chrome, chromium, edge, brave, firefox.
 	ID   string
 	Name string
 	// Dir is the user data directory per OS (relative to the home directory on
-	// macOS and Linux); the host manifest goes in its NativeMessagingHosts.
+	// macOS and Linux); it tells whether the browser is installed.
 	Dir map[string]string
+	// HostsDir is where host manifests go per OS (relative to the home
+	// directory); empty means Dir's NativeMessagingHosts.
+	HostsDir map[string]string
 	// RegistryKey is the per-user registry key (under HKEY_CURRENT_USER) on
 	// Windows whose NativeMessagingHosts subkey points to the manifest.
 	RegistryKey string
+	// Gecko is true for Firefox: its manifests list add-on IDs in
+	// allowed_extensions instead of origins in allowed_origins.
+	Gecko bool
 }
 
 // Browsers are the browsers `portcheck browser install` knows.
@@ -49,29 +60,53 @@ var Browsers = []Browser{
 		ID: "brave", Name: "Brave", RegistryKey: `Software\BraveSoftware\Brave-Browser`,
 		Dir: map[string]string{"darwin": "Library/Application Support/BraveSoftware/Brave-Browser", "linux": ".config/BraveSoftware/Brave-Browser"},
 	},
+	{
+		ID: "firefox", Name: "Mozilla Firefox", RegistryKey: `Software\Mozilla`, Gecko: true,
+		Dir: map[string]string{"darwin": "Library/Application Support/Firefox", "linux": ".mozilla"},
+		HostsDir: map[string]string{
+			"darwin": "Library/Application Support/Mozilla/NativeMessagingHosts",
+			"linux":  ".mozilla/native-messaging-hosts",
+		},
+	},
 }
 
-// Manifest is a native messaging host manifest.
+// Manifest is a native messaging host manifest. Chromium browsers read
+// AllowedOrigins, Firefox reads AllowedExtensions.
 type Manifest struct {
-	Name           string   `json:"name"`
-	Description    string   `json:"description"`
-	Path           string   `json:"path"`
-	Type           string   `json:"type"`
-	AllowedOrigins []string `json:"allowed_origins"`
+	Name              string   `json:"name"`
+	Description       string   `json:"description"`
+	Path              string   `json:"path"`
+	Type              string   `json:"type"`
+	AllowedOrigins    []string `json:"allowed_origins,omitempty"`
+	AllowedExtensions []string `json:"allowed_extensions,omitempty"`
 }
 
-// NewManifest returns the manifest for the portcheck binary at path.
-func NewManifest(path string, extensionIDs []string) Manifest {
+// NewManifest returns the manifest for the portcheck binary at path, for b,
+// allowing the given Chromium extension IDs or Firefox add-on IDs.
+func NewManifest(b Browser, path string, extensionIDs, geckoIDs []string) Manifest {
 	m := Manifest{
 		Name:        HostName,
 		Description: "portcheck: see what's using your ports (https://github.com/roystondwork-dev/portcheck)",
 		Path:        path,
 		Type:        "stdio",
 	}
+	if b.Gecko {
+		m.AllowedExtensions = slices.Clone(geckoIDs)
+		return m
+	}
 	for _, id := range extensionIDs {
 		m.AllowedOrigins = append(m.AllowedOrigins, "chrome-extension://"+id+"/")
 	}
 	return m
+}
+
+// AllowedIDs returns the extension or add-on IDs a manifest allows.
+func (m Manifest) AllowedIDs() []string {
+	ids := slices.Clone(m.AllowedExtensions)
+	for _, o := range m.AllowedOrigins {
+		ids = append(ids, strings.TrimSuffix(strings.TrimPrefix(o, "chrome-extension://"), "/"))
+	}
+	return ids
 }
 
 // Registry is the subset of the Windows registry used to register hosts.
@@ -128,7 +163,11 @@ func Targets(env Env) ([]Target, error) {
 				return nil, errors.New("can't find the home directory")
 			}
 			base := filepath.Join(env.Home, filepath.FromSlash(dir))
-			t.Manifest = filepath.Join(base, "NativeMessagingHosts", HostName+".json")
+			hosts := filepath.Join(base, "NativeMessagingHosts")
+			if h, ok := b.HostsDir[env.GOOS]; ok {
+				hosts = filepath.Join(env.Home, filepath.FromSlash(h))
+			}
+			t.Manifest = filepath.Join(hosts, HostName+".json")
 			t.Detected = isDir(base)
 		}
 		out = append(out, t)
@@ -151,7 +190,7 @@ func Select(targets []Target, ids []string) ([]Target, error) {
 	for _, id := range ids {
 		i := slices.IndexFunc(targets, func(t Target) bool { return t.Browser.ID == id })
 		if i < 0 {
-			return nil, fmt.Errorf("unknown browser %q (want chrome, edge, chromium or brave)", id)
+			return nil, fmt.Errorf("unknown browser %q (want chrome, edge, chromium, brave or firefox)", id)
 		}
 		out = append(out, targets[i])
 	}

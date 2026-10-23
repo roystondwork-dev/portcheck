@@ -74,14 +74,25 @@ func TestWriteMessageErrors(t *testing.T) {
 
 func TestIsLaunch(t *testing.T) {
 	t.Parallel()
-	for args, want := range map[string]bool{
-		"chrome-extension://fmocabgaaihiflefcdafnhoihcibgnhl/":                   true,
-		"chrome-extension://fmocabgaaihiflefcdafnhoihcibgnhl/ --parent-window=0": true,
-		"list --listening": false,
-		"":                 false,
-	} {
-		if got := IsLaunch(strings.Fields(args)); got != want {
-			t.Errorf("IsLaunch(%q) = %v, want %v", args, got, want)
+	const manifest = "io.github.roystondwork_dev.portcheck.json"
+	cases := []struct {
+		args []string
+		want bool
+	}{
+		{[]string{"chrome-extension://fmocabgaaihiflefcdafnhoihcibgnhl/"}, true},
+		{[]string{"chrome-extension://fmocabgaaihiflefcdafnhoihcibgnhl/", "--parent-window=0"}, true},
+		// Firefox: the manifest's path and the add-on ID.
+		{[]string{"/Users/a/Library/Application Support/Mozilla/NativeMessagingHosts/" + manifest, "portcheck@roystondwork-dev.github.io"}, true},
+		{[]string{`C:\Users\a\AppData\Local\portcheck\native-messaging\firefox\` + manifest, "portcheck@roystondwork-dev.github.io"}, true},
+		{[]string{manifest, "x@y"}, true},
+		{[]string{manifest}, false},
+		{[]string{"/tmp/other.json", "portcheck@x"}, false},
+		{[]string{"list", "--listening"}, false},
+		{nil, false},
+	}
+	for _, tc := range cases {
+		if got := IsLaunch(tc.args); got != tc.want {
+			t.Errorf("IsLaunch(%q) = %v, want %v", tc.args, got, tc.want)
 		}
 	}
 }
