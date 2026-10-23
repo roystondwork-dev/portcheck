@@ -43,7 +43,8 @@ after(() => {
 
 async function launch(grantLocalhost) {
   const opts = new firefox.Options()
-    .addArguments("-headless")
+    // System access lets the test open the add-on's pages (see openAddonPage).
+    .addArguments("-headless", "-remote-allow-system-access")
     .setPreference("extensions.webextensions.uuids", JSON.stringify({ [ADDON_ID]: UUID }))
     // Firefox treats Manifest V3 host permissions as optional; the add-on asks for
     // them in its popup. This pref grants them like an accepted install prompt.
@@ -68,6 +69,28 @@ function holdPort() {
   });
 }
 
+/**
+ * Opens one of the add-on's pages in a new tab and switches to it. WebDriver
+ * may not navigate to moz-extension:// URLs itself, so the tab is opened from
+ * Firefox's privileged (chrome) context.
+ */
+async function openAddonPage(driver, page) {
+  const before = await driver.getAllWindowHandles();
+  await driver.setContext(firefox.Context.CHROME);
+  await driver.executeScript(
+    `const tab = gBrowser.addTab(arguments[0], { triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal() });
+     gBrowser.selectedTab = tab;`,
+    `moz-extension://${UUID}/${page}`,
+  );
+  await driver.setContext(firefox.Context.CONTENT);
+  let handles = before;
+  for (let i = 0; i < 40 && handles.length === before.length; i++) {
+    await sleep(100);
+    handles = await driver.getAllWindowHandles();
+  }
+  await driver.switchTo().window(handles.find((h) => !before.includes(h)));
+}
+
 /** Runs fn(arg) inside the add-on's page (it has the extension APIs). */
 function inExtension(driver, fn, arg) {
   return driver.executeAsyncScript(
@@ -86,8 +109,7 @@ test("Firefox: badge, popup and Stop with the real portcheck", async () => {
     await driver.get(url);
     assert.equal(await driver.findElement(By.css("body")).getText(), "hello");
 
-    await driver.switchTo().newWindow("tab");
-    await driver.get(`moz-extension://${UUID}/popup.html`);
+    await openAddonPage(driver, "popup.html");
     let tab = -1;
     let badge = "";
     for (let i = 0; i < 60 && badge !== "node"; i++) {
@@ -101,7 +123,7 @@ test("Firefox: badge, popup and Stop with the real portcheck", async () => {
     const title = await inExtension(driver, (t) => browser.action.getTitle({ tabId: t }), tab);
     assert.match(title, new RegExp(`localhost:${port} is served by node \\(pid ${child.pid}\\)`));
 
-    await driver.get(`moz-extension://${UUID}/popup.html?tab=${tab}`);
+    await openAddonPage(driver, `popup.html?tab=${tab}`);
     const summary = await driver.wait(until.elementLocated(By.css(".summary")), 15_000);
     await driver.wait(until.elementTextIs(summary, `node · pid ${child.pid}`), 15_000);
     assert.equal(await driver.findElement(By.css(".chip")).getText().then((s) => s.toLowerCase()), "running");
@@ -120,7 +142,7 @@ test("Firefox: badge, popup and Stop with the real portcheck", async () => {
 test("Firefox: the popup asks for localhost access when it isn't granted", async () => {
   const driver = await launch(false);
   try {
-    await driver.get(`moz-extension://${UUID}/popup.html`);
+    await openAddonPage(driver, "popup.html");
     const address = await driver.wait(until.elementLocated(By.css(".address")), 15_000);
     await driver.wait(until.elementTextIs(address, "Allow localhost access"), 15_000);
     assert.ok(await driver.findElement(By.xpath("//button[contains(., 'Allow access to localhost pages')]")).isDisplayed());
