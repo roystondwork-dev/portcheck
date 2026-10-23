@@ -1,0 +1,23 @@
+{
+  "categories": {
+    "firefox": [
+      "web-development"
+    ]
+  },
+  "summary": {
+    "en-US": "See which process serves a localhost page (and who started it), stop it safely, and know why localhost refuses to connect."
+  },
+  "description": {
+    "en-US": "Your dev server won't start because the port is taken, or localhost says \"Unable to connect\"? portcheck tells you what's going on, right in the toolbar.\n\n• A badge on every localhost tab names the process serving it (node, python, java…); hover for its process ID and who started it (npm ← zsh).\n• The badge says \"off\" when nothing is listening, so you know your server isn't running instead of hunting for network problems.\n• The popup shows the process, its command, its user and how long it has been running, and stops it safely after you confirm. It never stops system processes or the browser itself. Ports published by Docker, Podman or WSL get the right stop command instead.\n• Every port listening on your computer, filterable, one click to open.\n\nWorks on localhost, *.localhost, 127.0.0.1, [::1] and 0.0.0.0, on any port.\n\nRequires the free, open-source portcheck app (macOS, Linux, Windows). Install it, then run \"portcheck browser install\" once; the add-on shows the steps. Nothing leaves your computer: no accounts, analytics or tracking.\n\nSource and documentation: https://github.com/roystondwork-dev/portcheck"
+  },
+  "homepage": {
+    "en-US": "https://roystondwork-dev.github.io/portcheck/guide/browser/"
+  },
+  "support_url": {
+    "en-US": "https://github.com/roystondwork-dev/portcheck/issues"
+  },
+  "version": {
+    "license": "MIT",
+    "approval_notes": "The add-on works together with the free, open-source portcheck app (native messaging host \"io.github.roystondwork_dev.portcheck\"). No account or login is needed; nothing is sent over the network.\n\nTo test on Ubuntu:\n1. Download portcheck_X.Y.Z_linux_amd64.tar.gz (or _arm64) from https://github.com/roystondwork-dev/portcheck/releases/latest and extract it.\n2. Run: ./portcheck browser install --browser firefox\n   (registers the app in ~/.mozilla/native-messaging-hosts for this add-on's ID, portcheck@roystondwork-dev.github.io)\n3. Start a local server: python3 -m http.server 8000 and open http://localhost:8000.\n4. The toolbar badge shows the process (\"pyth\"); the popup shows its details. If the popup shows \"Allow localhost access\", click \"Allow access to localhost pages\" (Firefox makes host permissions optional).\n5. In the popup, click \"Stop process\", then \"Stop\": the server stops; reloading the page shows the \"off\" badge.\n\nThe JavaScript is bundled (not minified) from TypeScript with esbuild; the source archive and BUILD-FIREFOX.md rebuild it exactly (npm ci && npm run build:firefox)."
+  }
+}
