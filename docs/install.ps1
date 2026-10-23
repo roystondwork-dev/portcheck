@@ -35,7 +35,9 @@ New-Item -ItemType Directory -Path $tmp | Out-Null
 try {
     Write-Host "Downloading portcheck $version for windows/$arch..."
     Invoke-WebRequest "$base/$archive" -OutFile (Join-Path $tmp $archive) -UseBasicParsing
-    $sums = (Invoke-WebRequest "$base/checksums.txt" -UseBasicParsing).Content
+    # Saved to a file: GitHub serves it as binary, which Content would return as bytes.
+    Invoke-WebRequest "$base/checksums.txt" -OutFile (Join-Path $tmp 'checksums.txt') -UseBasicParsing
+    $sums = Get-Content (Join-Path $tmp 'checksums.txt') -Raw
     $want = ($sums -split "`n" | Where-Object { $_ -match "\s$([regex]::Escape($archive))\s*$" } | ForEach-Object { ($_ -split '\s+')[0] }) | Select-Object -First 1
     $got = (Get-FileHash (Join-Path $tmp $archive) -Algorithm SHA256).Hash.ToLower()
     if (-not $want -or $want.ToLower() -ne $got) { throw "portcheck installer: checksum mismatch for $archive" }

@@ -52,6 +52,20 @@ async function launch(grantLocalhost) {
   const service = new firefox.ServiceBuilder().addArguments("--allow-system-access");
   const driver = await new Builder().forBrowser(Browser.FIREFOX).setFirefoxOptions(opts).setFirefoxService(service).build();
   await driver.installAddon(xpi, true);
+  if (grantLocalhost) {
+    // What clicking "Allow" in the popup does; temporary add-ons don't get the
+    // install-time grant.
+    await driver.setContext(firefox.Context.CHROME);
+    const err = await driver.executeAsyncScript(
+      `const done = arguments[arguments.length - 1];
+       const { ExtensionPermissions } = ChromeUtils.importESModule("resource://gre/modules/ExtensionPermissions.sys.mjs");
+       const ext = WebExtensionPolicy.getByID(arguments[0]).extension;
+       ExtensionPermissions.add(arguments[0], { permissions: [], origins: ext.manifest.host_permissions }, ext).then(() => done(""), (e) => done(String(e)));`,
+      ADDON_ID,
+    );
+    await driver.setContext(firefox.Context.CONTENT);
+    assert.equal(err, "", "granting localhost access");
+  }
   return driver;
 }
 
