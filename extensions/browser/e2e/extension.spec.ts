@@ -18,6 +18,7 @@ const EXT_ID = "fmocabgaaihiflefcdafnhoihcibgnhl";
 interface Browser {
   context: BrowserContext;
   worker: Worker;
+  profile: string;
 }
 
 /**
@@ -38,6 +39,23 @@ const hostBinary = (() => {
   };
 })();
 
+/** Registers portcheck in a profile, like `portcheck browser install` does for real. */
+function registerHost(profile: string, allow = [EXT_ID]): void {
+  // Chromium also reads native messaging hosts from <profile>/NativeMessagingHosts.
+  const dir = path.join(profile, "NativeMessagingHosts");
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, `${HOST}.json`),
+    JSON.stringify({
+      name: HOST,
+      description: "portcheck (test)",
+      path: hostBinary(),
+      type: "stdio",
+      allowed_origins: allow.map((id) => `chrome-extension://${id}/`),
+    }),
+  );
+}
+
 /**
  * Starts Chromium with the extension; registers portcheck in its profile for
  * the given extension IDs (none: not registered).
@@ -46,19 +64,7 @@ async function launch(register: boolean, opts: { dist?: string; allow?: string[]
   const dist = opts.dist ?? DIST;
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "pc-chromium-"));
   if (register) {
-    // Chromium also reads native messaging hosts from <profile>/NativeMessagingHosts.
-    const dir = path.join(profile, "NativeMessagingHosts");
-    fs.mkdirSync(dir);
-    fs.writeFileSync(
-      path.join(dir, `${HOST}.json`),
-      JSON.stringify({
-        name: HOST,
-        description: "portcheck (test)",
-        path: hostBinary(),
-        type: "stdio",
-        allowed_origins: (opts.allow ?? [EXT_ID]).map((id) => `chrome-extension://${id}/`),
-      }),
-    );
+    registerHost(profile, opts.allow);
   }
   const context = await chromium.launchPersistentContext(profile, {
     channel: "chromium",
@@ -68,7 +74,7 @@ async function launch(register: boolean, opts: { dist?: string; allow?: string[]
   if (dist === DIST) {
     expect(worker.url()).toBe(`chrome-extension://${EXT_ID}/background.js`);
   }
-  return { context, worker };
+  return { context, worker, profile };
 }
 
 /** A separate node process holding a TCP port. */
@@ -221,17 +227,55 @@ test("a localhost page opened while the browser starts gets its badge", async ()
   }
 });
 
-test("without portcheck, the popup explains how to set it up", async () => {
+test("without portcheck, the popup gives the one-line installer, then connects by itself", async () => {
   const b = await launch(false);
   try {
     const popup = await b.context.newPage();
     await popup.goto(`chrome-extension://${EXT_ID}/popup.html`);
     await expect(popup.locator(".address")).toHaveText("Connect portcheck");
     await expect(popup.locator(".chip")).toHaveText("Not connected");
-    await expect(popup.locator("code", { hasText: "portcheck browser install" })).toBeVisible();
+    const installer =
+      process.platform === "win32"
+        ? "irm https://roystondwork-dev.github.io/portcheck/install.ps1 | iex"
+        : "curl -fsSL https://roystondwork-dev.github.io/portcheck/install.sh | sh";
+    await expect(popup.locator("code")).toHaveText(installer);
+    await expect(popup.locator(".waiting")).toBeVisible();
     await expect(popup.locator("#ports")).toBeHidden();
+
+    // The user runs the installer; the open popup notices without a reload.
+    registerHost(b.profile);
+    await expect(popup.locator(".address")).toHaveText("No local page", { timeout: 15_000 });
+    await expect(popup.locator("#ports")).toBeVisible();
   } finally {
     await b.context.close();
+  }
+});
+
+test("without portcheck, the badge and popup still say whether the server runs", async () => {
+  const { child, port } = await holdPort();
+  const closed = await freePort();
+  const b = await launch(false);
+  try {
+    const page = await b.context.newPage();
+    const up = `http://localhost:${port}/`;
+    await page.goto(up);
+    const id = await tabId(b.worker, up);
+    await expect.poll(async () => (await badgeOf(b.worker, id)).text).toBe("on");
+    expect((await badgeOf(b.worker, id)).title).toBe(`localhost:${port} is running. Click to connect the portcheck app and see which process it is.`);
+
+    const popup = await b.context.newPage();
+    await popup.goto(`chrome-extension://${EXT_ID}/popup.html?tab=${id}`);
+    await expect(popup.locator(".address")).toHaveText(`localhost:${port}`);
+    await expect(popup.locator(".chip")).toHaveText("Running");
+    await expect(popup.locator(".setup-title")).toHaveText("Connect portcheck");
+
+    const down = `http://localhost:${closed}/`;
+    await page.goto(down).catch(() => undefined); // connection refused
+    const id2 = await tabId(b.worker, down);
+    await expect.poll(async () => (await badgeOf(b.worker, id2)).text).toBe("off");
+  } finally {
+    await b.context.close();
+    child.kill();
   }
 });
 
@@ -246,7 +290,7 @@ test("a store build (another ID) asks to be allowed, then works", async () => {
     const popup = await first.context.newPage();
     await popup.goto(`chrome-extension://${id}/popup.html`);
     await expect(popup.locator(".address")).toHaveText("Reconnect portcheck");
-    await expect(popup.locator("code")).toHaveText(`portcheck browser install --extension-id ${id}`);
+    await expect(popup.locator("code").nth(1)).toHaveText(`portcheck browser install --extension-id ${id}`);
   } finally {
     await first.context.close();
   }

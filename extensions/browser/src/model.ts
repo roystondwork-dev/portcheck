@@ -96,6 +96,18 @@ export function badge(label: string, s: PortState): Badge {
   return { text: short(h), color: GREEN, title: `${label} is served by ${who}${started}${more}.` };
 }
 
+/**
+ * The badge when the portcheck app isn't connected: whether the page's server
+ * answers, found by connecting to it.
+ */
+export function probeBadge(label: string, up: boolean): Badge {
+  const connect = "Click to connect the portcheck app and see which process it is.";
+  if (up) {
+    return { text: "on", color: GREEN, title: `${label} is running. ${connect}` };
+  }
+  return { text: "off", color: RED, title: `Nothing answers on ${label}. Is your server running? ${connect}` };
+}
+
 function short(h: Holder): string {
   const name = h.container ? (h.container.name ?? h.container.image ?? "ctr") : h.name.replace(/\.exe$/i, "");
   return name.slice(0, 4);

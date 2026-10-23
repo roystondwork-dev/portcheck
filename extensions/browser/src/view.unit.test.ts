@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { checkGolden } from "./fixtures";
 import { portState, type PortState } from "./model";
-import { filterPorts, portView, setupHelp, uptime } from "./view";
+import { filterPorts, installCommand, portView, setupHelp, uptime } from "./view";
 
 const NOW = Date.parse("2026-10-20T09:42:00Z"); // 12 minutes after the golden node started
 
@@ -79,22 +79,32 @@ describe("portView", () => {
 });
 
 describe("setupHelp", () => {
-  it("guides installing and connecting portcheck", () => {
-    const h = setupHelp("not-installed", "", "fmocabgaaihiflefcdafnhoihcibgnhl", ["fmocabgaaihiflefcdafnhoihcibgnhl"]);
-    expect(h.headline).toBe("Connect portcheck");
-    expect(h.steps.map((s) => s.command)).toEqual([
-      "brew install roystondwork-dev/tap/portcheck",
-      "scoop bucket add portcheck https://github.com/roystondwork-dev/scoop-bucket; scoop install portcheck",
-      "portcheck browser install",
+  const known = ["fmocabgaaihiflefcdafnhoihcibgnhl"];
+  it("gives the one-line installer for the user's OS", () => {
+    const mac = setupHelp("not-installed", "", known[0] ?? "", known, "mac");
+    expect(mac.headline).toBe("Connect portcheck");
+    expect(mac.steps).toEqual([{ text: "Run this in Terminal:", command: "curl -fsSL https://roystondwork-dev.github.io/portcheck/install.sh | sh" }]);
+    expect(setupHelp("not-installed", "", known[0] ?? "", known, "linux").steps).toEqual(mac.steps);
+    expect(setupHelp("not-installed", "", known[0] ?? "", known, "win").steps).toEqual([
+      { text: "Run this in PowerShell:", command: "irm https://roystondwork-dev.github.io/portcheck/install.ps1 | iex" },
     ]);
-    expect(setupHelp("forbidden", "", "x", ["x"]).steps).toEqual([{ text: "Update portcheck, then run:", command: "portcheck browser install" }]);
-    expect(setupHelp("failed", "boom", "x", [])).toEqual({ headline: "portcheck reported a problem", intro: "boom", steps: [] });
+  });
+
+  it("updates and reconnects when portcheck doesn't allow the extension", () => {
+    const h = setupHelp("forbidden", "", known[0] ?? "", known, "mac");
+    expect(h.headline).toBe("Reconnect portcheck");
+    expect(h.steps.map((s) => s.command)).toEqual([installCommand("mac").command]);
+    expect(setupHelp("failed", "boom", "x", [], "mac")).toEqual({ headline: "portcheck reported a problem", intro: "boom", steps: [] });
   });
 
   it("names a store build's ID that portcheck doesn't know yet", () => {
     const id = "abcdefghijklmnopabcdefghijklmnop";
-    expect(setupHelp("forbidden", "", id, ["fmocabgaaihiflefcdafnhoihcibgnhl"]).steps[0]?.command).toBe(`portcheck browser install --extension-id ${id}`);
-    expect(setupHelp("not-installed", "", id, []).steps[2]?.command).toBe(`portcheck browser install --extension-id ${id}`);
+    for (const problem of ["forbidden", "not-installed"] as const) {
+      expect(setupHelp(problem, "", id, known, "win").steps[1]).toEqual({
+        text: "Then allow this extension:",
+        command: `portcheck browser install --extension-id ${id}`,
+      });
+    }
   });
 });
 

@@ -123,34 +123,38 @@ export interface SetupHelp {
   steps: { text: string; command?: string }[];
 }
 
+/** The OS, as chrome.runtime.getPlatformInfo() names it ("mac", "win", "linux", …). */
+export type Platform = string;
+
+/** The one-line installer: installs portcheck and connects it to the browsers. */
+export function installCommand(platform: Platform): { shell: string; command: string } {
+  if (platform === "win") {
+    return { shell: "PowerShell", command: "irm https://roystondwork-dev.github.io/portcheck/install.ps1 | iex" };
+  }
+  return { shell: "Terminal", command: "curl -fsSL https://roystondwork-dev.github.io/portcheck/install.sh | sh" };
+}
+
 /**
  * What to tell the user when portcheck can't be reached. extensionId is this
- * extension's ID: if portcheck doesn't know it yet (a store build), the
- * connect command names it.
+ * extension's ID: if portcheck doesn't know it yet (a store build), a second
+ * step names it.
  */
-export function setupHelp(problem: HostProblem, message: string, extensionId: string, knownIds: readonly string[]): SetupHelp {
+export function setupHelp(problem: HostProblem, message: string, extensionId: string, knownIds: readonly string[], platform: Platform): SetupHelp {
   if (problem === "failed") {
     return { headline: "portcheck reported a problem", intro: message, steps: [] };
   }
-  const connect = knownIds.includes(extensionId) ? "portcheck browser install" : `portcheck browser install --extension-id ${extensionId}`;
+  const install = installCommand(platform);
+  const steps: SetupHelp["steps"] = [{ text: `Run this in ${install.shell}:`, command: install.command }];
+  if (!knownIds.includes(extensionId)) {
+    steps.push({ text: "Then allow this extension:", command: `portcheck browser install --extension-id ${extensionId}` });
+  }
   if (problem === "forbidden") {
-    return {
-      headline: "Reconnect portcheck",
-      intro: "portcheck is installed but doesn't allow this extension yet.",
-      steps: [{ text: "Update portcheck, then run:", command: connect }],
-    };
+    return { headline: "Reconnect portcheck", intro: "portcheck is installed but doesn't allow this extension yet. Update it:", steps };
   }
   return {
     headline: "Connect portcheck",
-    intro: "The extension asks the portcheck app on your computer. Set it up once:",
-    steps: [
-      { text: "Install portcheck on macOS or Linux", command: "brew install roystondwork-dev/tap/portcheck" },
-      {
-        text: "or on Windows",
-        command: "scoop bucket add portcheck https://github.com/roystondwork-dev/scoop-bucket; scoop install portcheck",
-      },
-      { text: "Connect it to this browser", command: connect },
-    ],
+    intro: "To see which process serves a port and stop it, the extension asks the free portcheck app. One command installs and connects it:",
+    steps,
   };
 }
 

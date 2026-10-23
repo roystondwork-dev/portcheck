@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { checkGolden, listGolden } from "./fixtures";
-import { ancestry, badge, containerLabel, listedPorts, portState } from "./model";
+import { ancestry, badge, containerLabel, listedPorts, portState, probeBadge } from "./model";
 import type { CheckData, Socket } from "./schema";
 
 const sock = (o: Partial<Socket>): Socket => ({ proto: "tcp", localAddress: "127.0.0.1", localPort: 3000, state: "LISTEN", ...o });
@@ -76,5 +76,16 @@ describe("listedPorts (real list output)", () => {
       { port: 18080, owners: "docker:web", url: "http://localhost:18080/" },
       { port: 50000, owners: "(hidden)", url: "http://localhost:50000/" },
     ]);
+  });
+});
+
+describe("probeBadge", () => {
+  it("says whether the server answers, and how to see more", () => {
+    expect(probeBadge("localhost:3000", true)).toEqual({
+      text: "on",
+      color: "#2E7D32",
+      title: "localhost:3000 is running. Click to connect the portcheck app and see which process it is.",
+    });
+    expect(probeBadge("localhost:3001", false)).toMatchObject({ text: "off", color: "#C62828" });
   });
 });

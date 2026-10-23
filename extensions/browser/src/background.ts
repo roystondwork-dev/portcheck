@@ -1,9 +1,11 @@
 // Sets the toolbar badge for local pages: which process serves the page, or
-// "off" when nothing listens (e.g. on "This site can't be reached").
+// "off" when nothing listens (e.g. on "This site can't be reached"). Until the
+// portcheck app is connected, it says whether the page's server answers.
 import { ext } from "./api";
-import { call, HostError, type SendNative } from "./host";
+import { call, type SendNative } from "./host";
 import { localTarget } from "./local";
-import { badge, portState } from "./model";
+import { badge, portState, probeBadge } from "./model";
+import { isUp } from "./probe";
 import type { CheckData } from "./schema";
 
 const send: SendNative = (host, message) => ext.runtime.sendNativeMessage(host, message);
@@ -34,9 +36,8 @@ async function update(tabId: number, url: string | undefined): Promise<void> {
   try {
     const { data } = await call<CheckData>(send, { op: "check", port: target.port }, "check");
     b = badge(target.label, portState(data, target.port));
-  } catch (err) {
-    const msg = err instanceof HostError ? err.message : String(err);
-    b = { text: "set", color: "#616161", title: `${msg} Click for setup.` };
+  } catch {
+    b = probeBadge(target.label, await isUp((u, init) => fetch(u, init), `${new URL(url ?? "").origin}/`));
   }
   if (current()) {
     await setBadge(tabId, b.text, b.color, b.title);
@@ -67,6 +68,13 @@ ext.tabs.onActivated.addListener(({ tabId }) => {
 
 ext.tabs.onRemoved.addListener((tabId) => {
   latest.delete(tabId);
+});
+
+// The popup asks for a refresh once the portcheck app is connected.
+ext.runtime.onMessage.addListener((message: unknown) => {
+  if (message === "refresh") {
+    void updateAll();
+  }
 });
 
 void updateAll();
