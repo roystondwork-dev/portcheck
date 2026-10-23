@@ -46,12 +46,23 @@ are hidden.
    from the same release PR (`extra-files` in `release-please-config.json`).
 6. Check that the release has the browser extension, built by the **browser** job (its
    version also comes from the release PR): `portcheck-browser-X.Y.Z.zip` (load
-   unpacked), `portcheck-browser-store-X.Y.Z.zip` (Edge Add-ons upload),
-   `portcheck-firefox-X.Y.Z.zip` (Firefox Add-ons upload), `portcheck-firefox.xpi` and
-   `portcheck-firefox-X.Y.Z.xpi` (signed by Mozilla for direct installs; needs the
-   `AMO_JWT_ISSUER` and `AMO_JWT_SECRET` secrets, otherwise skipped) and
-   `portcheck-firefox-source-X.Y.Z.zip` (its source, which Firefox's reviewers rebuild;
-   see `extensions/browser/BUILD-FIREFOX.md`).
+   unpacked), `portcheck-browser-store-X.Y.Z.zip` (Edge Add-ons),
+   `portcheck-firefox-X.Y.Z.zip` (Firefox Add-ons), `portcheck-firefox.xpi` and
+   `portcheck-firefox-X.Y.Z.xpi` (signed by Mozilla for direct installs) and
+   `portcheck-firefox-source-X.Y.Z.zip` (the source Firefox's reviewers rebuild; see
+   `extensions/browser/BUILD-FIREFOX.md`). The job also **submits the new version to
+   both stores**, which then review it (a few days):
+
+   - Firefox Add-ons, with `web-ext sign --channel listed` and the listing in
+     `extensions/browser/store/amo-metadata.json`. Secrets: `AMO_JWT_ISSUER`,
+     `AMO_JWT_SECRET` (addons.mozilla.org → Tools → Manage API Keys).
+   - Microsoft Edge Add-ons, with `scripts/edge-publish.sh`. Secrets: `EDGE_CLIENT_ID`,
+     `EDGE_API_KEY`, `EDGE_PRODUCT_ID` (Partner Center → Microsoft Edge → Publish API).
+
+   Each step is skipped without its secrets, and a failed submission doesn't fail the
+   release: check the job's log, and upload by hand if needed (the zip above; listing
+   texts in `extensions/browser/store/`). The Edge API key expires after 72 days; create
+   a new one in Partner Center and update `EDGE_API_KEY` when it does.
 7. **winget submissions are paused** while the first one,
    [microsoft/winget-pkgs#457169](https://github.com/microsoft/winget-pkgs/pull/457169)
    (0.8.0), waits for a Microsoft moderator: each release would otherwise open a new PR

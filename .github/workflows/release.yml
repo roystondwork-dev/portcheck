@@ -192,8 +192,10 @@ jobs:
       attestations: write
     env:
       TAG: ${{ needs.release-please.outputs.tag_name || inputs.tag }}
-      # Set: sign the Firefox direct download (see the step below).
+      # Set: sign the Firefox direct download and submit to Firefox Add-ons.
       AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+      # Set: submit to Microsoft Edge Add-ons.
+      EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
     defaults:
       run:
         working-directory: extensions/browser
@@ -250,6 +252,29 @@ jobs:
           subject-path: |
             ${{ runner.temp }}/portcheck-browser-*.zip
             ${{ runner.temp }}/portcheck-firefox-*
+      - name: Submit to Firefox Add-ons
+        # The listed add-on; Mozilla reviews it, then it reaches users. A
+        # failure (an outage, a review question) doesn't stop the release.
+        # Releases only, not manual rebuilds of a tag.
+        if: github.event_name == 'push' && env.AMO_JWT_ISSUER != ''
+        continue-on-error: true
+        env:
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: |
+          version=${TAG#v}
+          npx --yes web-ext@10.8.0 sign --channel listed \
+            --source-dir dist-firefox --amo-metadata store/amo-metadata.json \
+            --upload-source-code "$RUNNER_TEMP/portcheck-firefox-source-$version.zip" \
+            --api-key "$AMO_JWT_ISSUER" --api-secret "$AMO_JWT_SECRET" --approval-timeout 0
+      - name: Submit to Microsoft Edge Add-ons
+        if: github.event_name == 'push' && env.EDGE_API_KEY != ''
+        continue-on-error: true
+        env:
+          EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
+          EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
+        run: |
+          ../../scripts/edge-publish.sh "$RUNNER_TEMP/portcheck-browser-store-${TAG#v}.zip" \
+            "portcheck $TAG, release notes: https://github.com/roystondwork-dev/portcheck/releases/tag/$TAG"
       - name: Attach to the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
