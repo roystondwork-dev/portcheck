@@ -229,6 +229,8 @@ jobs:
         # so users can install the .xpi from the release page and it updates
         # itself from docs/firefox-updates.json. Skipped without the AMO keys.
         if: env.AMO_JWT_ISSUER != ''
+        # A Mozilla outage or a bad key mustn't hold back the other assets.
+        continue-on-error: true
         env:
           AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
         run: |
