@@ -22,7 +22,7 @@ native `portcheck` binary for your platform from the GitHub release, checks it a
 checksums published with the package, and caches it.
 
 Also available for VS Code, JetBrains IDEs, Edge and Firefox, and through Homebrew,
-Scoop and PyPI (`pipx install port-check`).
+Scoop and PyPI (`pipx install portcheck-tool`).
 
 - Documentation: https://roystondwork-dev.github.io/portcheck/
 - Source (MIT): https://github.com/roystondwork-dev/portcheck

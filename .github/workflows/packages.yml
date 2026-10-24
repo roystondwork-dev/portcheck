@@ -53,5 +53,5 @@ jobs:
           if [ "$RUNNER_OS" = Windows ]; then bin="$RUNNER_TEMP/venv/Scripts"; else bin="$RUNNER_TEMP/venv/bin"; fi
           "$bin/python" -m pip install --quiet twine
           "$bin/python" -m twine check --strict "$RUNNER_TEMP"/wheels/*.whl
-          "$bin/python" -m pip install --no-index --find-links "$RUNNER_TEMP/wheels" port-check
+          "$bin/python" -m pip install --no-index --find-links "$RUNNER_TEMP/wheels" portcheck-tool
           "$bin/portcheck" version

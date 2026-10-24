@@ -55,10 +55,10 @@ or `PORTCHECK_VERSION=0.9.0` for a specific version.
 === "pip / pipx / uv (any OS)"
 
     ```sh
-    pipx install port-check      # or: uv tool install port-check / pip install port-check
+    pipx install portcheck-tool  # or: uv tool install portcheck-tool / pip install portcheck-tool
     ```
 
-    The [port-check](https://pypi.org/project/port-check/) wheels carry the native
+    The [portcheck-tool](https://pypi.org/project/portcheck-tool/) wheels carry the native
     binary for each platform and put `portcheck` on your `PATH`; there's no Python code
     and nothing is downloaded at runtime.
 

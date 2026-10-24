@@ -1,7 +1,7 @@
 """Builds the PyPI wheels of portcheck from a release's archives.
 
 One wheel per OS and CPU, each carrying the portcheck binary as a script, so
-`pip install port-check` puts `portcheck` on PATH with no Python wrapper and
+`pip install portcheck-tool` puts `portcheck` on PATH with no Python wrapper and
 nothing to download at runtime (as ruff and uv do). Every archive is checked
 against the release's checksums.txt first.
 
@@ -18,7 +18,7 @@ import tarfile
 import zipfile
 from pathlib import Path
 
-NAME = "port_check"  # the distribution "port-check", normalised for file names
+NAME = "portcheck_tool"  # the distribution "portcheck-tool", normalised for file names
 
 # Release archive suffix → wheel platform tags. The Linux binaries are static,
 # so they run on glibc (manylinux) and musl (Alpine) alike. Go 1.27 needs
@@ -39,7 +39,7 @@ def metadata(version: str) -> str:
     readme = (Path(__file__).parent / "README.md").read_text()
     return (
         "Metadata-Version: 2.4\n"
-        f"Name: port-check\n"
+        "Name: portcheck-tool\n"
         f"Version: {version}\n"
         "Summary: See what's using a port and free it safely: which process, who started it, stop it. "
         'Fixes "port already in use".\n'

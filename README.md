@@ -102,7 +102,7 @@ scoop install portcheck
 npx portcheck-cli 3000
 
 # PyPI (any OS)
-pipx install port-check
+pipx install portcheck-tool
 
 # Go 1.26+
 go install github.com/roystondwork-dev/portcheck/cmd/portcheck@latest
