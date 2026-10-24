@@ -41,6 +41,27 @@ function sha256(file) {
 }
 
 /**
+ * Extracts one file from a release archive. On Windows, the system's bsdtar
+ * (Windows 10+) reads the .zip; the tar on PATH may be Git Bash's GNU tar,
+ * which can't, so it isn't used. PowerShell is the fallback.
+ */
+function extract(archive, dir, file, platform = process.platform, env = process.env, run = execFileSync) {
+  if (platform !== "win32") {
+    run("tar", ["-xf", archive, "-C", dir, file], { stdio: "ignore" });
+    return;
+  }
+  const tar = path.join(env.SystemRoot || "C:\\Windows", "System32", "tar.exe");
+  if (fs.existsSync(tar)) {
+    run(tar, ["-xf", archive, "-C", dir, file], { stdio: "ignore" });
+    return;
+  }
+  const q = (s) => "'" + s.replace(/'/g, "''") + "'";
+  run("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", `Expand-Archive -LiteralPath ${q(archive)} -DestinationPath ${q(dir)} -Force`], {
+    stdio: "ignore",
+  });
+}
+
+/**
  * Returns the path of the portcheck binary, downloading it if needed.
  * fetchFn and log are injectable for tests.
  */
@@ -78,8 +99,7 @@ async function ensureBinary({
     if (got !== want) {
       throw new Error(`checksum mismatch for ${name} (expected ${want}, got ${got}); not using it`);
     }
-    // bsdtar (macOS, Windows 10+) and GNU tar both read .tar.gz; bsdtar reads .zip too.
-    execFileSync("tar", ["-xf", archive, "-C", work, exe], { stdio: "ignore" });
+    extract(archive, work, exe, platform);
     fs.chmodSync(path.join(work, exe), 0o755);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     // Atomic, so a concurrent run never sees a half-written binary.
@@ -90,4 +110,4 @@ async function ensureBinary({
   return target;
 }
 
-module.exports = { archiveName, cacheDir, ensureBinary, sha256 };
+module.exports = { archiveName, cacheDir, ensureBinary, extract, sha256 };

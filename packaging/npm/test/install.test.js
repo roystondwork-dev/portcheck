@@ -6,7 +6,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { test } = require("node:test");
-const { archiveName, cacheDir, ensureBinary, sha256 } = require("../lib/install.js");
+const { archiveName, cacheDir, ensureBinary, extract, sha256 } = require("../lib/install.js");
 
 test("archive names match the release", () => {
   assert.equal(archiveName("0.9.0", "darwin", "arm64"), "portcheck_0.9.0_darwin_arm64.tar.gz");
@@ -84,4 +84,20 @@ test("runs the real portcheck from GitHub", { skip: !process.env.PORT_CHECK_E2E 
     env: { ...process.env, PORTCHECK_CACHE: cache },
   });
   assert.match(out, new RegExp(`^portcheck ${require("../package.json").version} `));
+});
+
+test("extracts with the right tool on each OS", () => {
+  const calls = [];
+  const run = (file, args) => calls.push([file, ...args]);
+  extract("a.tar.gz", "d", "portcheck", "linux", {}, run);
+  const sysroot = fs.mkdtempSync(path.join(os.tmpdir(), "pc-sysroot-"));
+  extract("a.zip", "d", "portcheck.exe", "win32", { SystemRoot: sysroot }, run); // no tar.exe there
+  fs.mkdirSync(path.join(sysroot, "System32"));
+  fs.writeFileSync(path.join(sysroot, "System32", "tar.exe"), "");
+  extract("a.zip", "d", "portcheck.exe", "win32", { SystemRoot: sysroot }, run);
+  assert.deepEqual(calls, [
+    ["tar", "-xf", "a.tar.gz", "-C", "d", "portcheck"],
+    ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", "Expand-Archive -LiteralPath 'a.zip' -DestinationPath 'd' -Force"],
+    [path.join(sysroot, "System32", "tar.exe"), "-xf", "a.zip", "-C", "d", "portcheck.exe"],
+  ]);
 });
