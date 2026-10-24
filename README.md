@@ -11,6 +11,7 @@
   <a href="https://codecov.io/gh/roystondwork-dev/portcheck"><img alt="Coverage" src="https://codecov.io/gh/roystondwork-dev/portcheck/graph/badge.svg"></a>
   <a href="https://github.com/roystondwork-dev/portcheck/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/roystondwork-dev/portcheck"></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/roystondwork-dev/portcheck"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/roystondwork-dev/portcheck/badge"></a>
+  <a href="https://www.bestpractices.dev/projects/15848"><img alt="OpenSSF Best Practices" src="https://www.bestpractices.dev/projects/15848/badge"></a>
   <a href="https://pkg.go.dev/github.com/roystondwork-dev/portcheck"><img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/roystondwork-dev/portcheck.svg"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
 </p>
