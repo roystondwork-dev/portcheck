@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>io.github.roystondwork-dev.portcheck</id>
     <name>Portcheck - Port in Use Fixer</name>
-    <vendor url="https://github.com/roystondwork-dev/portcheck">portcheck</vendor>
+    <vendor url="https://github.com/roystondwork-dev">Royston D</vendor>
     <description><![CDATA[
 <p>Fix <b>"port already in use"</b> in one click, and see every port listening on your machine.</p>
 <ul>
