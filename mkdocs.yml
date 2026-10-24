@@ -79,6 +79,16 @@ nav:
   - Getting started:
       - Install: install.md
       - Quickstart: quickstart.md
+  - Fix "port already in use":
+      - Find and stop the process: fix/index.md
+      - macOS: fix/macos.md
+      - Windows: fix/windows.md
+      - Linux: fix/linux.md
+      - Node.js, Next.js, Vite: fix/node.md
+      - Python, Django, Flask: fix/python.md
+      - Docker: fix/docker.md
+      - Rails, Spring Boot, Go, .NET, PHP: fix/others.md
+      - portcheck vs kill-port: fix/kill-port.md
   - Guides:
       - Inspect ports (list): guide/list.md
       - Check a port (check): guide/check.md

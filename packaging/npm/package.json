@@ -1,7 +1,7 @@
 {
   "name": "portcheck-cli",
   "version": "0.10.0",
-  "description": "See what's using a port and free it safely: which process, who started it, stop it. Fixes \"port already in use\" (EADDRINUSE).",
+  "description": "See what's using a port and free it safely: a safer kill-port that shows the process and who started it before stopping it. Fixes \"port already in use\" (EADDRINUSE).",
   "keywords": [
     "port",
     "eaddrinuse",
@@ -11,7 +11,14 @@
     "netstat",
     "localhost",
     "dev-server",
-    "cli"
+    "cli",
+    "kill",
+    "killport",
+    "port-kill",
+    "address-already-in-use",
+    "port-3000",
+    "free-port",
+    "process"
   ],
   "homepage": "https://roystondwork-dev.github.io/portcheck/",
   "bugs": "https://github.com/roystondwork-dev/portcheck/issues",

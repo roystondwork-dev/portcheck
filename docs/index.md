@@ -24,6 +24,14 @@ PID    PROCESS  RESULT      DETAIL
 42379  node     terminated
 ```
 
+!!! tip "Port already in use? Nothing to install"
+    `npx portcheck-cli kill 3000` shows what holds the port and who started it, then
+    stops it after you confirm. Fixes for your exact error:
+    [Node.js](fix/node.md) · [Python](fix/python.md) · [Docker](fix/docker.md) ·
+    [Rails, Spring Boot, Go](fix/others.md) · [macOS](fix/macos.md) ·
+    [Windows](fix/windows.md) · [Linux](fix/linux.md) ·
+    [vs kill-port](fix/kill-port.md)
+
 <div class="grid cards" markdown>
 
 -   :material-format-list-bulleted: **[Inspect](guide/list.md)**

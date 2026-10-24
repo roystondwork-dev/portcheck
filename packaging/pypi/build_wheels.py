@@ -49,7 +49,7 @@ def metadata(version: str) -> str:
         "Project-URL: Homepage, https://roystondwork-dev.github.io/portcheck/\n"
         "Project-URL: Source, https://github.com/roystondwork-dev/portcheck\n"
         "Project-URL: Issues, https://github.com/roystondwork-dev/portcheck/issues\n"
-        "Keywords: port,eaddrinuse,port-in-use,kill-port,lsof,netstat,localhost,cli\n"
+        "Keywords: port,eaddrinuse,port-in-use,address-already-in-use,kill-port,lsof,netstat,localhost,django,flask,cli\n"
         "Classifier: Development Status :: 4 - Beta\n"
         "Classifier: Environment :: Console\n"
         "Classifier: Intended Audience :: Developers\n"
