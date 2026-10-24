@@ -1,0 +1,38 @@
+<idea-plugin>
+    <id>io.github.roystondwork-dev.portcheck</id>
+    <name>Portcheck - Port in Use Fixer</name>
+    <vendor url="https://github.com/roystondwork-dev/portcheck">portcheck</vendor>
+    <description><![CDATA[
+<p>Fix <b>"port already in use"</b> in one click, and see every port listening on your machine.</p>
+<ul>
+  <li><b>When a Run/Debug console says the port is taken</b> (Node.js, Spring Boot, Tomcat, Django, Flask, Go, Rails, Vite, Next.js, .NET, Docker, …),
+      portcheck tells you which process holds it and offers <b>Stop it and rerun</b>.</li>
+  <li><b>Ports tool window:</b> every listening port with its process, PID and user; filter, stop (after confirming), open in the browser, copy the PID.</li>
+  <li><b>Tools | portcheck:</b> check a port, find a free port, stop what's using a port.</li>
+</ul>
+<p>Stopping is safe: portcheck never stops system processes or the IDE itself, and ports published by Docker, Podman or WSL get the right stop command instead.
+Works on macOS, Linux and Windows; portcheck is built in. Open source (MIT): <a href="https://github.com/roystondwork-dev/portcheck">github.com/roystondwork-dev/portcheck</a>.</p>
+]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Ports" anchor="bottom" icon="AllIcons.Webreferences.Server" factoryClass="io.github.roystondworkdev.portcheck.ui.PortsToolWindowFactory"/>
+        <notificationGroup id="portcheck" displayType="BALLOON"/>
+        <applicationService serviceImplementation="io.github.roystondworkdev.portcheck.ui.PortcheckSettings"/>
+        <applicationConfigurable parentId="tools" id="portcheck" displayName="portcheck" instance="io.github.roystondworkdev.portcheck.ui.SettingsConfigurable"/>
+    </extensions>
+
+    <projectListeners>
+        <listener class="io.github.roystondworkdev.portcheck.ui.RunWatcher" topic="com.intellij.execution.ExecutionListener"/>
+    </projectListeners>
+
+    <actions>
+        <group id="portcheck.Tools" text="portcheck" popup="true">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action id="portcheck.CheckPort" class="io.github.roystondworkdev.portcheck.ui.CheckPortAction" text="Check a Port…" description="Is a port free, and if not, what holds it?"/>
+            <action id="portcheck.FindFreePort" class="io.github.roystondworkdev.portcheck.ui.FindFreePortAction" text="Find a Free Port…" description="Find a free port in a range and copy it"/>
+            <action id="portcheck.StopPort" class="io.github.roystondworkdev.portcheck.ui.StopPortAction" text="Stop What's Using a Port…" description="Stop the process holding a port, after confirming"/>
+        </group>
+    </actions>
+</idea-plugin>
