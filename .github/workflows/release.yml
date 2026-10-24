@@ -190,15 +190,6 @@ jobs:
       contents: write      # attach the archives to the release
       id-token: write      # provenance
       attestations: write
-  packages:
-    # npm (`npx portcheck-cli`) and PyPI (`pipx install portcheck-tool`). Both publish
-    # with trusted publishing (GitHub OIDC): no tokens are stored. Releases only.
-    needs: [release-please, goreleaser]
-    if: needs.release-please.outputs.release_created == 'true' && needs.goreleaser.result == 'success'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write      # trusted publishing to npm and PyPI
     env:
       TAG: ${{ needs.release-please.outputs.tag_name }}
     steps:
@@ -217,6 +208,22 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "$TAG" "$RUNNER_TEMP"/tray/portcheck-tray_* --clobber
+
+  packages:
+    # npm (`npx portcheck-cli`) and PyPI (`pipx install portcheck-tool`). Both publish
+    # with trusted publishing (GitHub OIDC): no tokens are stored. Releases only.
+    needs: [release-please, goreleaser]
+    if: needs.release-please.outputs.release_created == 'true' && needs.goreleaser.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write      # trusted publishing to npm and PyPI
+    env:
+      TAG: ${{ needs.release-please.outputs.tag_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
       - name: Download and verify the release archives
         env:
