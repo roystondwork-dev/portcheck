@@ -1,0 +1,39 @@
+name: Neovim plugin
+
+on:
+  push:
+    branches: [main]
+    paths: [lua/**, plugin/**, tests/nvim/**, .github/workflows/neovim.yml]
+  pull_request:
+    paths: [lua/**, plugin/**, tests/nvim/**, .github/workflows/neovim.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  neovim:
+    name: Neovim plugin (${{ matrix.nvim }})
+    strategy:
+      fail-fast: false
+      matrix:
+        nvim: [v0.11.4, v0.12.6] # oldest and newest supported by the tests (:terminal via jobstart term=true)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: Build portcheck (for the real-binary tests)
+        run: go build -o bin/portcheck ./cmd/portcheck
+      - name: Install Neovim ${{ matrix.nvim }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "${{ matrix.nvim }}" -R neovim/neovim -p nvim-linux-x86_64.tar.gz -D "$RUNNER_TEMP"
+          tar -xzf "$RUNNER_TEMP/nvim-linux-x86_64.tar.gz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/nvim-linux-x86_64/bin" >> "$GITHUB_PATH"
+      - name: Test
+        env:
+          PORTCHECK_BIN: ${{ github.workspace }}/bin/portcheck
+        run: nvim --headless -u NONE --cmd "set rtp^=." -l tests/nvim/run.lua
