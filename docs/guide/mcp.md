@@ -82,12 +82,9 @@ through npm: `"command": "npx", "args": ["-y", "port-check", "mcp"]`.
 
 === "Zed"
 
-    Install the **Portcheck** extension (**Extensions → search "portcheck"**), or add
-    the server yourself in `settings.json`:
-
-    ```json
-    { "context_servers": { "portcheck": { "command": { "path": "portcheck", "args": ["mcp"] } } } }
-    ```
+    Install the **Portcheck** extension (**Extensions → search "portcheck"**). Or, in
+    the Agent Panel's settings, **Add Custom Server** with the command
+    `portcheck mcp`.
 
 === "Codex CLI"
 
