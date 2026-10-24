@@ -4,7 +4,7 @@
   "title": "Portcheck",
   "description": "See what's using a port and stop it safely: every listening port with its process, who started it, and one-key stop, open and copy.",
   "icon": "icon.png",
-  "author": "roystond",
+  "author": "roystondwork-dev",
   "categories": [
     "Developer Tools",
     "System"
