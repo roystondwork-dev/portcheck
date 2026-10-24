@@ -22,6 +22,8 @@ one. The zip has build provenance:
 When a run configuration fails because its port is taken, the plugin names the process
 that holds it and offers the fix:
 
+![IntelliJ IDEA: Demo Server fails with java.net.BindException: Address already in use; portcheck's notification says Port 3000 is in use by Python (pid 44979), started by zsh, with Stop Python and rerun, Stop Python and Show ports](../assets/jetbrains-stop-and-rerun.png)
+
 ```text
 Web server failed to start. Port 8080 was already in use.
 
@@ -43,7 +45,10 @@ Turn it off in **Settings → Tools → portcheck**.
 ## The Ports tool window
 
 **View → Tool Windows → Ports** lists every listening port with its process, PID and
-user. Filter by port, process or user; select a row to **Stop** it (after confirming),
+user.
+
+![The Ports tool window: port 3000 is now served by java (the demo server, restarted), with the other listening ports, their processes, PIDs and users; a notification says Python (pid 44979): terminated](../assets/jetbrains-ports.png)
+ Filter by port, process or user; select a row to **Stop** it (after confirming),
 **Open in Browser** (or double-click) or **Copy PID**; **Refresh** reloads.
 
 ## Actions
