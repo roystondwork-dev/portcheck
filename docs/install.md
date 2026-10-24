@@ -43,11 +43,11 @@ or `PORTCHECK_VERSION=0.9.0` for a specific version.
 === "npm (any OS)"
 
     ```sh
-    npx port-check 3000          # run without installing
-    npm install -g port-check    # or install the portcheck command
+    npx portcheck-cli 3000       # run without installing
+    npm install -g portcheck-cli # or install the portcheck command
     ```
 
-    On first run, the [port-check](https://www.npmjs.com/package/port-check) package
+    On first run, the [portcheck-cli](https://www.npmjs.com/package/portcheck-cli) package
     downloads portcheck for your platform from the GitHub release, checks it against the
     checksums published with the package, and caches it (`PORTCHECK_CACHE` to choose
     where). Node.js 18 or later.

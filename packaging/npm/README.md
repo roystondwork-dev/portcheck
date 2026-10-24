@@ -4,7 +4,7 @@ See what's using a port and free it safely: which process, who started it, stop 
 Fixes "port already in use" (`EADDRINUSE`, `Address already in use`).
 
 ```sh
-npx port-check 3000         # or: npm install -g port-check
+npx portcheck-cli 3000         # or: npm install -g portcheck-cli
 
 portcheck 3000              # who holds port 3000? (exit 1 if in use)
 portcheck kill 3000         # stop it, after confirming; never system processes

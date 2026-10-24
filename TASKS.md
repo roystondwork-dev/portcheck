@@ -34,7 +34,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M18 | Browser extension for Firefox; one-command setup | 6 / 6 | ✅ |
 | M19 | JetBrains plugin (IntelliJ, WebStorm, PyCharm, …) | 5 / 6 | 🟨 |
 | M20 | Safari extension (Mac app wrapper + Swift bridge to portcheck; signed with Developer ID) | 0 / ? | ⬜ (after 100 users: Apple Developer Program $99/yr) |
-| M21 | npm and PyPI packages (`npx port-check`, `pipx install port-check`) | 3 / 4 | 🟨 |
+| M21 | npm and PyPI packages (`npx portcheck-cli`, `pipx install port-check`) | 3 / 4 | 🟨 |
 | M22 | MCP server for AI coding assistants | 0 / ? | ⬜ (next) |
 | M23 | Raycast extension; Zed and Neovim plugins | 0 / ? | ⬜ |
 | M24 | Menu bar / system tray app | 0 / ? | ⬜ |
@@ -342,9 +342,9 @@ Design: [ADR-0007](docs/adr/0007-mcp-server.md).
 
 | ID | Task | Component / files | Tests required | Status | Notes |
 |---|---|---|---|---|---|
-| M21-01 | npm package `port-check`: downloads the release binary on first run, verified against checksums pinned in the package, cached per version | `packaging/npm/` | unit; real download (`PORT_CHECK_E2E`); `npx` from a packed tarball | ✅ | 6 kB; works with `npx`, pnpm and `--ignore-scripts` (no postinstall) |
+| M21-01 | npm package `portcheck-cli`: downloads the release binary on first run, verified against checksums pinned in the package, cached per version | `packaging/npm/` | unit; real download (`PORT_CHECK_E2E`); `npx` from a packed tarball | ✅ | 6 kB; works with `npx`, pnpm and `--ignore-scripts` (no postinstall) |
 | M21-02 | PyPI wheels `port-check`: one per platform with the binary as a script (no Python code) | `packaging/pypi/build_wheels.py` | twine check; pip install and run | ✅ | Static Linux binaries: manylinux + musllinux tags |
-| M21-03 | CI on 3 OSes against the latest release; release job publishes both with trusted publishing (OIDC, no tokens) | `.github/workflows/packages.yml`, `release.yml` | CI green | ✅ | `port-check` because `portcheck` is taken on both registries |
+| M21-03 | CI on 3 OSes against the latest release; release job publishes both with trusted publishing (OIDC, no tokens) | `.github/workflows/packages.yml`, `release.yml` | CI green | ✅ | `portcheck` is taken on both registries; npm also refuses `port-check` as too similar, hence `portcheck-cli` |
 | M21-04 | Accounts: npm (first publish by hand, then trusted publisher) and PyPI (pending trusted publisher) | — | — | ⬜ | Free |
 
 ## What's next (candidates, not yet scheduled)

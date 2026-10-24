@@ -99,7 +99,7 @@ scoop bucket add portcheck https://github.com/roystondwork-dev/scoop-bucket
 scoop install portcheck
 
 # npm (any OS): run it without installing
-npx port-check 3000
+npx portcheck-cli 3000
 
 # PyPI (any OS)
 pipx install port-check

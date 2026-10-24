@@ -28,12 +28,12 @@ function cacheDir(env = process.env, platform = process.platform, home = os.home
     return env.PORTCHECK_CACHE;
   }
   if (platform === "win32") {
-    return path.join(env.LOCALAPPDATA || path.join(home, "AppData", "Local"), "port-check");
+    return path.join(env.LOCALAPPDATA || path.join(home, "AppData", "Local"), "portcheck-cli");
   }
   if (platform === "darwin") {
-    return path.join(home, "Library", "Caches", "port-check");
+    return path.join(home, "Library", "Caches", "portcheck-cli");
   }
-  return path.join(env.XDG_CACHE_HOME || path.join(home, ".cache"), "port-check");
+  return path.join(env.XDG_CACHE_HOME || path.join(home, ".cache"), "portcheck-cli");
 }
 
 function sha256(file) {
@@ -83,9 +83,9 @@ async function ensureBinary({
   const name = archiveName(version, platform, arch);
   const want = checksums[name];
   if (!want) {
-    throw new Error(`no checksum for ${name}; reinstall port-check`);
+    throw new Error(`no checksum for ${name}; reinstall portcheck-cli`);
   }
-  log(`port-check: downloading portcheck ${version} (${name})...`);
+  log(`portcheck-cli: downloading portcheck ${version} (${name})...`);
   const res = await fetchFn(`${baseUrl}/${name}`);
   if (!res.ok) {
     throw new Error(`download failed: HTTP ${res.status} for ${baseUrl}/${name}`);

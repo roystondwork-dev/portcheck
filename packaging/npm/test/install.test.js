@@ -18,11 +18,11 @@ test("archive names match the release", () => {
 
 test("cache directory per OS, overridable", () => {
   assert.equal(cacheDir({ PORTCHECK_CACHE: "/c" }, "linux", "/h"), "/c");
-  assert.equal(cacheDir({}, "darwin", "/h"), path.join("/h", "Library", "Caches", "port-check"));
-  assert.equal(cacheDir({}, "linux", "/h"), path.join("/h", ".cache", "port-check"));
-  assert.equal(cacheDir({ XDG_CACHE_HOME: "/x" }, "linux", "/h"), path.join("/x", "port-check"));
-  assert.equal(cacheDir({ LOCALAPPDATA: "C:\\L" }, "win32", "/h"), path.join("C:\\L", "port-check"));
-  assert.equal(cacheDir({}, "win32", "/h"), path.join("/h", "AppData", "Local", "port-check"));
+  assert.equal(cacheDir({}, "darwin", "/h"), path.join("/h", "Library", "Caches", "portcheck-cli"));
+  assert.equal(cacheDir({}, "linux", "/h"), path.join("/h", ".cache", "portcheck-cli"));
+  assert.equal(cacheDir({ XDG_CACHE_HOME: "/x" }, "linux", "/h"), path.join("/x", "portcheck-cli"));
+  assert.equal(cacheDir({ LOCALAPPDATA: "C:\\L" }, "win32", "/h"), path.join("C:\\L", "portcheck-cli"));
+  assert.equal(cacheDir({}, "win32", "/h"), path.join("/h", "AppData", "Local", "portcheck-cli"));
 });
 
 /** A release archive holding a fake portcheck script, as GoReleaser lays it out. */

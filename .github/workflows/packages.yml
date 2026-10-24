@@ -1,7 +1,7 @@
 name: Packages
 
 # The npm and PyPI packages (packaging/), tested against the latest release on
-# every OS: `npx port-check` downloads and verifies the real binary, and the
+# every OS: `npx portcheck-cli` downloads and verifies the real binary, and the
 # wheels install `portcheck` with pip.
 on:
   push:
@@ -45,7 +45,7 @@ jobs:
           npm version "$VERSION" --no-git-tag-version --allow-same-version >/dev/null
           PORT_CHECK_E2E=1 npm test
           npm pack --pack-destination "$RUNNER_TEMP"
-          cd "$RUNNER_TEMP" && PORTCHECK_CACHE="$RUNNER_TEMP/cache" npx --yes "./port-check-$VERSION.tgz" version
+          cd "$RUNNER_TEMP" && PORTCHECK_CACHE="$RUNNER_TEMP/cache" npx --yes "./portcheck-cli-$VERSION.tgz" version
       - name: PyPI wheels (build, then pip install the one for this OS)
         run: |
           python3 packaging/pypi/build_wheels.py "$VERSION" "$RUNNER_TEMP/assets" "$RUNNER_TEMP/wheels"

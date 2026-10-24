@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Runs portcheck with the given arguments: `npx port-check 3000`.
+// Runs portcheck with the given arguments: `npx portcheck-cli 3000`.
 "use strict";
 
 const { spawnSync } = require("node:child_process");
@@ -11,7 +11,7 @@ ensureBinary({ version, checksums }).then(
   (bin) => {
     const r = spawnSync(bin, process.argv.slice(2), { stdio: "inherit" });
     if (r.error) {
-      console.error(`port-check: couldn't run portcheck: ${r.error.message}`);
+      console.error(`portcheck-cli: couldn't run portcheck: ${r.error.message}`);
       process.exit(3);
     }
     if (r.signal) {
@@ -20,7 +20,7 @@ ensureBinary({ version, checksums }).then(
     process.exit(r.status ?? 1);
   },
   (err) => {
-    console.error(`port-check: ${err.message}`);
+    console.error(`portcheck-cli: ${err.message}`);
     process.exit(3);
   },
 );

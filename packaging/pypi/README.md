@@ -21,7 +21,7 @@ Works on macOS, Linux and Windows (x64 and arm64). This package installs the nat
 `portcheck` binary; there's no Python code and nothing is downloaded at runtime.
 
 Also available for VS Code, JetBrains IDEs, Edge and Firefox, and through Homebrew,
-Scoop and npm (`npx port-check 3000`).
+Scoop and npm (`npx portcheck-cli 3000`).
 
 - Documentation: https://roystondwork-dev.github.io/portcheck/
 - Source (MIT): https://github.com/roystondwork-dev/portcheck
