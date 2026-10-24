@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.10.0](https://github.com/roystondwork-dev/portcheck/compare/v0.9.0...v0.10.0) (2026-10-24)
+
+
+### Features
+
+* **jetbrains:** JetBrains plugin: fix "port in use" from Run/Debug ([0a225bd](https://github.com/roystondwork-dev/portcheck/commit/0a225bda15bf77647011a6ba0b3b560b5e25d7f9))
+* **mcp:** portcheck mcp, an MCP server for AI coding assistants ([456f389](https://github.com/roystondwork-dev/portcheck/commit/456f3892aad1ab55da9fa2045df6b64e07d2dcae))
+* **neovim:** Neovim plugin: pick, check, kill and free ports; :terminal watcher ([103b2c4](https://github.com/roystondwork-dev/portcheck/commit/103b2c419793a7a49d4995d1a05d5c4ab02dcefe))
+* **packaging:** npm and PyPI packages (npx portcheck-cli, pipx install portcheck-tool) ([#52](https://github.com/roystondwork-dev/portcheck/issues/52)) ([0bf63bb](https://github.com/roystondwork-dev/portcheck/commit/0bf63bbf553d69fcc1a9ccb088d22e55feb1cd06))
+* **raycast:** Raycast extension: search, check, kill and free ports ([414fb73](https://github.com/roystondwork-dev/portcheck/commit/414fb73091a890dec64f1b15c35e97280a578b6b))
+* **tray:** portcheck-tray, a menu bar and system tray app ([a511778](https://github.com/roystondwork-dev/portcheck/commit/a51177827f251a74ec5798f9c58e1c5f3d243b2c))
+* **zed:** Zed extension: portcheck's MCP tools in Zed's agent ([52aec24](https://github.com/roystondwork-dev/portcheck/commit/52aec243cde023149d89fd495ed73475dd944e6c))
+
+
+### Bug Fixes
+
+* **jetbrains:** find the plugin's directory with public API; Windows test ([d7016da](https://github.com/roystondwork-dev/portcheck/commit/d7016da52737e6babc5592c7a97d2b249f62d0c6))
+* **jetbrains:** locate the bundled portcheck from the plugin's own jar ([0eba2c2](https://github.com/roystondwork-dev/portcheck/commit/0eba2c2d7e4c00021f6b4e229403258afeab8673))
+* **security:** update vulnerable dev dependencies; pin docs deps by hash; drop the Gradle wrapper JAR ([6779cf5](https://github.com/roystondwork-dev/portcheck/commit/6779cf562376ebabdbe85cf4ff893342ac8b9390))
+* **vscode:** re-check project ports after a change during a check ([bacd2f3](https://github.com/roystondwork-dev/portcheck/commit/bacd2f319d11708773d237ef22a2296b4690c8af))
+
+
+### Documentation
+
+* **jetbrains:** link the demo video ([b248db5](https://github.com/roystondwork-dev/portcheck/commit/b248db5ce87fbf7fe72d45a6cefae2896d0edb9b))
+* **jetbrains:** screenshots of the plugin in IntelliJ IDEA ([558c03d](https://github.com/roystondwork-dev/portcheck/commit/558c03d5874b7e2383f8928504aa8ad2e5710806))
+* **mcp:** add Zed's server through its UI ([f8b1239](https://github.com/roystondwork-dev/portcheck/commit/f8b12395f857b278c87154a9b2ea7d865bc964cf))
+* OpenSSF Best Practices passing badge ([6dafc1f](https://github.com/roystondwork-dev/portcheck/commit/6dafc1f15c0c579dbcb370816b450c7a2ffef425))
+* **raycast:** store screenshots (Search Ports, Check Port) ([3811c4a](https://github.com/roystondwork-dev/portcheck/commit/3811c4ada038d90eb18c36781dd31a7ca1fbfbed))
+
 ## [0.9.0](https://github.com/roystondwork-dev/portcheck/compare/v0.8.0...v0.9.0) (2026-10-23)
 
 

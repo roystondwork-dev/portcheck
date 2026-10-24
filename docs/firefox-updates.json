@@ -3,7 +3,7 @@
     "portcheck-direct@roystondwork-dev.github.io": {
       "updates": [
         {
-          "version": "0.9.0",
+          "version": "0.10.0",
           "update_link": "https://github.com/roystondwork-dev/portcheck/releases/latest/download/portcheck-firefox.xpi"
         }
       ]
