@@ -1,0 +1,26 @@
+{
+  "name": "portcheck-cli",
+  "version": "0.9.0",
+  "description": "See what's using a port and free it safely: which process, who started it, stop it. Fixes \"port already in use\" (EADDRINUSE).",
+  "keywords": ["port", "eaddrinuse", "port-in-use", "kill-port", "lsof", "netstat", "localhost", "dev-server", "cli"],
+  "homepage": "https://roystondwork-dev.github.io/portcheck/",
+  "bugs": "https://github.com/roystondwork-dev/portcheck/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/roystondwork-dev/portcheck.git",
+    "directory": "packaging/npm"
+  },
+  "license": "MIT",
+  "author": "Royston D",
+  "bin": {
+    "portcheck": "bin/portcheck.js",
+    "portcheck-cli": "bin/portcheck.js"
+  },
+  "files": ["bin", "lib", "checksums.json", "README.md"],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

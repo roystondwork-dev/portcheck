@@ -40,6 +40,28 @@ or `PORTCHECK_VERSION=0.9.0` for a specific version.
     brew install roystondwork-dev/tap/portcheck
     ```
 
+=== "npm (any OS)"
+
+    ```sh
+    npx portcheck-cli 3000       # run without installing
+    npm install -g portcheck-cli # or install the portcheck command
+    ```
+
+    On first run, the [portcheck-cli](https://www.npmjs.com/package/portcheck-cli) package
+    downloads portcheck for your platform from the GitHub release, checks it against the
+    checksums published with the package, and caches it (`PORTCHECK_CACHE` to choose
+    where). Node.js 18 or later.
+
+=== "pip / pipx / uv (any OS)"
+
+    ```sh
+    pipx install portcheck-tool  # or: uv tool install portcheck-tool / pip install portcheck-tool
+    ```
+
+    The [portcheck-tool](https://pypi.org/project/portcheck-tool/) wheels carry the native
+    binary for each platform and put `portcheck` on your `PATH`; there's no Python code
+    and nothing is downloaded at runtime.
+
 === "winget (Windows)"
 
     ```powershell

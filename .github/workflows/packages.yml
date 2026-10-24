@@ -1,0 +1,57 @@
+name: Packages
+
+# The npm and PyPI packages (packaging/), tested against the latest release on
+# every OS: `npx portcheck-cli` downloads and verifies the real binary, and the
+# wheels install `portcheck` with pip.
+on:
+  push:
+    branches: [main]
+    paths: [packaging/**, .github/workflows/packages.yml]
+  pull_request:
+    paths: [packaging/**, .github/workflows/packages.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  packages:
+    name: Packages (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: Download the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(gh release view --json tagName --jq .tagName)
+          echo "VERSION=${tag#v}" >> "$GITHUB_ENV"
+          gh release download "$tag" -D "$RUNNER_TEMP/assets" -p checksums.txt -p 'portcheck_*.tar.gz' -p 'portcheck_*.zip'
+      - name: npm package (unit tests, then npx against the real release)
+        working-directory: packaging/npm
+        run: |
+          node scripts/checksums.js "$VERSION" "$RUNNER_TEMP/assets/checksums.txt"
+          # Test the package as published: the version of the release it downloads.
+          npm version "$VERSION" --no-git-tag-version --allow-same-version >/dev/null
+          PORT_CHECK_E2E=1 npm test
+          npm pack --pack-destination "$RUNNER_TEMP"
+          cd "$RUNNER_TEMP" && PORTCHECK_CACHE="$RUNNER_TEMP/cache" npx --yes "./portcheck-cli-$VERSION.tgz" version
+      - name: PyPI wheels (build, then pip install the one for this OS)
+        run: |
+          python3 packaging/pypi/build_wheels.py "$VERSION" "$RUNNER_TEMP/assets" "$RUNNER_TEMP/wheels"
+          python3 -m venv "$RUNNER_TEMP/venv"
+          if [ "$RUNNER_OS" = Windows ]; then bin="$RUNNER_TEMP/venv/Scripts"; else bin="$RUNNER_TEMP/venv/bin"; fi
+          "$bin/python" -m pip install --quiet twine
+          "$bin/python" -m twine check --strict "$RUNNER_TEMP"/wheels/*.whl
+          "$bin/python" -m pip install --no-index --find-links "$RUNNER_TEMP/wheels" portcheck-tool
+          "$bin/portcheck" version

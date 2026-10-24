@@ -98,6 +98,12 @@ winget install roystondwork-dev.portcheck
 scoop bucket add portcheck https://github.com/roystondwork-dev/scoop-bucket
 scoop install portcheck
 
+# npm (any OS): run it without installing
+npx portcheck-cli 3000
+
+# PyPI (any OS)
+pipx install portcheck-tool
+
 # Go 1.26+
 go install github.com/roystondwork-dev/portcheck/cmd/portcheck@latest
 ```
