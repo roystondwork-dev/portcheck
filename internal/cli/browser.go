@@ -20,20 +20,26 @@ import (
 // app's stdin/stdout (ADR-0005). Each request runs a portcheck command
 // in-process with its output captured.
 func serveNativeHost(ctx context.Context, app *App) int {
-	run := func(ctx context.Context, args []string) ([]byte, []byte, int) {
+	if err := nativehost.Serve(ctx, app.Stdin, app.Stdout, inProcess(app)); err != nil {
+		fmt.Fprintf(app.Stderr, "portcheck: native messaging: %v\n", err)
+		return ExitRuntime
+	}
+	return ExitOK
+}
+
+// inProcess runs portcheck command lines in this process with their output
+// captured, for servers whose stdin and stdout carry a protocol (native
+// messaging, MCP).
+func inProcess(app *App) func(ctx context.Context, args []string) ([]byte, []byte, int) {
+	return func(ctx context.Context, args []string) ([]byte, []byte, int) {
 		var stdout, stderr bytes.Buffer
 		sub := *app
-		sub.Stdin = strings.NewReader("") // stdin carries the browser's messages
+		sub.Stdin = strings.NewReader("") // stdin carries the protocol
 		sub.Stdout, sub.Stderr = &stdout, &stderr
 		sub.StdinTTY, sub.StdoutTTY, sub.StderrTTY = false, false, false
 		code := Execute(ctx, &sub, args)
 		return stdout.Bytes(), stderr.Bytes(), code
 	}
-	if err := nativehost.Serve(ctx, app.Stdin, app.Stdout, run); err != nil {
-		fmt.Fprintf(app.Stderr, "portcheck: native messaging: %v\n", err)
-		return ExitRuntime
-	}
-	return ExitOK
 }
 
 type browserFlags struct {

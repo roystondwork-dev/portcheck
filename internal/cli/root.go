@@ -97,6 +97,7 @@ Running 'portcheck' alone in an interactive terminal opens the live TUI
 		c.newRunCmd(),
 		c.newDoctorCmd(),
 		c.newBrowserCmd(),
+		c.newMCPCmd(),
 		c.newVersionCmd(),
 	)
 	return root

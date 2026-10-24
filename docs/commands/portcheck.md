@@ -54,6 +54,7 @@ portcheck [port...] [flags]
 * [portcheck free](portcheck_free.md)	 - Find free ports
 * [portcheck kill](portcheck_kill.md)	 - Stop the process listening on a port
 * [portcheck list](portcheck_list.md)	 - List sockets and the processes that own them
+* [portcheck mcp](portcheck_mcp.md)	 - Serve portcheck to AI assistants (Model Context Protocol)
 * [portcheck run](portcheck_run.md)	 - Run a command on a free port (sets $PORT)
 * [portcheck scan](portcheck_scan.md)	 - Check which TCP ports are reachable on remote hosts
 * [portcheck tui](portcheck_tui.md)	 - Live, interactive view of ports (the default in a terminal)
