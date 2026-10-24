@@ -34,8 +34,12 @@ command instead.
 ## Set up
 
 [Install portcheck](../install.md) first, then add it to your assistant. If your
-assistant can't find `portcheck`, use its full path (`which portcheck`), or run it
-through npm: `"command": "npx", "args": ["-y", "port-check", "mcp"]`.
+assistant can't find `portcheck`, use its full path (`which portcheck`).
+
+!!! tip "No install: run it through npx"
+    With Node.js, any assistant can run portcheck without installing it: use
+    `"command": "npx", "args": ["-y", "portcheck-cli", "mcp"]`. In Claude Code:
+    `claude mcp add --scope user portcheck -- npx -y portcheck-cli mcp`.
 
 === "Claude Code"
 

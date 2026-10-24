@@ -25,8 +25,8 @@ When a dev server, database or test fails with "address already in use" / EADDRI
 call check_port with that port to see what holds it (name, PID, who started it), then
 stop_process if the user wants it stopped, or find_free_port to use another port.
 wait_for_port waits until a service accepts connections (or a port is free).
-stop_process never stops system processes, the user's other users' processes without
-privileges, or the assistant itself; containers get a stop command instead.`
+stop_process never stops system processes or the assistant itself, and can't stop
+other users' processes without privileges; containers get a stop command instead.`
 
 // ListInput filters list_ports.
 type ListInput struct {

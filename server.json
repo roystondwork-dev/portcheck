@@ -1,0 +1,39 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.roystondwork-dev/portcheck",
+  "title": "portcheck",
+  "description": "See which process holds a port, find free ports, and stop a dev server safely.",
+  "websiteUrl": "https://roystondwork-dev.github.io/portcheck/guide/mcp/",
+  "repository": {
+    "url": "https://github.com/roystondwork-dev/portcheck",
+    "source": "github",
+    "id": "1426647424"
+  },
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/roystondwork-dev/portcheck/main/extensions/vscode/media/icon.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "256x256"
+      ]
+    }
+  ],
+  "version": "0.10.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "portcheck-cli",
+      "version": "0.10.0",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ]
+    }
+  ]
+}
