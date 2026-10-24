@@ -90,6 +90,7 @@ nav:
       - Project ports (doctor): guide/doctor.md
       - Interactive view (tui): guide/tui.md
       - VS Code extension: guide/vscode.md
+      - JetBrains plugin: guide/jetbrains.md
       - Browser extension: guide/browser.md
       - Containers & WSL: guide/containers.md
       - Scripting & CI: guide/scripting.md
@@ -135,3 +136,4 @@ nav:
           - "0003: Native macOS sockets": adr/0003-native-macos-sockets.md
           - "0004: VS Code extension": adr/0004-vscode-extension.md
           - "0005: Browser extension": adr/0005-browser-extension.md
+          - "0006: JetBrains plugin": adr/0006-jetbrains-plugin.md

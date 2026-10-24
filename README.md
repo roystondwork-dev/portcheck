@@ -32,6 +32,7 @@
 | 🖥️ | `portcheck` | Live, sortable, filterable TUI. Stop processes without leaving it |
 | 🌐 | [Browser extension](https://microsoftedge.microsoft.com/addons/detail/jenlahoamefdpfmpodhidkgcceikheee) | Edge (and Chrome): which process serves a localhost tab, `off` when nothing listens, stop it from the popup ([guide](docs/guide/browser.md)) |
 | 🧩 | [VS Code extension](https://marketplace.visualstudio.com/items?itemName=portcheck-vscode.portcheck-vscode) | "Port in use" errors in the terminal become one-click fixes; listening ports in the sidebar ([guide](docs/guide/vscode.md)) |
+| 🧠 | [JetBrains plugin](docs/guide/jetbrains.md) | IntelliJ IDEA, WebStorm, PyCharm, GoLand…: "port in use" in Run/Debug → **Stop it and rerun**; a Ports tool window |
 
 ### VS Code extension
 
@@ -43,6 +44,16 @@ fixes it: stop it and re-run, or re-run on the next free port.
 Install **Portcheck - Port in Use Fixer** from the
 [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=portcheck-vscode.portcheck-vscode) (search "portcheck" in VS Code) or
 [Open VSX](https://open-vsx.org/extension/portcheck-vscode/portcheck-vscode) (VSCodium, Cursor, Windsurf). portcheck is built in.
+
+### JetBrains plugin
+
+In IntelliJ IDEA, WebStorm, PyCharm, GoLand and the other JetBrains IDEs, when a run
+configuration fails because its port is taken, a notification names the process and
+offers **Stop it and rerun**; the **Ports** tool window lists every listening port.
+Install `portcheck-jetbrains-<version>.zip` from the
+[latest release](https://github.com/roystondwork-dev/portcheck/releases/latest)
+(**Settings → Plugins → ⚙ → Install Plugin from Disk…**); JetBrains Marketplace is next
+([guide](docs/guide/jetbrains.md)).
 
 ### Browser extension
 

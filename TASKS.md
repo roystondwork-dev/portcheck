@@ -3,7 +3,7 @@
 > Single source of truth for the roadmap. Update the row's **Status** and **Notes**
 > in the same PR that completes the work.
 
-**Current milestone:** M18 — Firefox and one-command setup (PR #47). Open: manual WSL check (M11-04, deferred by maintainer), winget review (M7-06), Open VSX namespace claim (October 2027)
+**Current milestone:** M19 — JetBrains plugin. Open: manual WSL check (M11-04, deferred by maintainer), winget review (M7-06), Open VSX namespace claim (October 2027)
 **Last updated:** 2026-10-20
 **Latest release:** [v0.8.0](https://github.com/roystondwork-dev/portcheck/releases/tag/v0.8.0)
 
@@ -31,8 +31,8 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked
 | M15 | VS Code extension — USP (terminal "port in use" → one-click fix; project ports) | 5 / 5 | ✅ |
 | M16 | VS Code extension — packaging & publishing (VSIX, Marketplace, Open VSX) | 4 / 4 | ✅ |
 | M17 | Browser extension (Chrome, Edge; native messaging) | 8 / 8 | ✅ |
-| M18 | Browser extension for Firefox; one-command setup | 5 / 6 | 🟨 |
-| M19 | JetBrains plugin (IntelliJ, WebStorm, PyCharm, …) | 0 / ? | ⬜ (planned) |
+| M18 | Browser extension for Firefox; one-command setup | 6 / 6 | ✅ |
+| M19 | JetBrains plugin (IntelliJ, WebStorm, PyCharm, …) | 5 / 6 | 🟨 |
 | M20 | Safari extension (Mac app wrapper + Swift bridge to portcheck; signed with Developer ID) | 0 / ? | ⬜ (after 100 users: Apple Developer Program $99/yr) |
 
 ---
@@ -283,8 +283,21 @@ Design: [ADR-0005](docs/adr/0005-browser-extension.md), amendment "Firefox".
 | M18-02 | Firefox build: gecko ID, background scripts, data-collection declaration, `browser` API, Firefox error messages, localhost permission prompt | `extensions/browser/` (`npm run build:firefox`) | unit; Mozilla addons-linter (0 errors) | ✅ | ID `portcheck@roystondwork-dev.github.io` (ours; AMO keeps it) |
 | M18-03 | End-to-end in a real Firefox (Selenium) with the real `portcheck browser install --browser firefox` | `e2e-firefox/`, CI job | CI green | ✅ | Runs on Linux CI (the local sandbox can't start Firefox) |
 | M18-04 | Release assets: Firefox zip + source zip for AMO reviewers; Mozilla-signed direct `.xpi` with an update feed | `release.yml`, `docs/firefox-updates.json` | rebuild from source is byte-identical | ✅ | Signing needs the `AMO_JWT_ISSUER`/`AMO_JWT_SECRET` secrets (free Mozilla account) |
-| M18-05 | AMO listing kit and submission (free) | `extensions/browser/store/` | — | ⬜ | Needs portcheck with Firefox support released first |
+| M18-05 | AMO listing kit and submission (free) | `extensions/browser/store/`, `release.yml` | — | ✅ | Submitted automatically with v0.9.0 (listed + signed direct download) |
 | M18-06 | One-command setup (`install.sh`, `install.ps1`); popup shows the OS command and connects by itself; on/off badge before the app is connected | `docs/install.*`, `src/probe.ts`, `src/popup.ts` | unit 100%; Chromium e2e; Installer workflow on 3 OSes | ✅ | Installer verifies release checksums |
+
+## M19 — JetBrains plugin
+
+Design: [ADR-0006](docs/adr/0006-jetbrains-plugin.md).
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M19-01 | Kotlin client of the CLI (schema v1), binary resolution (setting → bundled → PATH) | `extensions/jetbrains/…/Cli.kt`, `Schema.kt` | unit; real binary (`PORTCHECK_BIN`) | ✅ | Restores the executable bit plugin zips drop |
+| M19-02 | "Port in use" matcher (same corpus as VS Code, plus Tomcat/Java) and streaming scanner | `Matcher.kt` | unit | ✅ | Keep in sync with `extensions/vscode/src/matcher.ts` |
+| M19-03 | Run/Debug watcher: notification with Stop and rerun / Stop / Copy stop command / Show ports | `ui/RunWatcher.kt` | headless IDE test | ✅ | Restarts the same execution environment |
+| M19-04 | Ports tool window, Tools actions (check, free, stop), settings | `ui/` | headless IDE test | ✅ | |
+| M19-05 | CI (3 OSes, coverage ≥ 95%, Plugin Verifier) and release packaging with all six binaries | `.github/workflows/jetbrains.yml`, `release.yml`, `scripts/package-release.sh` | CI green | ✅ | Coverage 99.5% |
+| M19-06 | JetBrains Marketplace: first upload by hand, then automatic (`JETBRAINS_MARKETPLACE_TOKEN`) | — | — | ⬜ | Free; needs a JetBrains account |
 
 ## What's next (candidates, not yet scheduled)
 
