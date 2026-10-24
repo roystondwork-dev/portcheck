@@ -309,6 +309,15 @@ Design: [ADR-0007](docs/adr/0007-mcp-server.md).
 | M22-02 | `portcheck mcp` on stdin/stdout, sharing the in-process runner with the browser host | `internal/cli/mcp.go` | JSON-RPC over pipes | ✅ | Checked over real stdio too |
 | M22-03 | Setup guide for Claude Code, VS Code, Cursor, Windsurf, Claude Desktop, Codex | `docs/guide/mcp.md` | `mkdocs --strict` | ✅ | |
 
+## M23 — Raycast, Zed and Neovim
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M23-01 | Raycast extension: Search Ports, Check Port, Kill Port, Find Free Port | `extensions/raycast/` | unit 100% lines; real portcheck; `ray build`; CI on macOS | ✅ | Finds portcheck in Homebrew, ~/.local/bin, ~/go/bin (Raycast doesn't see the shell's PATH) |
+| M23-02 | Raycast Store submission (`npm run publish`, PR to raycast/extensions) | — | `ray lint` | ⬜ | Needs the maintainer's Raycast username as `author` |
+| M23-03 | Zed extension | | | ⬜ | |
+| M23-04 | Neovim plugin | | | ⬜ | |
+
 ## What's next (candidates, not yet scheduled)
 
 | Candidate | Notes |

@@ -92,6 +92,7 @@ nav:
       - VS Code extension: guide/vscode.md
       - JetBrains plugin: guide/jetbrains.md
       - AI assistants (MCP): guide/mcp.md
+      - Raycast: guide/raycast.md
       - Browser extension: guide/browser.md
       - Containers & WSL: guide/containers.md
       - Scripting & CI: guide/scripting.md
