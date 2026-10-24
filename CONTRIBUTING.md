@@ -108,6 +108,19 @@ npx playwright test                 # the extension in a real Chromium with the 
 Like the VS Code extension, it's a thin client: port logic and safety checks belong in
 Go (see ADR-0005).
 
+## JetBrains plugin
+
+The plugin lives in `extensions/jetbrains/` (Kotlin, IntelliJ Platform Gradle Plugin).
+It needs JDK 21 and Gradle 9.5 or later; there's no Gradle wrapper in the repository
+(CI pins Gradle 9.5.0), so install Gradle once (`brew install gradle openjdk@21`):
+
+```sh
+make build                                          # the real-binary test uses bin/portcheck
+cd extensions/jetbrains
+PORTCHECK_BIN=$PWD/../../bin/portcheck gradle test koverVerify   # unit, headless-IDE and real-binary tests
+gradle runIde                                       # try it in a sandbox IDE
+```
+
 ## Commit messages
 
 We use [Conventional Commits](https://www.conventionalcommits.org/) — they drive

@@ -52,5 +52,5 @@ for t in $targets; do
 done
 chmod 755 "$bin"/*/portcheck*
 
-./gradlew buildPlugin -PportcheckBin="$bin" --no-build-cache --rerun-tasks --console=plain
+gradle buildPlugin -PportcheckBin="$bin" --no-build-cache --rerun-tasks --console=plain
 cp "build/distributions/portcheck-jetbrains-$version.zip" "$out/"
