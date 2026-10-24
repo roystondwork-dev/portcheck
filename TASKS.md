@@ -299,6 +299,16 @@ Design: [ADR-0006](docs/adr/0006-jetbrains-plugin.md).
 | M19-05 | CI (3 OSes, coverage ≥ 95%, Plugin Verifier) and release packaging with all six binaries | `.github/workflows/jetbrains.yml`, `release.yml`, `scripts/package-release.sh` | CI green | ✅ | Coverage 99.5% |
 | M19-06 | JetBrains Marketplace: first upload by hand, then automatic (`JETBRAINS_MARKETPLACE_TOKEN`) | — | — | ⬜ | Free; needs a JetBrains account |
 
+## M22 — MCP server for AI coding assistants
+
+Design: [ADR-0007](docs/adr/0007-mcp-server.md).
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M22-01 | Tools list_ports, check_port, find_free_port, wait_for_port, stop_process: validated inputs → fixed command lines, output with the exit code explained | `internal/mcpserver/` | unit 100% (in-memory MCP client) | ✅ | Official Go SDK; stop_process is destructive-annotated, never `--allow-system` |
+| M22-02 | `portcheck mcp` on stdin/stdout, sharing the in-process runner with the browser host | `internal/cli/mcp.go` | JSON-RPC over pipes | ✅ | Checked over real stdio too |
+| M22-03 | Setup guide for Claude Code, VS Code, Cursor, Windsurf, Claude Desktop, Codex | `docs/guide/mcp.md` | `mkdocs --strict` | ✅ | |
+
 ## What's next (candidates, not yet scheduled)
 
 | Candidate | Notes |

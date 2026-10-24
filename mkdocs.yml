@@ -91,6 +91,7 @@ nav:
       - Interactive view (tui): guide/tui.md
       - VS Code extension: guide/vscode.md
       - JetBrains plugin: guide/jetbrains.md
+      - AI assistants (MCP): guide/mcp.md
       - Browser extension: guide/browser.md
       - Containers & WSL: guide/containers.md
       - Scripting & CI: guide/scripting.md
@@ -111,6 +112,7 @@ nav:
           - free: commands/portcheck_free.md
           - kill: commands/portcheck_kill.md
           - list: commands/portcheck_list.md
+          - mcp: commands/portcheck_mcp.md
           - run: commands/portcheck_run.md
           - scan: commands/portcheck_scan.md
           - tui: commands/portcheck_tui.md
@@ -137,3 +139,4 @@ nav:
           - "0004: VS Code extension": adr/0004-vscode-extension.md
           - "0005: Browser extension": adr/0005-browser-extension.md
           - "0006: JetBrains plugin": adr/0006-jetbrains-plugin.md
+          - "0007: MCP server": adr/0007-mcp-server.md
