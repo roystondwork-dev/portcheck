@@ -2,7 +2,6 @@
 // calls off the UI thread.
 package io.github.roystondworkdev.portcheck.ui
 
-import com.intellij.ide.plugins.PluginManager
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
@@ -17,6 +16,7 @@ import com.intellij.openapi.project.Project
 import io.github.roystondworkdev.portcheck.PortcheckClient
 import io.github.roystondworkdev.portcheck.PortcheckException
 import io.github.roystondworkdev.portcheck.ProcessExec
+import io.github.roystondworkdev.portcheck.pluginDirOf
 import io.github.roystondworkdev.portcheck.resolveBinary
 
 @Service(Service.Level.APP)
@@ -45,7 +45,8 @@ class PortcheckSettings : PersistentStateComponent<PortcheckSettings.State> {
 
 object Portcheck {
     fun client(): PortcheckClient {
-        val dir = PluginManager.getPluginByClass(Portcheck::class.java)?.pluginPath?.toFile()
+        // Located from our own jar: the IDE's plugin-lookup APIs are internal.
+        val dir = pluginDirOf(Portcheck::class.java.getResource("Portcheck.class"))
         val binary = resolveBinary(PortcheckSettings.get().state.path, dir, System.getProperty("os.name"), System.getProperty("os.arch")) { it.isFile }
         return PortcheckClient(binary, ProcessExec)
     }

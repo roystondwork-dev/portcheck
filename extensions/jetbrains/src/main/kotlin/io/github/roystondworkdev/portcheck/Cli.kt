@@ -29,6 +29,19 @@ fun platformDir(osName: String, osArch: String): String {
 }
 
 /**
+ * The plugin's directory, from where a class of it was loaded:
+ * jar:file:/…/plugins/portcheck-jetbrains/lib/portcheck-jetbrains-X.jar!/… → …/plugins/portcheck-jetbrains.
+ * Null when not loaded from a jar (e.g. in tests).
+ */
+fun pluginDirOf(classUrl: java.net.URL?): File? {
+    if (classUrl?.protocol != "jar") {
+        return null
+    }
+    val jar = classUrl.path.substringBefore("!/")
+    return File(java.net.URI(jar)).parentFile?.parentFile
+}
+
+/**
  * Picks the binary: the setting, else the one bundled for this OS and CPU in
  * bin/<os>-<arch>/ (release builds carry all six), else portcheck on PATH.
  */
