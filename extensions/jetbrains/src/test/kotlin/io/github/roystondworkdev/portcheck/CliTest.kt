@@ -79,6 +79,15 @@ class CliTest {
     }
 
     @Test
+    fun pluginDirFromTheJar() {
+        val jar = File.createTempFile("portcheck-jetbrains", ".jar").also { it.deleteOnExit() }
+        val url = java.net.URL("jar:${jar.toURI()}!/io/github/roystondworkdev/portcheck/ui/Portcheck.class")
+        assertEquals(jar.parentFile.parentFile, pluginDirOf(url))
+        assertEquals(null, pluginDirOf(File("/x/Portcheck.class").toURI().toURL()))
+        assertEquals(null, pluginDirOf(null))
+    }
+
+    @Test
     fun resolveBinaryPrefersSettingThenBundledThenPath() {
         val dir = File("/plugins/portcheck-jetbrains")
         val bundled = File("/plugins/portcheck-jetbrains/bin/darwin-arm64/portcheck")
