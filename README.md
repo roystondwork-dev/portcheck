@@ -35,6 +35,7 @@
 | 🤖 | `portcheck mcp` | AI assistants (Claude Code, Cursor, Copilot…) check and free ports themselves ([guide](docs/guide/mcp.md)) |
 | ⌨️ | [Raycast](docs/guide/raycast.md) | Search Ports, Check Port, Kill Port and Find Free Port from the Mac launcher |
 | ✍️ | [Neovim](docs/guide/neovim.md) | `:Portcheck` picker, check/kill/free, and "port in use" in `:terminal` → stop it |
+| 🔌 | [Menu bar / tray app](docs/guide/tray.md) | Your listening ports in the macOS menu bar or Windows/Linux tray: stop, open, copy in two clicks |
 | 🧠 | [JetBrains plugin](docs/guide/jetbrains.md) | IntelliJ IDEA, WebStorm, PyCharm, GoLand…: "port in use" in Run/Debug → **Stop it and rerun**; a Ports tool window |
 
 ### VS Code extension

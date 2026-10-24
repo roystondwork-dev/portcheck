@@ -17,6 +17,9 @@ exclude:
   paths:
     # main() only wires os.Exit around cli.Execute, which is tested directly.
     - ^cmd/portcheck/main\.go$
+    # The tray app's OS glue (systray adapter, clipboard, browser); its logic is
+    # internal/tray, tested to 100%.
+    - ^cmd/portcheck-tray/
     # Test helpers and doc generator are not shipped code.
     - ^internal/testutil/
     - ^internal/cli/gendocs/

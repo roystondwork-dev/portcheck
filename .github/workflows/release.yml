@@ -180,6 +180,35 @@ jobs:
           npx ovsx create-namespace "$(node -p 'require("./package.json").publisher')" || true
           npx ovsx publish "$RUNNER_TEMP"/vsix/*.vsix
 
+  tray:
+    # The menu bar / tray app: built on macOS (the menu bar needs cgo and
+    # Xcode's tools; Windows and Linux are pure Go). Releases only.
+    needs: [release-please, goreleaser]
+    if: needs.release-please.outputs.release_created == 'true' && needs.goreleaser.result == 'success'
+    runs-on: macos-latest
+    permissions:
+      contents: write      # attach the archives to the release
+      id-token: write      # provenance
+      attestations: write
+    env:
+      TAG: ${{ needs.release-please.outputs.tag_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: Build the tray app for every platform
+        run: scripts/package-tray.sh "$TAG" "$RUNNER_TEMP/tray"
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: ${{ runner.temp }}/tray/portcheck-tray_*
+      - name: Attach to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" "$RUNNER_TEMP"/tray/portcheck-tray_* --clobber
+
   jetbrains:
     needs: [release-please, goreleaser]
     if: >-
