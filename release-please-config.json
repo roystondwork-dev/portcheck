@@ -60,6 +60,7 @@
         { "type": "json", "path": "extensions/browser/package-lock.json", "jsonpath": "$.version" },
         { "type": "json", "path": "extensions/browser/package-lock.json", "jsonpath": "$.packages[''].version" },
         { "type": "generic", "path": "extensions/jetbrains/gradle.properties" },
+        { "type": "json", "path": "packaging/npm/package.json", "jsonpath": "$.version" },
         { "type": "json", "path": "docs/firefox-updates.json", "jsonpath": "$.addons['portcheck-direct@roystondwork-dev.github.io'].updates[0].version" }
       ]
     }

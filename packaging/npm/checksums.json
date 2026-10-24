@@ -1,0 +1,8 @@
+{
+  "portcheck_0.9.0_darwin_amd64.tar.gz": "98c6def1e0e969acb1a9342ef79757e95002303402227b267b3f4a1b6a9ae5eb",
+  "portcheck_0.9.0_darwin_arm64.tar.gz": "9dfc7ec4a240e7be0a53032673a3730056c828421e63312e7d19d76af8e0bbd0",
+  "portcheck_0.9.0_linux_amd64.tar.gz": "a6ce3aabdfbdb252402983f21dcfd79ac67692cfa14223a83dc2ec81a273eee5",
+  "portcheck_0.9.0_linux_arm64.tar.gz": "cc58f775655e6082cd8e57d25708788be82eb2cd2c7509687261a7f597ef3439",
+  "portcheck_0.9.0_windows_amd64.zip": "a8191b06c8bba4d9f1caede2164faddfc26efdfb8e548b047e3d07c1d3846e12",
+  "portcheck_0.9.0_windows_arm64.zip": "ad2847c9623cd792549888aa896439a127f65fcddd49956a4ac8f807929331ec"
+}
