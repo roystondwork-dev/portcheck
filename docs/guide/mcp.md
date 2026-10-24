@@ -80,6 +80,15 @@ through npm: `"command": "npx", "args": ["-y", "port-check", "mcp"]`.
     { "mcpServers": { "portcheck": { "command": "/opt/homebrew/bin/portcheck", "args": ["mcp"] } } }
     ```
 
+=== "Zed"
+
+    Install the **Portcheck** extension (**Extensions → search "portcheck"**), or add
+    the server yourself in `settings.json`:
+
+    ```json
+    { "context_servers": { "portcheck": { "command": { "path": "portcheck", "args": ["mcp"] } } } }
+    ```
+
 === "Codex CLI"
 
     In `~/.codex/config.toml`:

@@ -317,6 +317,7 @@ Design: [ADR-0007](docs/adr/0007-mcp-server.md).
 | M23-02 | Raycast Store submission (`npm run publish`, PR to raycast/extensions) | — | `ray lint` | ⬜ | Needs the maintainer's Raycast username as `author` |
 | M23-03 | Zed extension | | | ⬜ | |
 | M23-04 | Neovim plugin | | | ⬜ | |
+| M23-03 | Zed extension: `portcheck mcp` as a context server (Zed's agent gets the MCP tools); `path` setting | `extensions/zed/` | cargo test; clippy; WASM build in CI | ✅ | Zed extensions registry: PR to zed-industries/extensions with `path = "extensions/zed"` |
 
 ## What's next (candidates, not yet scheduled)
 
