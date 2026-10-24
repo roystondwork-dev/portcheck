@@ -312,6 +312,8 @@ func TestDescribeBusy(t *testing.T) {
 		{freeport.Status{Availability: freeport.InUse}, "in use"},
 		{freeport.Status{Availability: freeport.InUse, Holders: []inspect.Socket{hidden}}, "in use"},
 		{freeport.Status{Availability: freeport.InUse, Holders: []inspect.Socket{ctr, proc, pidOnly}}, "in use by docker:web, node (pid 7), pid 8"},
+		// IPv4 and IPv6 sockets of one process: named once.
+		{freeport.Status{Availability: freeport.InUse, Holders: []inspect.Socket{proc, proc}}, "in use by node (pid 7)"},
 	} {
 		if got := describeBusy(tc.st); got != tc.want {
 			t.Errorf("describeBusy = %q, want %q", got, tc.want)

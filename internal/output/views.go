@@ -305,9 +305,18 @@ func CheckDoc(sts []freeport.Status) Document {
 			d.Rows = append(d.Rows, []Cell{port, proto, status, T("-", ToneMuted), T("-", ToneMuted), T("-", ToneMuted)})
 			continue
 		}
+		// The table has no address column, so a process listening on both
+		// 0.0.0.0 and [::] gets one row, not two identical ones. JSON keeps
+		// every socket.
+		seen := make(map[[3]Cell]bool, len(st.Holders))
 		for _, h := range st.Holders {
 			name, user := processCells(h)
-			d.Rows = append(d.Rows, []Cell{port, proto, status, pidCell(h.PID), name, user})
+			key := [3]Cell{pidCell(h.PID), name, user}
+			if seen[key] {
+				continue
+			}
+			seen[key] = true
+			d.Rows = append(d.Rows, []Cell{port, proto, status, key[0], name, user})
 		}
 	}
 	d.Data = data

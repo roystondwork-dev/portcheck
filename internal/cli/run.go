@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -252,13 +253,18 @@ func describeBusy(st freeport.Status) string {
 	}
 	holders := make([]string, 0, len(st.Holders))
 	for _, h := range st.Holders {
+		var who string
 		switch {
 		case h.Container != nil:
-			holders = append(holders, output.ContainerLabel(h.Container))
+			who = output.ContainerLabel(h.Container)
 		case h.Process != nil:
-			holders = append(holders, fmt.Sprintf("%s (pid %d)", h.Process.Name, h.PID))
+			who = fmt.Sprintf("%s (pid %d)", h.Process.Name, h.PID)
 		case h.PID > 0:
-			holders = append(holders, fmt.Sprintf("pid %d", h.PID))
+			who = fmt.Sprintf("pid %d", h.PID)
+		}
+		// One name per process, even when it listens on both IPv4 and IPv6.
+		if who != "" && !slices.Contains(holders, who) {
+			holders = append(holders, who)
 		}
 	}
 	if len(holders) == 0 {

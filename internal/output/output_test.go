@@ -117,6 +117,21 @@ func TestGolden(t *testing.T) {
 	}
 }
 
+func TestCheckDocOneRowPerProcess(t *testing.T) {
+	t.Parallel()
+	v4, v6 := sockets[1], sockets[1]
+	v6.Local = netip.AddrPortFrom(netip.IPv6Unspecified(), v4.Local.Port())
+	other := sockets[1]
+	other.PID, other.Process = 4243, nil
+	d := CheckDoc([]freeport.Status{{Port: 3000, Proto: inspect.TCP, Availability: freeport.InUse, Holders: []inspect.Socket{v4, v6, other}}})
+	if len(d.Rows) != 2 {
+		t.Fatalf("got %d rows, want one per process (2): %v", len(d.Rows), d.Rows)
+	}
+	if got := len(d.Data.(CheckJSON).Ports[0].Holders); got != 3 {
+		t.Errorf("JSON has %d holders, want every socket (3)", got)
+	}
+}
+
 func TestNoColorWins(t *testing.T) {
 	t.Parallel()
 	d := CheckDoc(statuses)
