@@ -33,6 +33,7 @@
 | 🌐 | [Browser extension](https://microsoftedge.microsoft.com/addons/detail/jenlahoamefdpfmpodhidkgcceikheee) | Edge (and Chrome): which process serves a localhost tab, `off` when nothing listens, stop it from the popup ([guide](docs/guide/browser.md)) |
 | 🧩 | [VS Code extension](https://marketplace.visualstudio.com/items?itemName=portcheck-vscode.portcheck-vscode) | "Port in use" errors in the terminal become one-click fixes; listening ports in the sidebar ([guide](docs/guide/vscode.md)) |
 | 🤖 | `portcheck mcp` | AI assistants (Claude Code, Cursor, Copilot…) check and free ports themselves ([guide](docs/guide/mcp.md)) |
+| ⌨️ | [Raycast](docs/guide/raycast.md) | Search Ports, Check Port, Kill Port and Find Free Port from the Mac launcher |
 | 🧠 | [JetBrains plugin](docs/guide/jetbrains.md) | IntelliJ IDEA, WebStorm, PyCharm, GoLand…: "port in use" in Run/Debug → **Stop it and rerun**; a Ports tool window |
 
 ### VS Code extension
