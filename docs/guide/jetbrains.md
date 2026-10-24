@@ -22,6 +22,8 @@ one. The zip has build provenance:
 When a run configuration fails because its port is taken, the plugin names the process
 that holds it and offers the fix:
 
+▶ [Watch the 20-second demo on YouTube](https://youtu.be/k0laz2xCaPs)
+
 ![IntelliJ IDEA: Demo Server fails with java.net.BindException: Address already in use; portcheck's notification says Port 3000 is in use by Python (pid 44979), started by zsh, with Stop Python and rerun, Stop Python and Show ports](../assets/jetbrains-stop-and-rerun.png)
 
 ```text

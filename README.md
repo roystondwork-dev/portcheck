@@ -51,6 +51,8 @@ In IntelliJ IDEA, WebStorm, PyCharm, GoLand and the other JetBrains IDEs, when a
 configuration fails because its port is taken, a notification names the process and
 offers **Stop it and rerun**; the **Ports** tool window lists every listening port.
 
+▶ [Watch the 20-second demo](https://youtu.be/k0laz2xCaPs)
+
 ![portcheck in IntelliJ IDEA: the run fails with "Address already in use", and a notification names the Python process holding port 3000 with Stop Python and rerun](docs/assets/jetbrains-stop-and-rerun.png)
 
 Install `portcheck-jetbrains-<version>.zip` from the
