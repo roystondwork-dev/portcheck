@@ -319,6 +319,12 @@ Design: [ADR-0007](docs/adr/0007-mcp-server.md).
 | M23-04 | Neovim plugin | | | ⬜ | |
 | M23-03 | Zed extension: `portcheck mcp` as a context server (Zed's agent gets the MCP tools); `path` setting | `extensions/zed/` | cargo test; clippy; WASM build in CI | ✅ | Zed extensions registry: PR to zed-industries/extensions with `path = "extensions/zed"` |
 
+## M23 — Raycast, Zed and Neovim (Neovim)
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M23-04 | Neovim plugin: `:Portcheck` picker, check, kill, free; "port in use" in `:terminal` → offer to stop; `:checkhealth` | `lua/portcheck/`, `plugin/portcheck.lua` | headless Neovim: unit + real portcheck (terminal watcher included); CI on 0.11 and 0.12 | ✅ | At the repository root so plugin managers install it from `roystondwork-dev/portcheck` |
+
 ## What's next (candidates, not yet scheduled)
 
 | Candidate | Notes |

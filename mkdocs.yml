@@ -91,6 +91,7 @@ nav:
       - Interactive view (tui): guide/tui.md
       - VS Code extension: guide/vscode.md
       - JetBrains plugin: guide/jetbrains.md
+      - Neovim: guide/neovim.md
       - AI assistants (MCP): guide/mcp.md
       - Raycast: guide/raycast.md
       - Browser extension: guide/browser.md
