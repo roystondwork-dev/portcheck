@@ -18,6 +18,21 @@
 
 <p align="center"><img alt="portcheck demo" src="docs/assets/demo.gif" width="800"></p>
 
+## Port already in use?
+
+```sh
+npx portcheck-cli kill 3000
+```
+
+portcheck shows what holds the port and who started it, asks, then stops it gently
+(and never touches system processes). It's a safer [`kill-port`](https://roystondwork-dev.github.io/portcheck/fix/kill-port/), with
+nothing to install first.
+
+Fixes for the error you're seeing: [Node.js, Next.js, Vite](https://roystondwork-dev.github.io/portcheck/fix/node/) ·
+[Python, Django, Flask](https://roystondwork-dev.github.io/portcheck/fix/python/) · [Docker](https://roystondwork-dev.github.io/portcheck/fix/docker/) ·
+[Rails, Spring Boot, Go, .NET, PHP](https://roystondwork-dev.github.io/portcheck/fix/others/) · [macOS](https://roystondwork-dev.github.io/portcheck/fix/macos/) ·
+[Windows](https://roystondwork-dev.github.io/portcheck/fix/windows/) · [Linux](https://roystondwork-dev.github.io/portcheck/fix/linux/)
+
 ## Features
 
 | | Command | |

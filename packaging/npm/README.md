@@ -3,7 +3,12 @@
 See what's using a port and free it safely: which process, who started it, stop it.
 Fixes "port already in use" (`EADDRINUSE`, `Address already in use`).
 
+A safer [`kill-port`](https://roystondwork-dev.github.io/portcheck/fix/kill-port/):
+it shows what it's about to stop and who started it, asks first, stops it gently
+before forcing, and refuses to stop system processes.
+
 ```sh
+npx portcheck-cli kill 3000    # free port 3000, after showing what's there
 npx portcheck-cli 3000         # or: npm install -g portcheck-cli
 
 portcheck 3000              # who holds port 3000? (exit 1 if in use)
@@ -24,5 +29,6 @@ checksums published with the package, and caches it.
 Also available for VS Code, JetBrains IDEs, Edge and Firefox, and through Homebrew,
 Scoop and PyPI (`pipx install portcheck-tool`).
 
+- Fix "port already in use" (Node.js, Python, Docker, macOS, Windows, Linux): https://roystondwork-dev.github.io/portcheck/fix/
 - Documentation: https://roystondwork-dev.github.io/portcheck/
 - Source (MIT): https://github.com/roystondwork-dev/portcheck
