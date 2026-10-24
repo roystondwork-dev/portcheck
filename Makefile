@@ -116,8 +116,12 @@ docs-cli: ## Regenerate CLI reference markdown + man pages.
 	go run ./internal/cli/gendocs -out docs/commands -man man
 
 .PHONY: docs-setup
-docs-setup: ## Create .venv with the pinned docs toolchain.
-	python3 -m venv .venv && .venv/bin/pip install -q -r docs/requirements.txt
+# The docs toolchain needs Python 3.10 or later; use the newest one installed.
+DOCS_PYTHON ?= $(shell for p in python3.13 python3.12 python3.11 python3.10 python3; do command -v $$p >/dev/null && $$p -c 'import sys; sys.exit(sys.version_info < (3, 10))' 2>/dev/null && echo $$p && break; done)
+
+docs-setup: ## Create .venv with the pinned, hash-checked docs toolchain (Python 3.10+).
+	@test -n "$(DOCS_PYTHON)" || { echo "docs-setup needs Python 3.10 or later (e.g. brew install python@3.13)"; exit 1; }
+	$(DOCS_PYTHON) -m venv .venv && .venv/bin/pip install -q --require-hashes -r docs/requirements.txt
 
 .PHONY: docs-serve
 docs-serve: docs-cli ## Serve the docs site locally with live reload.

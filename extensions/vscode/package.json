@@ -234,5 +234,10 @@
     "esbuild@0.28.2": true,
     "@vscode/vsce-sign@2.1.0": true,
     "fsevents": false
+  },
+  "overrides": {
+    "@azure/msal-node": "^7.1.0",
+    "diff": "^8.0.3",
+    "serialize-javascript": "^7.1.3"
   }
 }

@@ -1,0 +1,8 @@
+# Documentation site toolchain. Edit this file, then regenerate the locked,
+# hash-pinned docs/requirements.txt with:
+#   .venv/bin/pip-compile --generate-hashes --strip-extras docs/requirements.in
+# Stay on MkDocs 1.x: MkDocs 2.0 is incompatible with Material and its plugins.
+mkdocs==1.6.1
+mkdocs-material==9.7.7
+mkdocs-material-extensions==1.3.1
+pymdown-extensions==12.3
