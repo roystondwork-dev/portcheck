@@ -220,14 +220,14 @@ jobs:
         run: gh release upload "$TAG" "$RUNNER_TEMP"/tray/portcheck-tray_* --clobber
 
   packages:
-    # npm (`npx portcheck-cli`) and PyPI (`pipx install portcheck-tool`). Both publish
-    # with trusted publishing (GitHub OIDC): no tokens are stored. Releases only.
+    # npm (`npx portcheck-cli`), PyPI (`pipx install portcheck-tool`) and the MCP
+    # Registry. All three log in with GitHub OIDC: no tokens are stored. Releases only.
     needs: [release-please, goreleaser]
     if: needs.release-please.outputs.release_created == 'true' && needs.goreleaser.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write      # trusted publishing to npm and PyPI
+      id-token: write      # trusted publishing to npm and PyPI; MCP Registry login
     env:
       TAG: ${{ needs.release-please.outputs.tag_name }}
     steps:
@@ -257,6 +257,7 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
       - name: Publish to npm
+        id: npm
         continue-on-error: true
         working-directory: packaging/npm
         run: |
@@ -270,6 +271,28 @@ jobs:
           # Trusted publishing needs npm 11.5.1 or later; Node 24 ships it.
           npm --version
           npm publish --access public
+      # The MCP Registry lists `npx portcheck-cli mcp`. It only stores server.json and
+      # checks it against the npm package's mcpName, so it runs after npm.
+      - name: Publish to the MCP Registry
+        if: steps.npm.outcome == 'success'
+        continue-on-error: true
+        env:
+          MCP_PUBLISHER: v1.8.4
+          MCP_PUBLISHER_SHA256: 5dc2fd415369c73551259f31cd33e2aacc9e0d1021e7f08fef1492d93b781628
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/mcp-publisher.tar.gz" \
+            "https://github.com/modelcontextprotocol/registry/releases/download/$MCP_PUBLISHER/mcp-publisher_linux_amd64.tar.gz"
+          echo "$MCP_PUBLISHER_SHA256  $RUNNER_TEMP/mcp-publisher.tar.gz" | sha256sum -c -
+          tar xzf "$RUNNER_TEMP/mcp-publisher.tar.gz" -C "$RUNNER_TEMP" mcp-publisher
+          version=$(jq -r .version server.json)
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::server.json has $version, expected ${TAG#v} (release-please keeps them in sync)"
+            exit 1
+          fi
+          # npm can take a minute to serve a new version.
+          for _ in 1 2 3 4 5 6; do npm view "portcheck-cli@$version" version >/dev/null 2>&1 && break; sleep 20; done
+          "$RUNNER_TEMP/mcp-publisher" login github-oidc
+          "$RUNNER_TEMP/mcp-publisher" publish
 
   jetbrains:
     needs: [release-please, goreleaser]

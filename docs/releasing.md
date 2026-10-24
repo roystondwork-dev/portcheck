@@ -103,6 +103,13 @@ Signing needs no secret: cosign uses the workflow's GitHub OIDC identity
 (keyless), and users verify against that identity; see
 [verifying downloads](install.md#verifying-downloads).
 
+npm, PyPI and the [MCP Registry](https://registry.modelcontextprotocol.io) need no
+secret either: each logs in with the same OIDC identity (trusted publishing). The MCP
+Registry entry is `server.json` at the repository root (`io.github.roystondwork-dev/portcheck`,
+pointing at `npx portcheck-cli mcp`); release-please bumps its versions, and the
+registry checks them against `mcpName` in the published npm package, so it's
+published right after npm.
+
 ## Local dry run
 
 ```sh
