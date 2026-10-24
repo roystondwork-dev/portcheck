@@ -17,6 +17,7 @@ export class ProjectPorts implements vscode.Disposable {
   private readonly problems: vscode.DiagnosticCollection;
   private readonly disposables: vscode.Disposable[] = [];
   private inFlight: Promise<void> | undefined;
+  private queued: Promise<void> | undefined;
 
   constructor(
     private readonly d: Deps,
@@ -40,9 +41,20 @@ export class ProjectPorts implements vscode.Disposable {
     );
   }
 
-  /** Re-runs doctor. Concurrent calls share one run. */
+  /**
+   * Re-runs doctor. A call while a run is in progress queues one more run after
+   * it (that run may have read the file before it changed); concurrent calls
+   * share the queued run.
+   */
   refresh(): Promise<void> {
-    this.inFlight ??= this.check().finally(() => {
+    if (this.inFlight) {
+      this.queued ??= this.inFlight.catch(() => undefined).then(() => {
+        this.queued = undefined;
+        return this.refresh();
+      });
+      return this.queued;
+    }
+    this.inFlight = this.check().finally(() => {
       this.inFlight = undefined;
     });
     return this.inFlight;
