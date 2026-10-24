@@ -325,6 +325,15 @@ Design: [ADR-0007](docs/adr/0007-mcp-server.md).
 |---|---|---|---|---|---|
 | M23-04 | Neovim plugin: `:Portcheck` picker, check, kill, free; "port in use" in `:terminal` → offer to stop; `:checkhealth` | `lua/portcheck/`, `plugin/portcheck.lua` | headless Neovim: unit + real portcheck (terminal watcher included); CI on 0.11 and 0.12 | ✅ | At the repository root so plugin managers install it from `roystondwork-dev/portcheck` |
 
+## M24 — Menu bar / system tray app
+
+| ID | Task | Component / files | Tests required | Status | Notes |
+|---|---|---|---|---|---|
+| M24-01 | Tray logic: which ports (yours + containers; all on demand), menu per port (stop, open, copy PID/command, who started it), refresh only on change | `internal/tray/` | unit 100% (fake menu) | ✅ | Uses pkg/inspect and pkg/killer directly (same guards) |
+| M24-02 | OS glue: fyne.io/systray, template icon (macOS), ICO (Windows), clipboard and browser per OS | `cmd/portcheck-tray/` | builds on 3 OSes; run on macOS (menu bar shows the count) | ✅ | |
+| M24-03 | Packaging: universal macOS .app (LSUIElement, icns, ad-hoc signed), Windows exe without console, Linux; release job on macOS | `scripts/package-tray.sh`, `release.yml`, `tray.yml` | CI packages and checks the app | ✅ | Not notarized (no Apple Developer account): right-click → Open the first time |
+| M24-04 | Homebrew cask for the tray app (avoids the Gatekeeper prompt) | tap | — | ⬜ | |
+
 ## What's next (candidates, not yet scheduled)
 
 | Candidate | Notes |

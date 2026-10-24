@@ -1,0 +1,30 @@
+name: Tray app
+
+# Packages the menu bar / tray app as releases do (the code is tested by CI).
+on:
+  push:
+    branches: [main]
+    paths: [cmd/portcheck-tray/**, internal/tray/**, scripts/package-tray.sh, .github/workflows/tray.yml]
+  pull_request:
+    paths: [cmd/portcheck-tray/**, internal/tray/**, scripts/package-tray.sh, .github/workflows/tray.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Tray app (package)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: Package
+        run: scripts/package-tray.sh 0.0.0-dev "$RUNNER_TEMP/tray"
+      - name: Check the macOS app
+        run: |
+          cd "$RUNNER_TEMP" && ditto -x -k tray/portcheck-tray_0.0.0-dev_darwin_universal.zip app
+          [ "$(lipo -archs "app/portcheck tray.app/Contents/MacOS/portcheck-tray")" = "x86_64 arm64" ]
+          codesign --verify --deep "app/portcheck tray.app"
