@@ -1,0 +1,32 @@
+name: Zed extension
+
+on:
+  push:
+    branches: [main]
+    paths: [extensions/zed/**, .github/workflows/zed.yml]
+  pull_request:
+    paths: [extensions/zed/**, .github/workflows/zed.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: extensions/zed
+
+jobs:
+  zed:
+    name: Zed extension
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Rust toolchain (rustup is preinstalled)
+        run: |
+          rustup toolchain install stable --profile minimal --component clippy,rustfmt
+          rustup target add wasm32-wasip2
+      - run: cargo fmt --check
+      - run: cargo clippy --target wasm32-wasip2 -- -D warnings
+      - run: cargo test
+      - name: Build the extension as Zed does (WebAssembly)
+        run: cargo build --release --target wasm32-wasip2
