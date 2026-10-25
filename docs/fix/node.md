@@ -81,6 +81,21 @@ In `package.json`:
 }
 ```
 
+### In Vite, or any Node.js server
+
+Add the [Vite plugin or the Node.js hook](../guide/dev-servers.md) once, and your dev
+server says who holds its port itself. In Vite, ++k++ then ++enter++ stops the holder and
+restarts on your port:
+
+```ts title="vite.config.ts"
+import portcheck from "portcheck-cli/vite";
+
+export default { plugins: [portcheck()] };
+```
+
+For Node.js, Express or Next.js: `node -r portcheck-cli/register server.js`, or
+`NODE_OPTIONS=--require=portcheck-cli/register npx next dev`.
+
 ## Editor and browser
 
 - **VS Code:** when a command in the integrated terminal fails with `EADDRINUSE`, the
