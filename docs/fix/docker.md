@@ -56,7 +56,7 @@ npx portcheck-cli kill 5432
 ```
 
 For databases run as services, stop the service instead of the process, or it will
-start again: `brew services stop postgresql@17` on macOS,
+start again (more in [Databases](databases.md)): `brew services stop postgresql@17` on macOS,
 `sudo systemctl stop postgresql` on Linux. On Windows, use the **Services** app.
 
 Or publish the container on another host port: `-p 5433:5432`.

@@ -50,6 +50,14 @@ npx portcheck-cli 3000
 | `Web server failed to start. Port 8080 was already in use.` | [Rails, Spring Boot, Go and others](others.md) |
 | `listen tcp :8080: bind: address already in use` | [Rails, Spring Boot, Go and others](others.md) |
 | `Only one usage of each socket address ... is normally permitted` | [Windows](windows.md) |
+| `Is another postmaster already running on port 5432?` | [PostgreSQL, MySQL, Redis, MongoDB](databases.md) |
+| `Do you already have another mysqld server running on port: 3306 ?` | [PostgreSQL, MySQL, Redis, MongoDB](databases.md) |
+| `Could not create server TCP listening socket *:6379` | [PostgreSQL, MySQL, Redis, MongoDB](databases.md) |
+| `nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)` | [nginx, Apache, Caddy, IIS](web-servers.md) |
+| `AH00072: make_sock: could not bind to address [::]:80` | [nginx, Apache, Caddy, IIS](web-servers.md) |
+| Port 80 held by `System` (PID 4) on Windows | [nginx, Apache, Caddy, IIS](web-servers.md#windows-port-80-held-by-system-pid-4) |
+| `error listen EADDRINUSE: address already in use :::8081` | [React Native, Expo, adb](mobile.md) |
+| `cannot bind to 127.0.0.1:5037: Address already in use` | [React Native, Expo, adb](mobile.md#android-adb-on-port-5037) |
 
 Or go by operating system: [macOS](macos.md) · [Windows](windows.md) · [Linux](linux.md).
 

@@ -88,6 +88,9 @@ nav:
       - Python, Django, Flask: fix/python.md
       - Docker: fix/docker.md
       - Rails, Spring Boot, Go, .NET, PHP: fix/others.md
+      - PostgreSQL, MySQL, Redis, MongoDB: fix/databases.md
+      - nginx, Apache, IIS (80, 443): fix/web-servers.md
+      - React Native, Expo, adb: fix/mobile.md
       - portcheck vs kill-port: fix/kill-port.md
   - Guides:
       - Inspect ports (list): guide/list.md
