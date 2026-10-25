@@ -101,6 +101,7 @@ nav:
       - Scan remote hosts (scan): guide/scan.md
       - Wait for ports (wait): guide/wait.md
       - Run on a free port (run): guide/run.md
+      - Dev servers (Vite, Node.js): guide/dev-servers.md
       - Project ports (doctor): guide/doctor.md
       - Interactive view (tui): guide/tui.md
       - VS Code extension: guide/vscode.md

@@ -26,6 +26,33 @@ Works on macOS, Linux and Windows (x64 and arm64). On first run this package dow
 native `portcheck` binary for your platform from the GitHub release, checks it against
 checksums published with the package, and caches it.
 
+## In your dev server
+
+`npm install --save-dev portcheck-cli`, then let the dev server explain a taken port itself.
+
+**Vite:** when your port is taken and Vite moves to the next one, the plugin says who
+holds it; `k + enter` stops that process and restarts Vite on your port (Vite 7.3+).
+
+```js
+// vite.config.js
+import portcheck from "portcheck-cli/vite";
+
+export default { plugins: [portcheck()] };
+```
+
+**Node.js, Express, Next.js and others:** preload the hook. When a server can't listen
+and the program exits with an error, it says who holds the port. Your program behaves
+exactly as before: the error still reaches your handlers, or still crashes.
+
+```sh
+node -r portcheck-cli/register server.js
+NODE_OPTIONS=--require=portcheck-cli/register npx next dev
+```
+
+Guide: https://roystondwork-dev.github.io/portcheck/guide/dev-servers/
+
+## More
+
 Also available for VS Code, JetBrains IDEs, Edge and Firefox, and through Homebrew,
 Scoop and PyPI (`pipx install portcheck-tool`).
 
