@@ -149,9 +149,10 @@ func TestServer(t *testing.T) {
 		if destructive != (tool.Name == "stop_process") || tool.Annotations.ReadOnlyHint == (tool.Name == "stop_process") {
 			t.Errorf("%s annotations = %+v", tool.Name, tool.Annotations)
 		}
-		// Directories score tools on these: every tool has a title, and the
-		// read-only ones are idempotent.
-		if tool.Annotations.Title == "" || tool.Annotations.IdempotentHint != tool.Annotations.ReadOnlyHint {
+		// Directories score tools on these: every tool has a title and all four
+		// hints, and the read-only ones are idempotent.
+		if tool.Annotations.Title == "" || tool.Annotations.IdempotentHint != tool.Annotations.ReadOnlyHint ||
+			tool.Annotations.DestructiveHint == nil || tool.Annotations.OpenWorldHint == nil {
 			t.Errorf("%s annotations = %+v", tool.Name, tool.Annotations)
 		}
 		if tool.Name == "check_port" {
