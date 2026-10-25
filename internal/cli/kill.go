@@ -3,6 +3,7 @@ package cli
 import (
 	"bufio"
 	"cmp"
+	"context"
 	"errors"
 	"fmt"
 	"maps"
@@ -35,6 +36,7 @@ type killTarget struct {
 	name     string
 	ports    []uint16
 	ancestry string // "npm (4200) ← zsh (900)", if known
+	project  string // e.g. "my-shop", if known
 }
 
 func (c *cli) newKillCmd() *cobra.Command {
@@ -79,12 +81,16 @@ func (c *cli) runKill(cmd *cobra.Command, args []string, f killFlags) error {
 	if err != nil {
 		return err
 	}
-	ctx := cmd.Context()
-
 	targets, err := c.killTargets(cmd, args, protos, f.pids)
 	if err != nil {
 		return err
 	}
+	return c.stopTargets(cmd.Context(), targets, f)
+}
+
+// stopTargets runs the safety guards, asks for confirmation (unless --yes or
+// --dry-run), stops the allowed targets and prints the results.
+func (c *cli) stopTargets(ctx context.Context, targets []killTarget, f killFlags) error {
 	// Run safety guards up front so refusals are shown before confirmation.
 	var results []output.KillResultJSON
 	var allowed []killTarget
@@ -173,6 +179,7 @@ func (c *cli) killTargets(cmd *cobra.Command, args []string, protos []inspect.Pr
 			if s.Process != nil {
 				t.name = s.Process.Name
 				t.ancestry = output.Ancestry(s.Process)
+				t.project = s.Process.Project
 			}
 			if !slices.Contains(t.ports, s.Port()) {
 				t.ports = append(t.ports, s.Port())
@@ -233,6 +240,9 @@ func (c *cli) confirm(targets []killTarget, force bool) (bool, error) {
 		}
 		if t.ancestry != "" {
 			line += ", started by " + t.ancestry
+		}
+		if t.project != "" {
+			line += ", in " + t.project
 		}
 		fmt.Fprintln(c.app.Stderr, line)
 	}

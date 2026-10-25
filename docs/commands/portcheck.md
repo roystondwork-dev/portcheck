@@ -57,6 +57,7 @@ portcheck [port...] [flags]
 * [portcheck mcp](portcheck_mcp.md)	 - Serve portcheck to AI assistants (Model Context Protocol)
 * [portcheck run](portcheck_run.md)	 - Run a command on a free port (sets $PORT)
 * [portcheck scan](portcheck_scan.md)	 - Check which TCP ports are reachable on remote hosts
+* [portcheck servers](portcheck_servers.md)	 - List the dev servers you started, with their project and uptime
 * [portcheck tui](portcheck_tui.md)	 - Live, interactive view of ports (the default in a terminal)
 * [portcheck version](portcheck_version.md)	 - Print version and build information
 * [portcheck wait](portcheck_wait.md)	 - Wait until ports accept connections (or become free)

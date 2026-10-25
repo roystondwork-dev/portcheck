@@ -97,6 +97,7 @@ nav:
       - Check a port (check): guide/check.md
       - Find free ports (free): guide/free.md
       - Stop a process (kill): guide/kill.md
+      - Forgotten dev servers (servers): guide/servers.md
       - Scan remote hosts (scan): guide/scan.md
       - Wait for ports (wait): guide/wait.md
       - Run on a free port (run): guide/run.md
@@ -127,6 +128,7 @@ nav:
           - completion zsh: commands/portcheck_completion_zsh.md
           - free: commands/portcheck_free.md
           - kill: commands/portcheck_kill.md
+          - servers: commands/portcheck_servers.md
           - list: commands/portcheck_list.md
           - mcp: commands/portcheck_mcp.md
           - run: commands/portcheck_run.md

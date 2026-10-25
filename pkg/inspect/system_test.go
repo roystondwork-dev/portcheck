@@ -16,11 +16,11 @@ import (
 )
 
 type fakeHandle struct {
-	name, user, cmdline, exe string
-	createMS                 int64
-	nameErr, otherErr        error
-	ppid                     int32
-	ppidErr                  error
+	name, user, cmdline, exe, cwd string
+	createMS                      int64
+	nameErr, otherErr             error
+	ppid                          int32
+	ppidErr                       error
 }
 
 func (h fakeHandle) PpidWithContext(context.Context) (int32, error) { return h.ppid, h.ppidErr }
@@ -33,6 +33,7 @@ func (h fakeHandle) CmdlineWithContext(context.Context) (string, error) {
 	return h.cmdline, h.otherErr
 }
 func (h fakeHandle) ExeWithContext(context.Context) (string, error) { return h.exe, h.otherErr }
+func (h fakeHandle) CwdWithContext(context.Context) (string, error) { return h.cwd, h.otherErr }
 func (h fakeHandle) CreateTimeWithContext(context.Context) (int64, error) {
 	return h.createMS, h.otherErr
 }
@@ -47,12 +48,14 @@ func TestSystemProcess(t *testing.T) {
 
 	t.Run("full", func(t *testing.T) {
 		t.Parallel()
-		p := providerWithHandle(fakeHandle{name: "node", user: "alice", cmdline: "node app.js", exe: "/usr/bin/node", createMS: created.UnixMilli()}, nil)
+		p := providerWithHandle(fakeHandle{name: "node", user: "alice", cmdline: "node app.js", exe: "/usr/bin/node", cwd: "/src/shop", createMS: created.UnixMilli()}, nil)
+		p.project = func(cwd string) string { return "project of " + cwd }
 		got, err := p.Process(t.Context(), 42)
 		if err != nil {
 			t.Fatal(err)
 		}
-		want := &ProcessInfo{PID: 42, Name: "node", User: "alice", Cmdline: "node app.js", Exe: "/usr/bin/node", CreateTime: created}
+		want := &ProcessInfo{PID: 42, Name: "node", User: "alice", Cmdline: "node app.js", Exe: "/usr/bin/node", CreateTime: created,
+			Cwd: "/src/shop", Project: "project of /src/shop"}
 		if d := diff(want, got); d != "" {
 			t.Errorf("(-want +got):\n%s", d)
 		}
@@ -76,6 +79,9 @@ func TestSystemProcess(t *testing.T) {
 		got, _ := p.Process(t.Context(), 1)
 		if !got.CreateTime.IsZero() {
 			t.Errorf("CreateTime = %v, want zero", got.CreateTime)
+		}
+		if got.Cwd != "" || got.Project != "" {
+			t.Errorf("Cwd, Project = %q, %q; want empty without a project func", got.Cwd, got.Project)
 		}
 	})
 

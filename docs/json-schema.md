@@ -51,6 +51,8 @@ present, and empty arrays are `[]`, never `null`.
 | `exe` | string, optional | |
 | `startTime` | string, optional | RFC 3339, UTC |
 | `ancestors` | array, optional | processes that started this one, nearest first (up to 3): `[{ "pid": 4200, "name": "npm" }, …]`; stops before PID 1 |
+| `cwd` | string, optional | the process's working directory |
+| `project` | string, optional | the project it runs in: the name of the nearest directory at or above `cwd` holding `.git`, `package.json`, `go.mod`, `pyproject.toml`, `Cargo.toml` or a similar marker, else `cwd`'s name; empty for `/` and the home directory |
 
 ### Container
 

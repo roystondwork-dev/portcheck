@@ -42,6 +42,7 @@ Fixes for the error you're seeing: [Node.js, Next.js, Vite](https://roystondwork
 | ✅ | `portcheck 3000` | Is the port free? If not, who holds it? Exit code 0 or 1 for scripts |
 | 🆓 | `portcheck free 3000-3999 -n 3` | Free ports, verified by actually binding them |
 | 🛑 | `portcheck kill 8080` | Graceful SIGTERM, then SIGKILL; refuses PID 1, your shell and system processes |
+| 🧹 | `portcheck servers --older-than 1d` | The dev servers you forgot: your listening processes with their project and uptime, oldest first; `--stop` to clean up |
 | 📡 | `portcheck scan db.internal -p 5432` | Rate-limited TCP connect checks of remote hosts. No root needed |
 | ⏳ | `portcheck wait db:5432 -t 60s` | Block until services accept connections, or until a port is free. Built for CI |
 | ▶️ | `portcheck run --port 3000 --next -- npm run dev` | Start a command on a free port (`$PORT`, `{port}`); take the next one or stop the holder |

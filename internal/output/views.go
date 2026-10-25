@@ -51,6 +51,8 @@ type ProcessJSON struct {
 	Exe       string           `json:"exe,omitempty"`
 	StartTime *time.Time       `json:"startTime,omitempty"`
 	Ancestors []ProcessRefJSON `json:"ancestors,omitempty"`
+	Cwd       string           `json:"cwd,omitempty"`
+	Project   string           `json:"project,omitempty"`
 }
 
 // ProcessRefJSON identifies an ancestor process.
@@ -97,6 +99,19 @@ type KillJSON struct {
 	Results []KillResultJSON `json:"results"`
 }
 
+// ProcessInfoJSON converts process details to their JSON form.
+func ProcessInfoJSON(p *inspect.ProcessInfo) ProcessJSON {
+	pj := ProcessJSON{PID: p.PID, Name: p.Name, User: p.User, Cmdline: p.Cmdline, Exe: p.Exe, Cwd: p.Cwd, Project: p.Project}
+	for _, a := range p.Ancestors {
+		pj.Ancestors = append(pj.Ancestors, ProcessRefJSON{PID: a.PID, Name: a.Name})
+	}
+	if !p.CreateTime.IsZero() {
+		t := p.CreateTime.UTC()
+		pj.StartTime = &t
+	}
+	return pj
+}
+
 func socketJSON(s inspect.Socket) SocketJSON {
 	out := SocketJSON{
 		Proto:        string(s.Proto),
@@ -110,15 +125,8 @@ func socketJSON(s inspect.Socket) SocketJSON {
 		out.RemotePort = s.Remote.Port()
 	}
 	if p := s.Process; p != nil {
-		pj := &ProcessJSON{PID: p.PID, Name: p.Name, User: p.User, Cmdline: p.Cmdline, Exe: p.Exe}
-		for _, a := range p.Ancestors {
-			pj.Ancestors = append(pj.Ancestors, ProcessRefJSON{PID: a.PID, Name: a.Name})
-		}
-		if !p.CreateTime.IsZero() {
-			t := p.CreateTime.UTC()
-			pj.StartTime = &t
-		}
-		out.Process = pj
+		pj := ProcessInfoJSON(p)
+		out.Process = &pj
 	}
 	if c := s.Container; c != nil {
 		out.Container = &ContainerJSON{
@@ -362,6 +370,60 @@ func KillDoc(results []KillResultJSON) Document {
 		})
 	}
 	return d
+}
+
+// ServerJSON is one entry of `portcheck servers`: a process, the TCP ports it
+// listens on, and how long it has been running.
+type ServerJSON struct {
+	ProcessJSON
+	Ports []uint16 `json:"ports"`
+	// UptimeSeconds is 0 when the start time is unknown (no startTime).
+	UptimeSeconds int64 `json:"uptimeSeconds,omitempty"`
+}
+
+// ServersJSON is the payload of `portcheck servers`.
+type ServersJSON struct {
+	Servers []ServerJSON `json:"servers"`
+}
+
+// ServersDoc renders the result of `portcheck servers`.
+func ServersDoc(servers []ServerJSON) Document {
+	d := Document{
+		Kind:    "servers",
+		Data:    ServersJSON{Servers: append([]ServerJSON{}, servers...)},
+		Headers: []string{"PID", "PROCESS", "PROJECT", "PORTS", "UPTIME"},
+		Empty:   "No servers of yours are running in a project folder.",
+	}
+	for _, s := range servers {
+		ports := make([]string, len(s.Ports))
+		for i, p := range s.Ports {
+			ports[i] = strconv.Itoa(int(p))
+		}
+		uptime := T("-", ToneMuted)
+		if s.StartTime != nil {
+			uptime = C(Uptime(time.Duration(s.UptimeSeconds) * time.Second))
+		}
+		d.Rows = append(d.Rows, []Cell{
+			pidCell(s.PID), C(s.Name), C(cmp.Or(s.Project, "-")), C(strings.Join(ports, ",")), uptime,
+		})
+	}
+	return d
+}
+
+// Uptime formats how long something has been running, coarsely: "45s",
+// "12m", "3h 5m", "2d 4h".
+func Uptime(d time.Duration) string {
+	d = max(d, 0)
+	switch {
+	case d < time.Minute:
+		return strconv.Itoa(int(d.Seconds())) + "s"
+	case d < time.Hour:
+		return strconv.Itoa(int(d.Minutes())) + "m"
+	case d < 24*time.Hour:
+		return fmt.Sprintf("%dh %dm", int(d.Hours()), int(d.Minutes())%60)
+	default:
+		return fmt.Sprintf("%dd %dh", int(d.Hours())/24, int(d.Hours())%24)
+	}
 }
 
 // VersionDoc renders build information.

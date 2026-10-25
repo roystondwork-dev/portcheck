@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "kind": "servers",
+  "data": {
+    "servers": [
+      {
+        "pid": 4242,
+        "name": "node",
+        "user": "alice",
+        "cmdline": "node --max-old-space-size=4096 ./node_modules/.bin/next dev --turbo --hostname 127.0.0.1",
+        "exe": "/usr/local/bin/node",
+        "startTime": "2026-10-20T09:30:00Z",
+        "ancestors": [
+          {
+            "pid": 4200,
+            "name": "npm"
+          },
+          {
+            "pid": 900,
+            "name": "zsh"
+          }
+        ],
+        "ports": [
+          3000,
+          24678
+        ],
+        "uptimeSeconds": 180000
+      },
+      {
+        "pid": 77,
+        "name": "hugo",
+        "project": "docs",
+        "ports": [
+          1313
+        ]
+      }
+    ]
+  }
+}

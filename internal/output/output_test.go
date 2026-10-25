@@ -73,9 +73,14 @@ func docs() map[string]Document {
 		"free":       FreeDoc([]uint16{3001, 3002}),
 		"free-empty": FreeDoc(nil),
 		"kill":       KillDoc(killResults),
-		"version":    VersionDoc(version),
-		"scan":       ScanDoc(scanResults, scanSummary, 1500*time.Millisecond),
-		"scan-empty": ScanDoc(nil, scan.Summary{}, 0),
+		"servers": ServersDoc([]ServerJSON{
+			{ProcessJSON: ProcessInfoJSON(node), Ports: []uint16{3000, 24678}, UptimeSeconds: 50 * 3600},
+			{ProcessJSON: ProcessJSON{PID: 77, Name: "hugo", Project: "docs"}, Ports: []uint16{1313}},
+		}),
+		"servers-empty": ServersDoc(nil),
+		"version":       VersionDoc(version),
+		"scan":          ScanDoc(scanResults, scanSummary, 1500*time.Millisecond),
+		"scan-empty":    ScanDoc(nil, scan.Summary{}, 0),
 		"doctor": DoctorDoc("/work/app/.portcheck.yaml", []DoctorCheckJSON{
 			{Name: "web", Port: 3000, Proto: "tcp", Expect: "free", Status: "in-use", Detail: "in use by node (pid 4242), started by npm (4200)", Fix: "portcheck kill 3000"},
 			{Name: "db", Port: 5432, Proto: "tcp", Expect: "open", Host: "localhost", OK: true, Status: "ok"},
@@ -129,6 +134,21 @@ func TestCheckDocOneRowPerProcess(t *testing.T) {
 	}
 	if got := len(d.Data.(CheckJSON).Ports[0].Holders); got != 3 {
 		t.Errorf("JSON has %d holders, want every socket (3)", got)
+	}
+}
+
+func TestUptime(t *testing.T) {
+	t.Parallel()
+	for d, want := range map[time.Duration]string{
+		-time.Second:                    "0s",
+		45 * time.Second:                "45s",
+		12*time.Minute + 30*time.Second: "12m",
+		3*time.Hour + 5*time.Minute:     "3h 5m",
+		50*time.Hour + 59*time.Minute:   "2d 2h",
+	} {
+		if got := Uptime(d); got != want {
+			t.Errorf("Uptime(%v) = %q, want %q", d, got, want)
+		}
 	}
 }
 
