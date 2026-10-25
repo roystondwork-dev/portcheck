@@ -264,9 +264,11 @@ func checkSchema() *jsonschema.Schema {
 // New returns the MCP server; version is portcheck's.
 func New(version string, run RunFunc) *mcp.Server {
 	s := mcp.NewServer(&mcp.Implementation{Name: "portcheck", Title: "portcheck", Version: version}, &mcp.ServerOptions{Instructions: instructions})
-	// Looking things up changes nothing, so the read-only tools are also idempotent.
+	// Looking things up changes nothing, so the read-only tools are also idempotent
+	// and not destructive. All four hints are explicit on every tool: some
+	// directories reject tools that leave any of them out.
 	readOnly := func(title string) *mcp.ToolAnnotations {
-		return &mcp.ToolAnnotations{Title: title, ReadOnlyHint: true, IdempotentHint: true, OpenWorldHint: boolPtr(false)}
+		return &mcp.ToolAnnotations{Title: title, ReadOnlyHint: true, DestructiveHint: boolPtr(false), IdempotentHint: true, OpenWorldHint: boolPtr(false)}
 	}
 	tool(s, &mcp.Tool{
 		Name: "list_ports",
