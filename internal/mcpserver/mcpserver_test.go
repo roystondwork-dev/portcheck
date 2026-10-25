@@ -2,6 +2,7 @@ package mcpserver
 
 import (
 	"context"
+	"encoding/json"
 	"slices"
 	"strings"
 	"testing"
@@ -147,6 +148,17 @@ func TestServer(t *testing.T) {
 		destructive := tool.Annotations.DestructiveHint != nil && *tool.Annotations.DestructiveHint
 		if destructive != (tool.Name == "stop_process") || tool.Annotations.ReadOnlyHint == (tool.Name == "stop_process") {
 			t.Errorf("%s annotations = %+v", tool.Name, tool.Annotations)
+		}
+		// Directories score tools on these: every tool has a title, and the
+		// read-only ones are idempotent.
+		if tool.Annotations.Title == "" || tool.Annotations.IdempotentHint != tool.Annotations.ReadOnlyHint {
+			t.Errorf("%s annotations = %+v", tool.Name, tool.Annotations)
+		}
+		if tool.Name == "check_port" {
+			b, _ := json.Marshal(tool.InputSchema)
+			if want := `"ports":{"description":"the ports to check, e.g. [3000]","items":{"type":"integer"},"minItems":1,"type":"array"}`; !strings.Contains(string(b), want) {
+				t.Errorf("check_port schema = %s, want it to contain %s", b, want)
+			}
 		}
 	}
 	slices.Sort(names)
