@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.10.1](https://github.com/roystondwork-dev/portcheck/compare/v0.10.0...v0.10.1) (2026-10-25)
+
+
+### Bug Fixes
+
+* **check:** one row per process when it listens on both IPv4 and IPv6 ([fa62245](https://github.com/roystondwork-dev/portcheck/commit/fa62245f66973b89e77a97249b75f814f2c09c41))
+* **mcp:** clearer tool definitions: titles, idempotent hints, non-null ports ([5b867cc](https://github.com/roystondwork-dev/portcheck/commit/5b867cc8251e6e8dfdbf9f1626ec3a2db6487d16))
+* **raycast:** recheck the process before stopping it; show incomplete lists; refresh from empty views ([fbd5556](https://github.com/roystondwork-dev/portcheck/commit/fbd55566a4d35f59ef72b765e76f48edc0701b86))
+
+
+### Documentation
+
+* "port already in use" fix pages for each OS and framework; portcheck as a safer kill-port ([7ace8e6](https://github.com/roystondwork-dev/portcheck/commit/7ace8e62c557af3e5124632cd6e5cb7cbb2641b7))
+* Google Search Console verification file ([772aaa7](https://github.com/roystondwork-dev/portcheck/commit/772aaa7b8d754649c81f8dd2fbcd9bad020bc417))
+
+
+### Build & Release
+
+* **mcp:** glama.json so Glama can attribute the server to its maintainer ([c3bb03a](https://github.com/roystondwork-dev/portcheck/commit/c3bb03a1ac885780438b4c2b0ed3dee3d0aa87c2))
+* **mcp:** publish to the official MCP Registry on each release ([326ec11](https://github.com/roystondwork-dev/portcheck/commit/326ec11b358311171dfa0659f68f9faff2be935a))
+
 ## [0.10.0](https://github.com/roystondwork-dev/portcheck/compare/v0.9.0...v0.10.0) (2026-10-24)
 
 
