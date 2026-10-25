@@ -77,6 +77,11 @@ type ProcessInfo struct {
 	Cmdline    string
 	Exe        string
 	CreateTime time.Time
+	// Cwd is the process's working directory, and Project the name of the
+	// project it runs in (see ProjectName), e.g. "my-shop" for a dev server
+	// started in ~/code/my-shop/web. Both are best effort.
+	Cwd     string
+	Project string
 	// Ancestors are the processes that started this one, nearest first (the
 	// parent, then its parent, …), up to MaxAncestors. The chain stops before
 	// PID 1 (init, launchd) and at the first process that can't be inspected.

@@ -100,7 +100,9 @@ var (
 	nodeSock6  = inspect.RawSocket{Proto: inspect.TCP, Local: ap("[::1]:3000"), State: inspect.StateListen, PID: 100}
 	javaSock   = inspect.RawSocket{Proto: inspect.TCP, Local: ap("0.0.0.0:8080"), State: inspect.StateListen, PID: 200}
 	hiddenSock = inspect.RawSocket{Proto: inspect.TCP, Local: ap("0.0.0.0:22"), State: inspect.StateListen}
-	ghostSock  = inspect.RawSocket{Proto: inspect.TCP, Local: ap("0.0.0.0:9000"), State: inspect.StateListen, PID: 300} // process gone
+	// testNow is the harness's clock.
+	testNow   = time.Date(2026, 10, 25, 12, 0, 0, 0, time.UTC)
+	ghostSock = inspect.RawSocket{Proto: inspect.TCP, Local: ap("0.0.0.0:9000"), State: inspect.StateListen, PID: 300} // process gone
 )
 
 type harness struct {
@@ -137,9 +139,11 @@ func newHarness() *harness {
 		BrowserEnv: func() (nativehost.Env, error) {
 			return nativehost.Env{GOOS: "linux", Home: "/nonexistent/portcheck-test-home"}, nil
 		},
-		Executable: func() (string, error) { return "/nonexistent/portcheck", nil },
-		LookPath:   func(string) (string, error) { return "", errors.New("not found") },
-		Build:      buildinfo.Info{Version: "v1.2.3", Commit: "abc", Date: "2026-10-20", GoVersion: "go1.27", Platform: "test/arch"},
+		Executable:  func() (string, error) { return "/nonexistent/portcheck", nil },
+		LookPath:    func(string) (string, error) { return "", errors.New("not found") },
+		Build:       buildinfo.Info{Version: "v1.2.3", Commit: "abc", Date: "2026-10-20", GoVersion: "go1.27", Platform: "test/arch"},
+		Now:         func() time.Time { return testNow },
+		CurrentUser: func() (string, error) { return "alice", nil },
 	}
 	return h
 }

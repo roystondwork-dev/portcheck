@@ -15,6 +15,7 @@ import (
 	"os/signal"
 	"runtime"
 	"syscall"
+	"time"
 
 	"golang.org/x/term"
 
@@ -79,6 +80,10 @@ type App struct {
 	// Executable returns the running binary's path; LookPath finds programs on PATH.
 	Executable func() (string, error)
 	LookPath   func(string) (string, error)
+	// Now returns the current time; CurrentUser the name processes of the
+	// current user are owned by (as inspect.ProcessInfo.User reports it).
+	Now         func() time.Time
+	CurrentUser func() (string, error)
 }
 
 // NewApp returns an App wired to the real operating system. When a
@@ -116,6 +121,8 @@ func NewApp() *App {
 		BrowserEnv:    nativehost.SystemEnv,
 		Executable:    os.Executable,
 		LookPath:      exec.LookPath,
+		Now:           time.Now,
+		CurrentUser:   currentUser,
 	}
 }
 

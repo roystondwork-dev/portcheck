@@ -20,6 +20,7 @@ type processHandle interface {
 	UsernameWithContext(ctx context.Context) (string, error)
 	CmdlineWithContext(ctx context.Context) (string, error)
 	ExeWithContext(ctx context.Context) (string, error)
+	CwdWithContext(ctx context.Context) (string, error)
 	CreateTimeWithContext(ctx context.Context) (int64, error)
 	PpidWithContext(ctx context.Context) (int32, error)
 }
@@ -32,6 +33,8 @@ type systemProvider struct {
 	native      func(ctx context.Context) ([]RawSocket, error)
 	connections func(ctx context.Context, kind string) ([]gnet.ConnectionStat, error)
 	newProcess  func(ctx context.Context, pid int32) (processHandle, error)
+	// project names the project of a working directory; nil leaves it empty.
+	project func(cwd string) string
 }
 
 // NewSystemProvider returns a Provider backed by the operating system.
@@ -47,6 +50,7 @@ func NewSystemProvider() Provider {
 		newProcess: func(ctx context.Context, pid int32) (processHandle, error) {
 			return process.NewProcessWithContext(ctx, pid)
 		},
+		project: ProjectName,
 	}
 }
 
@@ -93,6 +97,12 @@ func (p *systemProvider) Process(ctx context.Context, pid int32) (*ProcessInfo, 
 	}
 	if ms, err := h.CreateTimeWithContext(ctx); err == nil && ms > 0 {
 		info.CreateTime = time.UnixMilli(ms)
+	}
+	if v, err := h.CwdWithContext(ctx); err == nil {
+		info.Cwd = v
+		if p.project != nil {
+			info.Project = p.project(v)
+		}
 	}
 	info.Ancestors = p.ancestors(ctx, pid, h)
 	return info, nil
