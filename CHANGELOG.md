@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.11.0](https://github.com/roystondwork-dev/portcheck/compare/v0.10.1...v0.11.0) (2026-10-25)
+
+
+### Features
+
+* **npm:** Vite plugin and Node.js hook that explain a taken port ([8d142b9](https://github.com/roystondwork-dev/portcheck/commit/8d142b908614cd3fbe9771905df54b73f99f6042))
+* **servers:** list the dev servers you forgot, with their project and uptime ([f8084a6](https://github.com/roystondwork-dev/portcheck/commit/f8084a603e875a7b548b97cdd81046165364592f))
+
+
+### Bug Fixes
+
+* **mcp:** declare all four hints on every tool ([dd3f16d](https://github.com/roystondwork-dev/portcheck/commit/dd3f16d4ea334d9d6b60dbe4f8a0e92e3796d3aa))
+
+
+### Documentation
+
+* **fix:** port-in-use pages for databases, web servers and React Native/Expo/adb ([516df3d](https://github.com/roystondwork-dev/portcheck/commit/516df3df9aa59aee1e5bd47afb0e041c7aa15067))
+* M8ven trust index badge (MCP server listing) ([50b9c4a](https://github.com/roystondwork-dev/portcheck/commit/50b9c4ac9b2324ccf128938c73f18f7041043e01))
+
 ## [0.10.1](https://github.com/roystondwork-dev/portcheck/compare/v0.10.0...v0.10.1) (2026-10-25)
 
 
