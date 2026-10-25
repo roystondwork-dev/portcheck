@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -247,36 +248,59 @@ func tool[In any](s *mcp.Server, t *mcp.Tool, run RunFunc, argsFn func(In) ([]st
 	})
 }
 
+// checkSchema is check_port's input schema. Inferred from CheckInput, ports
+// would be "array or null" (a nil Go slice); it's a required, non-empty array.
+func checkSchema() *jsonschema.Schema {
+	sc, err := jsonschema.For[CheckInput](nil)
+	if err != nil {
+		panic(err) // CheckInput is a fixed type: only a programming error gets here
+	}
+	ports := sc.Properties["ports"]
+	ports.Types, ports.Type, ports.MinItems = nil, "array", new(int)
+	*ports.MinItems = 1
+	return sc
+}
+
 // New returns the MCP server; version is portcheck's.
 func New(version string, run RunFunc) *mcp.Server {
 	s := mcp.NewServer(&mcp.Implementation{Name: "portcheck", Title: "portcheck", Version: version}, &mcp.ServerOptions{Instructions: instructions})
-	readOnly := &mcp.ToolAnnotations{ReadOnlyHint: true, OpenWorldHint: boolPtr(false)}
+	// Looking things up changes nothing, so the read-only tools are also idempotent.
+	readOnly := func(title string) *mcp.ToolAnnotations {
+		return &mcp.ToolAnnotations{Title: title, ReadOnlyHint: true, IdempotentHint: true, OpenWorldHint: boolPtr(false)}
+	}
 	tool(s, &mcp.Tool{
-		Name:        "list_ports",
-		Description: "List the ports listening on this machine, with the process, PID, user and who started it.",
-		Annotations: &mcp.ToolAnnotations{Title: "List listening ports", ReadOnlyHint: true, OpenWorldHint: boolPtr(false)},
+		Name: "list_ports",
+		Description: "List the ports listening on this machine, with the process, PID, user and who started it " +
+			"(e.g. npm ← zsh), and the container for ports published by Docker or Podman. " +
+			"Use it to see what's running, or to find a dev server by name (name=\"node*\") or port range.",
+		Annotations: readOnly("List listening ports"),
 	}, run, ListArgs, 0, 4)
 	tool(s, &mcp.Tool{
-		Name:        "check_port",
-		Description: "Check whether ports are free; for each port in use, which process holds it (name, PID, user, command, who started it, container).",
-		Annotations: &mcp.ToolAnnotations{Title: "Check a port", ReadOnlyHint: true, OpenWorldHint: boolPtr(false)},
+		Name: "check_port",
+		Description: "Check whether ports are free. For each port in use, says which process holds it: name, PID, user, " +
+			"command line, who started it, and the container if Docker or Podman publishes it. " +
+			"Use it first when a server fails with \"address already in use\" or EADDRINUSE.",
+		InputSchema: checkSchema(),
+		Annotations: readOnly("Check a port"),
 	}, run, CheckArgs, 0, 1)
 	tool(s, &mcp.Tool{
-		Name:        "find_free_port",
-		Description: "Find free ports, optionally in a range.",
-		Annotations: readOnly,
+		Name: "find_free_port",
+		Description: "Find ports that are free right now, verified by binding them, optionally within a range " +
+			"(e.g. 3000-3999). Use it to start a server on another port instead of stopping what holds one.",
+		Annotations: readOnly("Find free ports"),
 	}, run, FreeArgs, 0, 1)
 	tool(s, &mcp.Tool{
 		Name: "stop_process",
 		Description: "Stop the process listening on a port, or a process by PID: asks it to exit, then kills it after 5 s. " +
 			"Refuses system processes and the assistant itself. Ports published by Docker, Podman or WSL report the command to run instead. " +
-			"Use dry_run to see what would be stopped.",
+			"Use dry_run to see what would be stopped, and check_port first to tell the user what it is.",
 		Annotations: &mcp.ToolAnnotations{Title: "Stop a process", DestructiveHint: boolPtr(true), OpenWorldHint: boolPtr(false)},
 	}, run, StopArgs, 0, 1, 3, 4)
 	tool(s, &mcp.Tool{
-		Name:        "wait_for_port",
-		Description: "Wait until a port accepts connections (e.g. a server finished starting), or with free=true until it is free.",
-		Annotations: &mcp.ToolAnnotations{Title: "Wait for a port", ReadOnlyHint: true, OpenWorldHint: boolPtr(false)},
+		Name: "wait_for_port",
+		Description: "Wait until a port accepts connections, e.g. until a server or database has finished starting, " +
+			"or with free=true until a port is free again. Returns as soon as it's ready, or fails after timeout_seconds.",
+		Annotations: readOnly("Wait for a port"),
 	}, run, WaitArgs, 0, 1)
 	return s
 }
