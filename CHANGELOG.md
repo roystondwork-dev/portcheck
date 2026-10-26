@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/roystondwork-dev/portcheck/compare/v0.11.0...v0.11.1) (2026-10-26)
+
+
+### Bug Fixes
+
+* **raycast:** title case for the Portcheck Path preference (store review) ([31807b3](https://github.com/roystondwork-dev/portcheck/commit/31807b33b509cf5f49e698f831cc24a0f73f9220))
+
 ## [0.11.0](https://github.com/roystondwork-dev/portcheck/compare/v0.10.1...v0.11.0) (2026-10-25)
 
 
