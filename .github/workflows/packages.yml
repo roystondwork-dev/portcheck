@@ -34,7 +34,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag=$(gh release view --json tagName --jq .tagName)
+          # The newest release whose binaries are published: on a release commit,
+          # release-please has just created the release and its assets are still
+          # being built, so fall back to the one before.
+          tag=""
+          for t in $(gh release list --limit 5 --exclude-drafts --json tagName --jq '.[].tagName'); do
+            if gh release view "$t" --json assets --jq '.assets[].name' | grep -qx checksums.txt; then
+              tag=$t
+              break
+            fi
+          done
+          [ -n "$tag" ] || { echo "::error::no recent release has checksums.txt"; exit 1; }
+          echo "Testing against $tag"
           echo "VERSION=${tag#v}" >> "$GITHUB_ENV"
           gh release download "$tag" -D "$RUNNER_TEMP/assets" -p checksums.txt -p 'portcheck_*.tar.gz' -p 'portcheck_*.zip'
       - name: npm package (unit tests, then npx against the real release)
