@@ -96,7 +96,11 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "overrides": {
-    "minimatch@>=7.0.0 <11.0.1": "^11.0.5",
-    "glob@>=9.0.0 <14.0.2": "^14.0.4"
+    "@oclif/core": {
+      "minimatch": "^11.0.5"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.5"
+    }
   }
 }
