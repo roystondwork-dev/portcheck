@@ -22,6 +22,9 @@ updates:
       # Mocha 12 is ESM-only; the extension host of older VS Code can't load it.
       - dependency-name: "mocha"
         update-types: ["version-update:semver-major"]
+      # typescript-eslint supports TypeScript below 6.1 only; revisit when it supports 7.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       npm-deps:
         patterns: ["*"]
@@ -33,6 +36,9 @@ updates:
       interval: weekly
     ignore:
       - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # typescript-eslint supports TypeScript below 6.1 only; revisit when it supports 7.
+      - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
     groups:
       browser-npm-deps:
