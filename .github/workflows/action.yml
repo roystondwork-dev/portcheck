@@ -36,10 +36,10 @@ jobs:
         with:
           wait: localhost:8765
           timeout: 60s
-          args: free 41000-41999
+          args: free 41000-41999 --json
       - name: Check the results
         env:
-          FREE: ${{ steps.pc.outputs.output }}
+          FREE: ${{ fromJSON(steps.pc.outputs.output).data.ports[0] }}
         run: |
           echo "free port: $FREE"
           [[ "$FREE" =~ ^41[0-9]{3}$ ]] || { echo "::error::expected a port in 41000-41999, got '$FREE'"; exit 1; }

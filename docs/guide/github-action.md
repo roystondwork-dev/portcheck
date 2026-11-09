@@ -29,15 +29,20 @@ a port on localhost, or `host:port`.
 ## Run any portcheck command
 
 `args` runs any other portcheck command line after `wait`, and its standard output is the
-step's `output`:
+step's `output`. Add `--json` and read a value with `fromJSON()`, so you get the data without
+the table's header line:
 
 ```yaml
 - id: port
   uses: roystondwork-dev/portcheck@v0.12.0
   with:
-    args: free 3000-3999
-- run: PORT=${{ steps.port.outputs.output }} npm start &
+    args: free 3000-3999 --json
+- run: npm start &
+  env:
+    PORT: ${{ fromJSON(steps.port.outputs.output).data.ports[0] }}
 ```
+
+The JSON for every command is described in [JSON output](../json-schema.md).
 
 With neither `wait` nor `args`, the action only installs portcheck, and later steps can run
 `portcheck` themselves:

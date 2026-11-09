@@ -29,7 +29,7 @@ inputs:
 
 outputs:
   output:
-    description: What the `args` command printed on stdout, e.g. the free port from "free".
+    description: What the `args` command printed on stdout. Add --json to `args` and read it with fromJSON().
     value: ${{ steps.run.outputs.output }}
 
 runs:
