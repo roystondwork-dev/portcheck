@@ -66,3 +66,22 @@ func TestExplainDoc(t *testing.T) {
 		t.Errorf("empty explain = %+v", d)
 	}
 }
+
+func TestExplainLinesAirPlay(t *testing.T) {
+	t.Parallel()
+	cc := inspect.Socket{RawSocket: inspect.RawSocket{Proto: inspect.TCP, Local: netip.MustParseAddrPort("0.0.0.0:5000"), State: inspect.StateListen, PID: 666},
+		Process: &inspect.ProcessInfo{PID: 666, Name: "ControlCenter"}}
+	got := ExplainLines(freeport.Status{Port: 5000, Proto: inspect.TCP, Availability: freeport.InUse, Holders: []inspect.Socket{cc}}, "")
+	want := []string{
+		"portcheck: port 5000 is held by macOS AirPlay Receiver (ControlCenter, pid 666)",
+		"portcheck: turn it off in System Settings → General → AirDrop & Handoff → AirPlay Receiver, or use another port",
+	}
+	if d := cmp.Diff(want, got); d != "" {
+		t.Errorf("(-want +got):\n%s", d)
+	}
+	// ControlCenter on another port is just a process.
+	cc.Local = netip.MustParseAddrPort("0.0.0.0:6000")
+	if got := ExplainLines(freeport.Status{Port: 6000, Holders: []inspect.Socket{cc}}, ""); got[1] != "portcheck: stop it: portcheck kill 6000" {
+		t.Errorf("got %q", got)
+	}
+}

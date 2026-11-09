@@ -63,6 +63,11 @@ func ExplainLines(st freeport.Status, runHint string) []string {
 				who += ", in " + h.Process.Project
 			}
 			fix = "stop it: portcheck kill " + port
+			if isAirPlay(h) {
+				// macOS restarts it when stopped.
+				who = "macOS AirPlay Receiver (ControlCenter, pid " + strconv.Itoa(int(h.PID)) + ")"
+				fix = "turn it off in System Settings → General → AirDrop & Handoff → AirPlay Receiver, or use another port"
+			}
 			if runHint != "" {
 				fix += "  ·  or use a free port: " + runHint
 			}
@@ -77,6 +82,12 @@ func ExplainLines(st freeport.Status, runHint string) []string {
 		line += fmt.Sprintf(" (and %d more)", more)
 	}
 	return []string{line, "portcheck: " + fix}
+}
+
+// isAirPlay reports whether s is macOS's AirPlay Receiver, which listens on
+// ports 5000 and 7000 and comes back if it is stopped.
+func isAirPlay(s inspect.Socket) bool {
+	return s.Process != nil && s.Process.Name == "ControlCenter" && (s.Port() == 5000 || s.Port() == 7000)
 }
 
 func processName(s inspect.Socket) string {
