@@ -11,6 +11,7 @@ import (
 	"github.com/roystondwork-dev/portcheck/pkg/freeport"
 	"github.com/roystondwork-dev/portcheck/pkg/inspect"
 	"github.com/roystondwork-dev/portcheck/pkg/scan"
+	"github.com/roystondwork-dev/portcheck/pkg/tunnel"
 )
 
 // JSON payload types. Field names and meanings are part of the public,
@@ -27,6 +28,24 @@ type SocketJSON struct {
 	PID           int32          `json:"pid,omitempty"`
 	Process       *ProcessJSON   `json:"process,omitempty"`
 	Container     *ContainerJSON `json:"container,omitempty"`
+	Tunnel        *TunnelJSON    `json:"tunnel,omitempty"`
+}
+
+// TunnelJSON says where a forwarded port leads, for a process that listens
+// only to forward it: ssh -L, ssh -D or kubectl/oc port-forward.
+type TunnelJSON struct {
+	Kind        string `json:"kind"` // "ssh", "ssh-socks" or "port-forward"
+	Target      string `json:"target,omitempty"`
+	Via         string `json:"via,omitempty"`
+	Description string `json:"description"`
+}
+
+// TunnelOf returns the tunnel s's process runs on its port, if any.
+func TunnelOf(s inspect.Socket) (tunnel.Tunnel, bool) {
+	if s.Process == nil || s.Container != nil {
+		return tunnel.Tunnel{}, false
+	}
+	return tunnel.Parse(s.Process.Cmdline, s.Port())
 }
 
 // ContainerJSON is the container (or WSL distro) publishing a socket's port.
@@ -132,6 +151,9 @@ func socketJSON(s inspect.Socket) SocketJSON {
 		pj := ProcessInfoJSON(p)
 		out.Process = &pj
 	}
+	if t, ok := TunnelOf(s); ok {
+		out.Tunnel = &TunnelJSON{Kind: string(t.Kind), Target: t.Target, Via: t.Via, Description: t.String()}
+	}
 	if c := s.Container; c != nil {
 		out.Container = &ContainerJSON{
 			ID: c.ID, Name: c.Name, Image: c.Image, Runtime: c.Runtime,
@@ -221,10 +243,22 @@ func processCells(s inspect.Socket) (name, user Cell) {
 	case s.Container != nil:
 		return T(ContainerLabel(s.Container), ToneInfo), user
 	case s.Process != nil:
+		if t, ok := TunnelOf(s); ok {
+			return T(s.Process.Name+" → "+tunnelShort(t), ToneInfo), user
+		}
 		return C(s.Process.Name), user
 	default:
 		return T("?", ToneMuted), user
 	}
+}
+
+// tunnelShort is where a tunnel leads, for a table cell: "db.internal:5432",
+// "svc/web:80" or "SOCKS proxy".
+func tunnelShort(t tunnel.Tunnel) string {
+	if t.Kind == tunnel.SSHSocks {
+		return "SOCKS proxy"
+	}
+	return t.Target
 }
 
 func stateTone(s inspect.State) Tone {

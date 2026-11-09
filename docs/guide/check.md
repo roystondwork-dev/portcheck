@@ -14,6 +14,23 @@ PORT  PROTO  STATUS  PID    PROCESS  USER
 [port specs](../port-specs.md), so `portcheck check 8000-8010` works too (up to 4096 ports).
 Results are listed in ascending port order.
 
+### Tunnels
+
+A port held by an SSH tunnel or a Kubernetes port-forward shows where it leads, so you
+can tell a tunnel to production from a local database:
+
+```console
+$ portcheck 5432 8080
+PORT  PROTO  STATUS  PID    PROCESS                 USER
+5432  tcp    in-use  41210  ssh → db.internal:5432  alice
+8080  tcp    in-use  41377  kubectl → svc/web:80    alice
+```
+
+`kill` names the tunnel before it asks ("SSH tunnel to db.internal:5432 via ops@bastion"),
+and `--json` adds a `tunnel` object. portcheck reads `ssh -L`, `ssh -D` and
+`kubectl`/`oc port-forward` from the command line; a forward set up in an SSH config file
+(`LocalForward`) isn't visible there.
+
 ## Statuses
 
 | Status | Meaning |

@@ -37,6 +37,7 @@ type killTarget struct {
 	ports    []uint16
 	ancestry string // "npm (4200) ← zsh (900)", if known
 	project  string // e.g. "my-shop", if known
+	tunnel   string // e.g. "SSH tunnel to db:5432 via bastion", if it is one
 }
 
 func (c *cli) newKillCmd() *cobra.Command {
@@ -181,6 +182,9 @@ func (c *cli) killTargets(cmd *cobra.Command, args []string, protos []inspect.Pr
 				t.ancestry = output.Ancestry(s.Process)
 				t.project = s.Process.Project
 			}
+			if tn, ok := output.TunnelOf(s); ok {
+				t.tunnel = tn.String()
+			}
 			if !slices.Contains(t.ports, s.Port()) {
 				t.ports = append(t.ports, s.Port())
 			}
@@ -243,6 +247,9 @@ func (c *cli) confirm(targets []killTarget, force bool) (bool, error) {
 		}
 		if t.project != "" {
 			line += ", in " + t.project
+		}
+		if t.tunnel != "" {
+			line += " (" + t.tunnel + ")"
 		}
 		fmt.Fprintln(c.app.Stderr, line)
 	}

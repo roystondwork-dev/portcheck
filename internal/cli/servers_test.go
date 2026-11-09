@@ -155,6 +155,20 @@ func TestKillShowsProject(t *testing.T) {
 	}
 }
 
+func TestKillShowsTunnel(t *testing.T) {
+	t.Parallel()
+	h := newHarness()
+	h.provider.Processes[100].Name = "ssh"
+	h.provider.Processes[100].Cmdline = "ssh -N -L 3000:db.internal:5432 ops@bastion"
+	h.provider.Processes[100].Ancestors = nil
+	h.killer.names[100] = "ssh"
+	h.app.StdinTTY, h.app.Stdin = true, strings.NewReader("n\n")
+	h.run(t, "kill", "3000")
+	if want := "PID 100  ssh  (port 3000) (SSH tunnel to db.internal:5432 via ops@bastion)\n"; !strings.Contains(h.stderr.String(), want) {
+		t.Errorf("stderr lacks %q:\n%s", want, h.stderr)
+	}
+}
+
 func TestSameUser(t *testing.T) {
 	t.Parallel()
 	for _, tc := range []struct {

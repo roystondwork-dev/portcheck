@@ -39,6 +39,19 @@ present, and empty arrays are `[]`, never `null`.
 | `pid` | number, optional | omitted when the owner is not visible (permissions) |
 | `process` | Process, optional | |
 | `container` | Container, optional | the container (or WSL distro) behind this port, when it can be determined |
+| `tunnel` | Tunnel, optional | where the port leads, when the process only forwards it (`ssh -L`, `ssh -D`, `kubectl`/`oc port-forward`) |
+
+### Tunnel
+
+Read from the process's command line; a forward configured in an SSH config file
+(`LocalForward`) isn't visible there.
+
+| Field | Type | Notes |
+|---|---|---|
+| `kind` | string | `ssh` (`ssh -L`), `ssh-socks` (`ssh -D`) or `port-forward` (`kubectl`/`oc port-forward`) |
+| `target` | string, optional | where connections go, e.g. `db.internal:5432` or `svc/web:80`; not set for `ssh-socks` |
+| `via` | string, optional | the SSH destination, e.g. `ops@bastion`, or the Kubernetes namespace |
+| `description` | string | e.g. `SSH tunnel to db.internal:5432 via ops@bastion` |
 
 ### Process
 

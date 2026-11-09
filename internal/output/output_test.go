@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/roystondwork-dev/portcheck/internal/buildinfo"
 	"github.com/roystondwork-dev/portcheck/internal/testutil"
 	"github.com/roystondwork-dev/portcheck/pkg/freeport"
@@ -263,6 +265,42 @@ func TestContainerLabel(t *testing.T) {
 		if got := ContainerLabel(c); got != want {
 			t.Errorf("ContainerLabel = %q, want %q", got, want)
 		}
+	}
+}
+
+func TestTunnels(t *testing.T) {
+	t.Parallel()
+	listen := func(port uint16, pid int32, cmd string) inspect.Socket {
+		return inspect.Socket{RawSocket: inspect.RawSocket{Proto: inspect.TCP, Local: netip.AddrPortFrom(netip.IPv4Unspecified(), port), State: inspect.StateListen, PID: pid},
+			Process: &inspect.ProcessInfo{PID: pid, Name: "ssh", User: "alice", Cmdline: cmd}}
+	}
+	ssh := listen(15432, 50, "ssh -N -L 15432:db.internal:5432 ops@bastion")
+	socks := listen(1080, 51, "ssh -D 1080 proxy")
+	plain := listen(22, 52, "ssh host") // ssh listening without a forward on this port
+	d := CheckDoc([]freeport.Status{
+		{Port: 15432, Proto: inspect.TCP, Availability: freeport.InUse, Holders: []inspect.Socket{ssh}},
+		{Port: 1080, Proto: inspect.TCP, Availability: freeport.InUse, Holders: []inspect.Socket{socks}},
+		{Port: 22, Proto: inspect.TCP, Availability: freeport.InUse, Holders: []inspect.Socket{plain}},
+	})
+	names := make([]string, 0, len(d.Rows))
+	for _, r := range d.Rows {
+		names = append(names, r[4].Text)
+	}
+	if diff := cmp.Diff([]string{"ssh → db.internal:5432", "ssh → SOCKS proxy", "ssh"}, names); diff != "" {
+		t.Errorf("PROCESS cells (-want +got):\n%s", diff)
+	}
+	data := d.Data.(CheckJSON)
+	want := &TunnelJSON{Kind: "ssh", Target: "db.internal:5432", Via: "ops@bastion", Description: "SSH tunnel to db.internal:5432 via ops@bastion"}
+	if diff := cmp.Diff(want, data.Ports[0].Holders[0].Tunnel); diff != "" {
+		t.Errorf("tunnel JSON (-want +got):\n%s", diff)
+	}
+	if data.Ports[2].Holders[0].Tunnel != nil {
+		t.Errorf("plain ssh has a tunnel: %+v", data.Ports[2].Holders[0].Tunnel)
+	}
+	// A container's port is never a tunnel, even if its proxy's command line looks like one.
+	ssh.Container = &inspect.Container{Name: "x", Runtime: "docker"}
+	if _, ok := TunnelOf(ssh); ok {
+		t.Error("container port reported as a tunnel")
 	}
 }
 
