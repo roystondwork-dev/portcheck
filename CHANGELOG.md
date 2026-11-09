@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.11.1](https://github.com/roystondwork-dev/portcheck/compare/v0.11.0...v0.11.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* **deps:** patch minimatch and glob (GHSA-g3hv-75wg-m249, GHSA-3g3m-2fjr-6pw4) ([118fb97](https://github.com/roystondwork-dev/portcheck/commit/118fb97bc8a7227a8db89be8360af3fb378227a1))
+* **deps:** use overrides npm 10 understands ([a927c80](https://github.com/roystondwork-dev/portcheck/commit/a927c80086c18fbd6eae1f9ce2e333b6709be0a2))
+* **raycast:** title case for the Portcheck Path preference (store review) ([31807b3](https://github.com/roystondwork-dev/portcheck/commit/31807b33b509cf5f49e698f831cc24a0f73f9220))
+
+
+### Build & Release
+
+* **deps:** bump the go-deps group across 1 directory with 3 updates ([aab3a96](https://github.com/roystondwork-dev/portcheck/commit/aab3a9675b12266eebc76b1ad070617f37f1eec6))
+
 ## [0.11.0](https://github.com/roystondwork-dev/portcheck/compare/v0.10.1...v0.11.0) (2026-10-25)
 
 

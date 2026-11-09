@@ -2,7 +2,7 @@
   "name": "portcheck-vscode",
   "displayName": "Portcheck - Port in Use Fixer",
   "description": "See what's using your ports — process, who started it, container or WSL distro — and free them safely.",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "publisher": "portcheck-vscode",
   "icon": "media/icon.png",
   "galleryBanner": {
