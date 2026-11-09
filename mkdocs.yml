@@ -117,6 +117,7 @@ nav:
       - Containers & WSL: guide/containers.md
       - Scripting & CI: guide/scripting.md
       - GitHub Action: guide/github-action.md
+      - Dev containers & Codespaces: guide/devcontainer.md
   - Reference:
       - Commands:
           - portcheck: commands/portcheck.md

@@ -1,0 +1,17 @@
+{
+  "id": "portcheck",
+  "version": "1.0.0",
+  "name": "portcheck",
+  "description": "See which process holds a port and free it safely; find free ports; wait for services. Installs the portcheck CLI.",
+  "documentationURL": "https://roystondwork-dev.github.io/portcheck/guide/devcontainer/",
+  "licenseURL": "https://github.com/roystondwork-dev/portcheck/blob/main/LICENSE",
+  "options": {
+    "version": {
+      "type": "string",
+      "proposals": ["latest"],
+      "default": "latest",
+      "description": "The portcheck release to install, e.g. 0.12.0"
+    }
+  },
+  "installsAfter": ["ghcr.io/devcontainers/features/common-utils"]
+}

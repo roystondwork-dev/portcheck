@@ -1,0 +1,10 @@
+{
+  "pinned-version": {
+    "image": "mcr.microsoft.com/devcontainers/base:debian",
+    "features": { "portcheck": { "version": "0.11.1" } }
+  },
+  "alpine": {
+    "image": "mcr.microsoft.com/devcontainers/base:alpine",
+    "features": { "portcheck": {} }
+  }
+}

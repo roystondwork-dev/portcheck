@@ -167,6 +167,23 @@ winget:
           name: winget-pkgs
           branch: master
 
+dockers_v2:
+  # ghcr.io/roystondwork-dev/portcheck, for CI jobs and containers:
+  #   docker run --rm --network host ghcr.io/roystondwork-dev/portcheck wait db:5432
+  - ids: [portcheck]
+    images: ["ghcr.io/roystondwork-dev/portcheck"]
+    tags: ["{{ .Version }}", "latest"]
+    platforms: [linux/amd64, linux/arm64]
+    dockerfile: build/Dockerfile
+    labels:
+      org.opencontainers.image.title: portcheck
+      org.opencontainers.image.description: "See which process holds a port, free it safely, wait for services"
+      org.opencontainers.image.source: https://github.com/roystondwork-dev/portcheck
+      org.opencontainers.image.url: https://roystondwork-dev.github.io/portcheck/
+      org.opencontainers.image.version: "{{ .Version }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+      org.opencontainers.image.licenses: MIT
+
 release:
   github:
     owner: roystondwork-dev

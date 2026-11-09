@@ -108,6 +108,27 @@ or `PORTCHECK_VERSION=0.9.0` for a specific version.
     go install github.com/roystondwork-dev/portcheck/cmd/portcheck@latest
     ```
 
+=== "Docker"
+
+    A small image for linux/amd64 and linux/arm64 (distroless, runs as non-root),
+    published with every release from 0.12.0:
+
+    ```sh
+    docker run --rm --network host ghcr.io/roystondwork-dev/portcheck wait db:5432 --timeout 60s
+    ```
+
+    `--network host` lets it reach services on the host. To inspect or stop the host's
+    processes from a container on Linux, it also needs the host's process namespace:
+    `docker run --rm --network host --pid host ghcr.io/roystondwork-dev/portcheck list -l`.
+    On macOS and Windows, Docker runs containers in a VM, so install portcheck
+    natively for those.
+
+    In a Dockerfile:
+
+    ```dockerfile
+    COPY --from=ghcr.io/roystondwork-dev/portcheck:latest /usr/bin/portcheck /usr/local/bin/portcheck
+    ```
+
 Check the installation:
 
 ```sh

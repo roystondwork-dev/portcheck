@@ -31,3 +31,4 @@ Thumbs.db
 
 # Claude Code agent worktrees
 .claude/worktrees/
+devcontainer-features/src/portcheck/portcheck-install.sh
