@@ -1,0 +1,64 @@
+name: GitHub Action
+
+# Tests the portcheck GitHub Action (action.yml at the repository root) the way
+# users run it: `uses:` it, wait for a real server, and read its output.
+on:
+  push:
+    branches: [main]
+    paths: [action.yml, docs/install.sh, docs/install.ps1, .github/workflows/action.yml]
+  pull_request:
+    paths: [action.yml, docs/install.sh, docs/install.ps1, .github/workflows/action.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  action:
+    name: Action (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Start a server that takes a few seconds to come up
+        run: |
+          py=$(command -v python3 || command -v python)
+          (sleep 3; "$py" -m http.server 8765 >/dev/null 2>&1) &
+      - name: Wait for it, and find a free port
+        id: pc
+        uses: ./
+        with:
+          wait: localhost:8765
+          timeout: 60s
+          args: free 41000-41999
+      - name: Check the results
+        env:
+          FREE: ${{ steps.pc.outputs.output }}
+        run: |
+          echo "free port: $FREE"
+          [[ "$FREE" =~ ^41[0-9]{3}$ ]] || { echo "::error::expected a port in 41000-41999, got '$FREE'"; exit 1; }
+          curl -fsS -o /dev/null http://localhost:8765/
+          portcheck version
+      - name: A pinned version, install only
+        uses: ./
+        with:
+          version: 0.11.0
+      - name: Check the pinned version is on PATH
+        run: portcheck version | grep -q '^portcheck 0\.11\.0 '
+      - name: A timeout fails the step
+        id: timeout
+        continue-on-error: true
+        uses: ./
+        with:
+          wait: localhost:1
+          timeout: 2s
+      - name: Check it failed
+        env:
+          OUTCOME: ${{ steps.timeout.outcome }}
+        run: '[ "$OUTCOME" = failure ] || { echo "::error::waiting for a closed port should fail"; exit 1; }'

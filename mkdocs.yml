@@ -113,6 +113,7 @@ nav:
       - Browser extension: guide/browser.md
       - Containers & WSL: guide/containers.md
       - Scripting & CI: guide/scripting.md
+      - GitHub Action: guide/github-action.md
   - Reference:
       - Commands:
           - portcheck: commands/portcheck.md

@@ -1,0 +1,85 @@
+name: portcheck
+description: Wait until services accept connections, check ports and find free ones in CI, on Linux, macOS and Windows.
+author: Royston D
+branding:
+  icon: radio
+  color: blue
+
+inputs:
+  wait:
+    description: >-
+      Ports or host:port targets to wait for, separated by spaces, e.g. "5432 redis:6379".
+      The step succeeds when every target accepts TCP connections.
+    required: false
+    default: ""
+  timeout:
+    description: How long `wait` waits before failing, e.g. 30s, 2m.
+    required: false
+    default: 60s
+  args:
+    description: >-
+      Any other portcheck command line to run, e.g. "free 3000-3999" or "check 8080".
+      Runs after `wait`. Leave both empty to only install portcheck on PATH.
+    required: false
+    default: ""
+  version:
+    description: "The portcheck release to install, e.g. 0.11.1; the default is the latest release."
+    required: false
+    default: latest
+
+outputs:
+  output:
+    description: What the `args` command printed on stdout, e.g. the free port from "free".
+    value: ${{ steps.run.outputs.output }}
+
+runs:
+  using: composite
+  steps:
+    # The installers verify the download against the release's checksums. They come
+    # from the action's own checkout, so they match the action version you pinned.
+    - name: Install portcheck
+      if: runner.os != 'Windows'
+      shell: bash
+      env:
+        PORTCHECK_INSTALL_DIR: ${{ runner.temp }}/portcheck
+        PORTCHECK_VERSION: ${{ inputs.version != 'latest' && inputs.version || '' }}
+        PORTCHECK_NO_BROWSER: "1"
+        INSTALL_SH: ${{ github.action_path }}/docs/install.sh
+      run: |
+        sh "$INSTALL_SH"
+        echo "$PORTCHECK_INSTALL_DIR" >> "$GITHUB_PATH"
+    - name: Install portcheck
+      if: runner.os == 'Windows'
+      shell: pwsh
+      env:
+        PORTCHECK_INSTALL_DIR: ${{ runner.temp }}\portcheck
+        PORTCHECK_VERSION: ${{ inputs.version != 'latest' && inputs.version || '' }}
+        PORTCHECK_NO_BROWSER: "1"
+        INSTALL_PS1: ${{ github.action_path }}\docs\install.ps1
+      run: |
+        & $env:INSTALL_PS1
+        Add-Content -Path $env:GITHUB_PATH -Value $env:PORTCHECK_INSTALL_DIR
+    - name: Wait for ports
+      if: inputs.wait != ''
+      shell: bash
+      env:
+        TARGETS: ${{ inputs.wait }}
+        TIMEOUT: ${{ inputs.timeout }}
+      run: |
+        # shellcheck disable=SC2086 # targets are space-separated on purpose
+        portcheck wait $TARGETS --timeout "$TIMEOUT"
+    - name: Run portcheck
+      id: run
+      if: inputs.args != ''
+      shell: bash
+      env:
+        ARGS: ${{ inputs.args }}
+      run: |
+        # shellcheck disable=SC2086 # args are a command line on purpose
+        out=$(portcheck $ARGS)
+        printf '%s\n' "$out"
+        {
+          echo "output<<PORTCHECK_EOF"
+          printf '%s\n' "$out"
+          echo "PORTCHECK_EOF"
+        } >> "$GITHUB_OUTPUT"
