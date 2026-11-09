@@ -116,6 +116,10 @@ type Container struct {
 	// distro that listens on the port, when known.
 	Process    string
 	ProcessPID int32
+	// ComposeProject and ComposeService are set for containers started by
+	// Docker Compose (or podman-compose), from the container's labels.
+	ComposeProject string
+	ComposeService string
 }
 
 // Socket is a RawSocket enriched with information about its owning process

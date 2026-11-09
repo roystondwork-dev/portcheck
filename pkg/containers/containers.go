@@ -96,10 +96,11 @@ func runtimeFor(endpoint string) string {
 
 // apiContainer is the subset of GET /containers/json used here.
 type apiContainer struct {
-	ID    string   `json:"Id"`
-	Names []string `json:"Names"`
-	Image string   `json:"Image"`
-	Ports []struct {
+	ID     string            `json:"Id"`
+	Names  []string          `json:"Names"`
+	Image  string            `json:"Image"`
+	Labels map[string]string `json:"Labels"`
+	Ports  []struct {
 		IP          string `json:"IP"`
 		PrivatePort uint16 `json:"PrivatePort"`
 		PublicPort  uint16 `json:"PublicPort"`
@@ -133,7 +134,12 @@ func (c *Client) Published(ctx context.Context) ([]Published, error) {
 func (c *Client) convert(raw []apiContainer) []Published {
 	var out []Published
 	for _, rc := range raw {
-		ctr := inspect.Container{ID: shortID(rc.ID), Image: rc.Image, Runtime: c.runtime}
+		ctr := inspect.Container{
+			ID: shortID(rc.ID), Image: rc.Image, Runtime: c.runtime,
+			// Docker Compose and podman-compose both set these labels.
+			ComposeProject: rc.Labels["com.docker.compose.project"],
+			ComposeService: rc.Labels["com.docker.compose.service"],
+		}
 		if len(rc.Names) > 0 {
 			ctr.Name = strings.TrimPrefix(rc.Names[0], "/")
 		}

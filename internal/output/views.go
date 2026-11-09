@@ -37,6 +37,10 @@ type ContainerJSON struct {
 	Runtime    string `json:"runtime"`
 	Process    string `json:"process,omitempty"`
 	ProcessPID int32  `json:"processPid,omitempty"`
+	// ComposeProject and ComposeService name the Docker Compose project and
+	// service that started the container.
+	ComposeProject string `json:"composeProject,omitempty"`
+	ComposeService string `json:"composeService,omitempty"`
 	// StopHint is the command that stops what holds the port without touching
 	// the host proxy, e.g. "docker stop web".
 	StopHint string `json:"stopHint"`
@@ -132,6 +136,7 @@ func socketJSON(s inspect.Socket) SocketJSON {
 		out.Container = &ContainerJSON{
 			ID: c.ID, Name: c.Name, Image: c.Image, Runtime: c.Runtime,
 			Process: c.Process, ProcessPID: c.ProcessPID, StopHint: StopHint(c),
+			ComposeProject: c.ComposeProject, ComposeService: c.ComposeService,
 		}
 	}
 	return out
@@ -180,7 +185,11 @@ func DescribeContainer(c *inspect.Container) string {
 		}
 		return s
 	}
-	return fmt.Sprintf("published by %s container %q (%s)", c.Runtime, ref, cmp.Or(c.Image, "unknown image"))
+	image := cmp.Or(c.Image, "unknown image")
+	if c.ComposeProject != "" && c.ComposeService != "" {
+		return fmt.Sprintf("published by %s container %q (service %s of compose project %s, %s)", c.Runtime, ref, c.ComposeService, c.ComposeProject, image)
+	}
+	return fmt.Sprintf("published by %s container %q (%s)", c.Runtime, ref, image)
 }
 
 // StopHint is the command that stops what holds the port, without touching
@@ -192,6 +201,11 @@ func StopHint(c *inspect.Container) string {
 			return fmt.Sprintf("wsl -d %s --exec kill %d", ref, c.ProcessPID)
 		}
 		return fmt.Sprintf("wsl --terminate %s   (stops the whole distro)", ref)
+	}
+	if c.ComposeProject != "" && c.ComposeService != "" {
+		// Works from any directory, without the compose file, and keeps
+		// Compose's view of the project consistent.
+		return fmt.Sprintf("%s compose -p %s stop %s", c.Runtime, c.ComposeProject, c.ComposeService)
 	}
 	return c.Runtime + " stop " + ref
 }

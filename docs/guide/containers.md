@@ -22,8 +22,18 @@ container it serves. Instead it tells you which container to stop:
 
 ```console
 $ portcheck kill 8080
-Port 8080 is published by docker container "web" (nginx:alpine). Stop the container instead:
+Port 8080 is published by docker container "web" (nginx:alpine). Stop it there instead:
   docker stop web
+```
+
+For a container started by **Docker Compose** (or podman-compose), portcheck names the
+service and project, and suggests stopping the service through Compose. That works from
+any directory, without the compose file:
+
+```console
+$ portcheck kill 5432
+Port 5432 is published by docker container "myapp-db-1" (service db of compose project myapp, postgres:17). Stop it there instead:
+  docker compose -p myapp stop db
 ```
 
 The exit status is `1`, and other, non-container targets in the same command are

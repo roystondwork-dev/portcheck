@@ -277,6 +277,12 @@ func TestDescribeAndStopHint(t *testing.T) {
 		{inspect.Container{Name: "Ubuntu", Runtime: "wsl", Process: "node", ProcessPID: 1234}, `forwarded from WSL distro "Ubuntu" (node, pid 1234)`, "wsl -d Ubuntu --exec kill 1234"},
 		{inspect.Container{Name: "Debian", Runtime: "wsl", Process: "nginx"}, `forwarded from WSL distro "Debian" (nginx)`, "wsl --terminate Debian   (stops the whole distro)"},
 		{inspect.Container{Name: "Alpine", Runtime: "wsl"}, `forwarded from WSL distro "Alpine"`, "wsl --terminate Alpine   (stops the whole distro)"},
+		{inspect.Container{Name: "myapp-db-1", Image: "postgres:17", Runtime: "docker", ComposeProject: "myapp", ComposeService: "db"},
+			`published by docker container "myapp-db-1" (service db of compose project myapp, postgres:17)`, "docker compose -p myapp stop db"},
+		{inspect.Container{Name: "shop_web_1", Runtime: "podman", ComposeProject: "shop", ComposeService: "web"},
+			`published by podman container "shop_web_1" (service web of compose project shop, unknown image)`, "podman compose -p shop stop web"},
+		// A project label without a service (not from Compose itself) is a plain container.
+		{inspect.Container{Name: "x", Image: "i", Runtime: "docker", ComposeProject: "p"}, `published by docker container "x" (i)`, "docker stop x"},
 	}
 	for _, tt := range tests {
 		if got := DescribeContainer(&tt.c); got != tt.desc {

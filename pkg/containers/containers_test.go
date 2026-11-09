@@ -29,7 +29,10 @@ const sampleResponse = `[
  {"Id":"short","Names":[],"Image":"coredns","Ports":[
    {"IP":"0.0.0.0","PrivatePort":53,"PublicPort":1053,"Type":"udp"},
    {"IP":"0.0.0.0","PrivatePort":99,"PublicPort":1099,"Type":"sctp"},
-   {"IP":"","PrivatePort":7,"PublicPort":1007,"Type":"tcp"}]}
+   {"IP":"","PrivatePort":7,"PublicPort":1007,"Type":"tcp"}]},
+ {"Id":"c0mp05e1d000aaaabbbb","Names":["/myapp-db-1"],"Image":"postgres:17","Labels":{
+   "com.docker.compose.project":"myapp","com.docker.compose.service":"db","com.docker.compose.oneoff":"False"},
+   "Ports":[{"IP":"0.0.0.0","PrivatePort":5432,"PublicPort":15432,"Type":"tcp"}]}
 ]`
 
 // serve starts handler on a TCP server and, except on Windows (where unix
@@ -79,11 +82,13 @@ var wantPublished = []Published{
 	{Port: Port{Proto: inspect.TCP, HostIP: addr("::"), HostPort: 18080, ContainerPort: 80}, Container: web},
 	{Port: Port{Proto: inspect.UDP, HostIP: addr("0.0.0.0"), HostPort: 1053, ContainerPort: 53}, Container: dnsCtr},
 	{Port: Port{Proto: inspect.TCP, HostPort: 1007, ContainerPort: 7}, Container: dnsCtr},
+	{Port: Port{Proto: inspect.TCP, HostIP: addr("0.0.0.0"), HostPort: 15432, ContainerPort: 5432}, Container: composeDB},
 }
 
 var (
-	web    = inspect.Container{ID: "b1308ab03f9f", Name: "web", Image: "nginx:alpine", Runtime: "docker"}
-	dnsCtr = inspect.Container{ID: "short", Image: "coredns", Runtime: "docker"}
+	web       = inspect.Container{ID: "b1308ab03f9f", Name: "web", Image: "nginx:alpine", Runtime: "docker"}
+	dnsCtr    = inspect.Container{ID: "short", Image: "coredns", Runtime: "docker"}
+	composeDB = inspect.Container{ID: "c0mp05e1d000", Name: "myapp-db-1", Image: "postgres:17", Runtime: "docker", ComposeProject: "myapp", ComposeService: "db"}
 )
 
 var cmpAddr = cmp.Comparer(func(a, b netip.Addr) bool { return a == b })
