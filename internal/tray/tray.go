@@ -25,15 +25,32 @@ type Entry struct {
 	PID       int32  // 0 for containers and hidden owners
 	StartedBy string // "npm (4200) ← zsh (900)", or ""
 	Cmdline   string
-	StopHint  string // for containers: the command that stops them
-	Hidden    bool   // owner not visible to this user
+	StopHint  string    // for containers: the command that stops them
+	Hidden    bool      // owner not visible to this user
+	Project   string    // the project the process runs in, e.g. "my-shop"
+	Started   time.Time // when the process started; zero if unknown
 }
 
 // URL opens the port in a browser.
 func (e Entry) URL() string { return fmt.Sprintf("http://localhost:%d/", e.Port) }
 
-// Label is the menu item's title, e.g. ":3000  node".
-func (e Entry) Label() string { return fmt.Sprintf(":%d  %s", e.Port, e.Name) }
+// Label is the menu item's title, e.g. ":3000  node" or ":3000  node · my-shop".
+func (e Entry) Label() string {
+	if e.Project != "" {
+		return fmt.Sprintf(":%d  %s · %s", e.Port, e.Name, e.Project)
+	}
+	return fmt.Sprintf(":%d  %s", e.Port, e.Name)
+}
+
+// DefaultStaleAfter is how long a project's server runs before the tray
+// suggests it may be forgotten.
+const DefaultStaleAfter = 24 * time.Hour
+
+// Stale reports whether e is one of the user's dev servers (a process in a
+// project) that has been running at least after.
+func (e Entry) Stale(now time.Time, after time.Duration) bool {
+	return e.PID != 0 && e.Project != "" && !e.Started.IsZero() && now.Sub(e.Started) >= after
+}
 
 // Entries are the listening TCP ports to show, one per port and process,
 // sorted by port. Unless all is set, only processes of user and containers:
@@ -55,7 +72,7 @@ func Entries(sockets []inspect.Socket, user string, all bool) []Entry {
 		default:
 			e.PID, e.Name = s.PID, "?"
 			if p := s.Process; p != nil {
-				e.Name, e.Cmdline = p.Name, p.Cmdline
+				e.Name, e.Cmdline, e.Project, e.Started = p.Name, p.Cmdline, p.Project, p.CreateTime
 				var by []string
 				for _, a := range p.Ancestors {
 					by = append(by, fmt.Sprintf("%s (%d)", a.Name, a.PID))
@@ -103,6 +120,10 @@ type Deps struct {
 	Copy  func(text string) error
 	User  string
 	Every time.Duration // refresh interval
+	// Now is the clock; StaleAfter how long a project's server runs before the
+	// menu offers to stop it (default DefaultStaleAfter).
+	Now        func() time.Time
+	StaleAfter time.Duration
 }
 
 // Tray keeps the menu in sync with the machine's ports.
@@ -117,6 +138,7 @@ type Tray struct {
 	summary string
 	status  string // the last action's result, shown in the tooltip
 	entries []Entry
+	stale   []Entry // entries running longer than StaleAfter, oldest first
 }
 
 // New returns a tray drawing into menu.
@@ -142,18 +164,21 @@ func (t *Tray) Refresh(ctx context.Context) {
 	sockets, err := t.d.List(ctx)
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	var entries []Entry
+	var entries, stale []Entry
 	sig := "error:"
 	if err == nil {
 		entries = Entries(sockets, t.d.User, t.all)
-		sig = fmt.Sprintf("%v %+v", t.all, entries)
+		stale = t.staleEntries(entries)
+		// Start times, not uptimes, go in the signature, so an open menu isn't
+		// redrawn every minute; it changes when a server becomes stale.
+		sig = fmt.Sprintf("%v %+v %d", t.all, entries, len(stale))
 	} else {
 		sig += err.Error()
 	}
 	if sig == t.shown {
 		return
 	}
-	t.shown, t.entries = sig, entries
+	t.shown, t.entries, t.stale = sig, entries, stale
 	t.draw(ctx, err)
 }
 
@@ -173,6 +198,9 @@ func (t *Tray) draw(ctx context.Context, err error) {
 	}
 	m.Add(t.summary, "").Disable()
 	m.SetTitle(t.title, t.tooltip())
+	if len(t.stale) > 0 {
+		t.addStale(ctx)
+	}
 	m.Separator()
 	for _, e := range t.entries {
 		t.addEntry(ctx, e)
@@ -226,12 +254,57 @@ func (t *Tray) addEntry(ctx context.Context, e Entry) {
 	if e.StartedBy != "" {
 		item.Sub("Started by "+e.StartedBy, "").Disable()
 	}
+	if !e.Started.IsZero() {
+		item.Sub("Running since "+e.Started.Local().Format("Mon 2 Jan 15:04"), "").Disable()
+	}
 	if e.Cmdline != "" {
 		cmd := e.Cmdline
 		if len(cmd) > 60 {
 			cmd = cmd[:57] + "..."
 		}
 		item.Sub(cmd, e.Cmdline).OnClick(func() { t.copy(e.Cmdline) })
+	}
+}
+
+// staleEntries are the entries that look forgotten, oldest first, one per process.
+func (t *Tray) staleEntries(entries []Entry) []Entry {
+	now, after := time.Now(), cmp.Or(t.d.StaleAfter, DefaultStaleAfter)
+	if t.d.Now != nil {
+		now = t.d.Now()
+	}
+	var out []Entry
+	for _, e := range entries {
+		if e.Stale(now, after) && !slices.ContainsFunc(out, func(o Entry) bool { return o.PID == e.PID }) {
+			out = append(out, e)
+		}
+	}
+	slices.SortStableFunc(out, func(a, b Entry) int { return a.Started.Compare(b.Started) })
+	return out
+}
+
+// addStale offers to stop the servers that have run longer than StaleAfter;
+// t.mu is held.
+func (t *Tray) addStale(ctx context.Context) {
+	n := len(t.stale)
+	since := "over a day"
+	if days := cmp.Or(t.d.StaleAfter, DefaultStaleAfter) / (24 * time.Hour); days > 1 {
+		since = fmt.Sprintf("over %d days", days)
+	}
+	title := fmt.Sprintf("%d dev servers running %s", n, since)
+	label := fmt.Sprintf("Stop All %d", n)
+	if n == 1 {
+		title, label = "1 dev server running "+since, "Stop It"
+	}
+	item := t.menu.Add(title, "Processes in your projects that have been running a long time. You may have forgotten them.")
+	stale := slices.Clone(t.stale)
+	item.Sub(label, "Asks each to exit, then kills it after 5 s. Never system processes.").OnClick(func() {
+		for _, e := range stale {
+			t.stop(ctx, e)
+		}
+	})
+	for _, e := range stale {
+		item.Sub(e.Label()+"  (since "+e.Started.Local().Format("Mon 2 Jan")+")", e.Cmdline).
+			OnClick(func() { t.stop(ctx, e) })
 	}
 }
 

@@ -71,6 +71,7 @@ func onReady(ctx context.Context) {
 		Copy:  func(text string) error { return copyText(ctx, text) },
 		User:  currentUser(),
 		Every: 3 * time.Second,
+		Now:   time.Now,
 	}, menu{})
 	go t.Run(ctx)
 }

@@ -6,15 +6,19 @@ on; the menu lists them.
 
 ```text
  🔌 3
- ─────────────────────────────
+ ──────────────────────────────────────
  3 ports listening
- ─────────────────────────────
- :3000  node            ▸  Stop node (pid 41852)
- :5432  postgres        ▸  Open http://localhost:3000/
+ 2 dev servers running over a day  ▸  Stop All 2
+                                      :3000  node · api  (since Fri 6 Nov)
+                                      :5173  node · shop  (since Sat 7 Nov)
+ ──────────────────────────────────────
+ :3000  node · api      ▸  Stop node (pid 41852)
+ :5173  node · shop     ▸  Open http://localhost:3000/
  :8080  docker:web      ▸  Copy PID
                            Started by npm (41790) ← zsh (900)
+                           Running since Fri 6 Nov 09:12
                            node ./node_modules/.bin/next dev
- ─────────────────────────────
+ ──────────────────────────────────────
  ☐ Show All Ports (also other users' and system)
  Refresh
  Quit portcheck
@@ -22,8 +26,13 @@ on; the menu lists them.
 
 - Each port's submenu stops the process (portcheck's [safety guards](kill.md#safety)
   apply: never system processes), opens it in the browser, copies its PID or command
-  line, and shows who started it. A port published by Docker, Podman or WSL offers
-  **Copy Stop Command** instead.
+  line, and shows who started it and when. A port published by Docker, Podman or WSL
+  offers **Copy Stop Command** instead.
+- Each port shows the project it runs in (`node · shop`), found the same way as
+  [`portcheck servers`](servers.md).
+- **Forgotten dev servers:** when processes in your projects have been running for more
+  than a day, a line at the top lists them, oldest first. Click one to stop it, or
+  **Stop All**, with the same safety guards.
 - By default it shows your own processes and containers, the ports you started.
   **Show All Ports** adds other users' processes and system services.
 - The menu refreshes every 3 seconds; the result of the last action is in the icon's

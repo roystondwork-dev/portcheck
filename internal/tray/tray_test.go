@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/netip"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -315,5 +316,86 @@ func TestRun(t *testing.T) {
 	defer tr.mu.Unlock()
 	if len(tr.entries) != 1 || tr.entries[0].Port != 9000 {
 		t.Errorf("Run didn't pick up the new port: %+v", tr.entries)
+	}
+}
+
+func TestForgottenServers(t *testing.T) {
+	t.Parallel()
+	now := time.Date(2026, 11, 9, 12, 0, 0, 0, time.Local)
+	srv := func(port uint16, pid int32, project string, age time.Duration) inspect.Socket {
+		return inspect.Socket{RawSocket: listen(port, pid), Process: &inspect.ProcessInfo{
+			PID: pid, Name: "node", User: "alice", Project: project, CreateTime: now.Add(-age),
+		}}
+	}
+	old := srv(5173, 10, "shop", 50*time.Hour)
+	older := srv(3000, 11, "api", 72*time.Hour)
+	older6 := older
+	older6.Local = netip.AddrPortFrom(netip.IPv6Unspecified(), 3000)
+	fresh := srv(4000, 12, "docs", time.Hour)
+	noProject := srv(9000, 13, "", 100*time.Hour)
+
+	w := &world{sockets: []inspect.Socket{old, older, older6, fresh, noProject}}
+	d := w.deps()
+	d.Now = func() time.Time { return now }
+	m := &fakeMenu{}
+	tr := New(d, m)
+	ctx := context.Background()
+	tr.Refresh(ctx)
+	lines := m.lines()
+	want := []string{
+		"4 ports listening (off)",
+		"2 dev servers running over a day",
+		"  Stop All 2",
+		"  :3000  node · api  (since " + older.Process.CreateTime.Format("Mon 2 Jan") + ")",
+		"  :5173  node · shop  (since " + old.Process.CreateTime.Format("Mon 2 Jan") + ")",
+		"-",
+	}
+	if diff := cmp.Diff(want, lines[:len(want)]); diff != "" {
+		t.Errorf("menu top (-want +got):\n%s", diff)
+	}
+	if !slices.Contains(lines, "  Running since "+fresh.Process.CreateTime.Format("Mon 2 Jan 15:04")+" (off)") {
+		t.Errorf("no start time for docs:\n%s", strings.Join(lines, "\n"))
+	}
+	if !slices.Contains(lines, ":4000  node · docs") {
+		t.Errorf("no project in label:\n%s", strings.Join(lines, "\n"))
+	}
+
+	// One server: singular wording, and clicking a single server stops just it.
+	m.clickOn(t, ":3000  node · api  (since "+older.Process.CreateTime.Format("Mon 2 Jan")+")")
+	if diff := cmp.Diff([]int32{11}, w.killed); diff != "" {
+		t.Errorf("killed (-want +got):\n%s", diff)
+	}
+	if want := "1 dev server running over a day"; !slices.Contains(m.lines(), want) {
+		t.Errorf("menu lacks %q:\n%s", want, strings.Join(m.lines(), "\n"))
+	}
+	m.clickOn(t, "Stop It")
+	if diff := cmp.Diff([]int32{11, 10}, w.killed); diff != "" {
+		t.Errorf("killed (-want +got):\n%s", diff)
+	}
+	if slices.ContainsFunc(m.lines(), func(l string) bool { return strings.Contains(l, "running over") }) {
+		t.Errorf("stale line still shown:\n%s", strings.Join(m.lines(), "\n"))
+	}
+}
+
+func TestForgottenServersStopAllAndThreshold(t *testing.T) {
+	t.Parallel()
+	now := time.Now()
+	a := inspect.Socket{RawSocket: listen(5173, 20), Process: &inspect.ProcessInfo{PID: 20, Name: "vite", User: "alice", Project: "a", CreateTime: now.Add(-80 * time.Hour)}}
+	b := inspect.Socket{RawSocket: listen(8000, 21), Process: &inspect.ProcessInfo{PID: 21, Name: "python3", User: "alice", Project: "b", CreateTime: now.Add(-50 * time.Hour)}}
+	w := &world{sockets: []inspect.Socket{a, b}}
+	d := w.deps() // Now unset: the real clock
+	d.StaleAfter = 48 * time.Hour
+	m := &fakeMenu{}
+	tr := New(d, m)
+	tr.Refresh(context.Background())
+	if want := "2 dev servers running over 2 days"; !slices.Contains(m.lines(), want) {
+		t.Fatalf("menu lacks %q:\n%s", want, strings.Join(m.lines(), "\n"))
+	}
+	m.clickOn(t, "Stop All 2")
+	if diff := cmp.Diff([]int32{20, 21}, w.killed); diff != "" {
+		t.Errorf("killed oldest first (-want +got):\n%s", diff)
+	}
+	if e := (Entry{PID: 1, Project: "x"}); e.Stale(now, time.Hour) {
+		t.Error("an entry without a start time can't be stale")
 	}
 }
