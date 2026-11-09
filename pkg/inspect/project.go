@@ -13,7 +13,7 @@ var projectMarkers = []string{
 	"pom.xml", "build.gradle", "build.gradle.kts", "composer.json", "deno.json", "mix.exs",
 }
 
-// maxProjectDepth bounds how far up from the working directory ProjectName looks.
+// maxProjectDepth bounds how far up from the working directory ProjectRoot looks.
 const maxProjectDepth = 8
 
 // ProjectName names the project a process runs in, from its working directory:
@@ -23,14 +23,25 @@ const maxProjectDepth = 8
 // directory, which name no project (daemons usually run in /), and, without a
 // marker, when cwd is outside the user's home directory.
 func ProjectName(cwd string) string {
+	if root := ProjectRoot(cwd); root != "" {
+		return filepath.Base(root)
+	}
+	return ""
+}
+
+// ProjectRoot is the directory ProjectName names: the nearest directory at or
+// above cwd that holds a project marker, or cwd itself when there is none and
+// cwd is inside the home directory. It returns "" otherwise, and for an empty
+// cwd, the filesystem root and the home directory.
+func ProjectRoot(cwd string) string {
 	home, _ := os.UserHomeDir()
-	return projectName(cwd, home, func(path string) bool {
+	return projectRoot(cwd, home, func(path string) bool {
 		_, err := os.Lstat(path)
 		return err == nil
 	})
 }
 
-func projectName(cwd, home string, exists func(string) bool) string {
+func projectRoot(cwd, home string, exists func(string) bool) string {
 	if cwd == "" {
 		return ""
 	}
@@ -43,7 +54,7 @@ func projectName(cwd, home string, exists func(string) bool) string {
 	for range maxProjectDepth {
 		for _, m := range projectMarkers {
 			if exists(filepath.Join(dir, m)) {
-				return filepath.Base(dir)
+				return dir
 			}
 		}
 		parent := filepath.Dir(dir)
@@ -57,7 +68,7 @@ func projectName(cwd, home string, exists func(string) bool) string {
 	if !within(cwd, home, foldCase) {
 		return ""
 	}
-	return filepath.Base(cwd)
+	return cwd
 }
 
 // foldCase is whether paths compare case-insensitively: Windows and macOS file

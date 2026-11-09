@@ -46,6 +46,7 @@ Fixes for the error you're seeing: [Node.js, Next.js, Vite](https://roystondwork
 | 📡 | `portcheck scan db.internal -p 5432` | Rate-limited TCP connect checks of remote hosts. No root needed |
 | ⏳ | `portcheck wait db:5432 -t 60s` | Block until services accept connections, or until a port is free. Built for CI, also as a [GitHub Action](docs/guide/github-action.md) |
 | ▶️ | `portcheck run --port 3000 --next -- npm run dev` | Start a command on a free port (`$PORT`, `{port}`); take the next one or stop the holder |
+| 📌 | `PORT=$(portcheck port) npm run dev` | Every project gets its own remembered port, so two projects never fight over 3000 ([guide](docs/guide/port.md)) |
 | 🩺 | `portcheck doctor` | Check the ports listed in `.portcheck.yaml` and get a fix for each problem |
 | 🖥️ | `portcheck` | Live, sortable, filterable TUI. Stop processes without leaving it |
 | 🌐 | [Browser extension](https://microsoftedge.microsoft.com/addons/detail/jenlahoamefdpfmpodhidkgcceikheee) | Edge (and Chrome): which process serves a localhost tab, `off` when nothing listens, stop it from the popup ([guide](docs/guide/browser.md)) |

@@ -426,6 +426,66 @@ func Uptime(d time.Duration) string {
 	}
 }
 
+// PortJSON is the payload of `portcheck port`: a project's remembered port.
+type PortJSON struct {
+	Port    uint16 `json:"port"`
+	Project string `json:"project"`
+	Path    string `json:"path"`
+	// Assigned is true when this call assigned the port.
+	Assigned bool `json:"assigned"`
+	// Forgotten is true for `portcheck port --forget`.
+	Forgotten bool `json:"forgotten,omitempty"`
+}
+
+// PortDoc renders `portcheck port`. The table and plain formats print just the
+// port, so `PORT=$(portcheck port)` works.
+func PortDoc(p PortJSON) Document {
+	text := strconv.Itoa(int(p.Port))
+	if p.Forgotten {
+		text = fmt.Sprintf("Forgot port %d of %s (%s).", p.Port, p.Project, p.Path)
+	}
+	return Document{
+		Kind:    "port",
+		Data:    p,
+		Text:    text,
+		Headers: []string{"PORT", "PROJECT", "PATH"},
+		Rows:    [][]Cell{{C(strconv.Itoa(int(p.Port))), C(p.Project), C(p.Path)}},
+	}
+}
+
+// PortEntryJSON is one assignment in `portcheck port --list`.
+type PortEntryJSON struct {
+	Port     uint16    `json:"port"`
+	Project  string    `json:"project"`
+	Path     string    `json:"path"`
+	LastUsed time.Time `json:"lastUsed"`
+	// Exists is false when the project's directory is gone.
+	Exists bool `json:"exists"`
+}
+
+// PortsJSON is the payload of `portcheck port --list`.
+type PortsJSON struct {
+	Projects []PortEntryJSON `json:"projects"`
+}
+
+// PortsDoc renders `portcheck port --list`.
+func PortsDoc(entries []PortEntryJSON) Document {
+	d := Document{
+		Kind:    "ports",
+		Data:    PortsJSON{Projects: append([]PortEntryJSON{}, entries...)},
+		Headers: []string{"PORT", "PROJECT", "PATH", "LAST USED"},
+		Empty:   "No project has a port yet. Run portcheck port in a project.",
+	}
+	for _, e := range entries {
+		path := C(e.Path)
+		if !e.Exists {
+			path = T(e.Path+" (missing)", ToneMuted)
+		}
+		d.Rows = append(d.Rows, []Cell{C(strconv.Itoa(int(e.Port))), C(e.Project), path, C(e.LastUsed.UTC().Format("2006-01-02"))})
+	}
+	return d
+}
+
 // VersionDoc renders build information.
 func VersionDoc(info buildinfo.Info) Document {
 	return Document{

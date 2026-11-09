@@ -83,7 +83,16 @@ portcheck run --port 3000 --next -- npm run dev
 ```
 
 This uses port 3000 if it's free and the next free port if not, and passes it to your
-app in `$PORT`. See [Run on a free port](../guide/run.md). In VS Code, JetBrains IDEs,
+app in `$PORT`. See [Run on a free port](../guide/run.md).
+
+Or give every project its own port, remembered on your machine, so two projects never
+fight over 3000 in the first place:
+
+```sh
+portcheck run --port auto -- npm run dev    # or: PORT=$(portcheck port) npm run dev
+```
+
+See [Stable project ports](../guide/port.md). In VS Code, JetBrains IDEs,
 Neovim and the [browser](../guide/browser.md), portcheck names the holder as soon as your
 app hits the error.
 

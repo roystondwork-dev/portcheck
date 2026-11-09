@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "kind": "port",
+  "data": {
+    "port": 3456,
+    "project": "shop",
+    "path": "/home/alice/code/shop",
+    "assigned": true
+  }
+}

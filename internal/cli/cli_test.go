@@ -144,6 +144,7 @@ func newHarness() *harness {
 		Build:       buildinfo.Info{Version: "v1.2.3", Commit: "abc", Date: "2026-10-20", GoVersion: "go1.27", Platform: "test/arch"},
 		Now:         func() time.Time { return testNow },
 		CurrentUser: func() (string, error) { return "alice", nil },
+		ConfigDir:   func() (string, error) { return "", errors.New("no configuration directory in this test") },
 	}
 	return h
 }

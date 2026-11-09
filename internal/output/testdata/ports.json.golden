@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "kind": "ports",
+  "data": {
+    "projects": [
+      {
+        "port": 3123,
+        "project": "api",
+        "path": "/home/alice/code/api",
+        "lastUsed": "2026-11-08T18:00:00Z",
+        "exists": true
+      },
+      {
+        "port": 3456,
+        "project": "old",
+        "path": "/home/alice/code/old",
+        "lastUsed": "2026-09-01T09:00:00Z",
+        "exists": false
+      }
+    ]
+  }
+}

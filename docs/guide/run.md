@@ -19,6 +19,11 @@ portcheck: starting npm run dev with PORT=3001
 | `--port 3000 --kill` | stops the holder (asks first; `--yes` skips the question), waits for the port to be released, then uses 3000 |
 | *(no `--port`)* | uses the first free port in `--range` (default `3000-9999`) |
 
+`--port auto` uses the project's own port, the one [`portcheck port`](port.md) assigns
+and remembers, so each project starts on the same port every time and two projects never
+pick the same one. A busy project port is handled like any `--port`: explained, or
+`--next` (for this run only; the assignment stays) or `--kill`.
+
 "Free" uses the same rules as [`check`](check.md#statuses). `--kill` uses the same
 confirmation and [safety guards](kill.md#safety) as `portcheck kill`: it refuses
 system processes, and for a port published by a container it tells you to

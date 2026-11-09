@@ -68,13 +68,14 @@ messages go to stderr.`,
   portcheck run --port 3000 --next -- npm run dev
   portcheck run --port 8080 --kill --yes -- ./server
   portcheck run -- python3 -m http.server {port}
+  portcheck run --port auto -- npm run dev     # this project's own port (see 'portcheck port')
   portcheck run --port 5173 --wait -- npx vite --port {port}`,
 		Args: usageArgs(cobra.MinimumNArgs(1)),
 		RunE: func(cmd *cobra.Command, args []string) error { return c.runRun(cmd, args, f) },
 	}
 	fl := cmd.Flags()
 	fl.SetInterspersed(false) // everything after the command name belongs to the command
-	fl.StringVarP(&f.port, "port", "p", "", "port number, or a name from .portcheck.yaml (default: first free port in --range)")
+	fl.StringVarP(&f.port, "port", "p", "", "port number, a name from .portcheck.yaml, or auto for this project's port (default: first free port in --range)")
 	fl.StringVar(&f.portRange, "range", defaultRunRange, "ports to choose from when --port is not given")
 	fl.BoolVar(&f.next, "next", false, "if --port is taken, use the next free port above it")
 	fl.BoolVar(&f.kill, "kill", false, "if --port is taken, stop the process holding it (asks first)")
@@ -116,7 +117,13 @@ func (c *cli) runRun(cmd *cobra.Command, args []string, f runFlags) error {
 		}
 	}
 
-	requested, err := c.resolveRunPort(f.port)
+	var requested uint16
+	var err error
+	if f.port == autoPort {
+		requested, err = c.resolveAutoPort(cmd, f)
+	} else {
+		requested, err = c.resolveRunPort(f.port)
+	}
 	if err != nil {
 		return err
 	}

@@ -101,6 +101,7 @@ nav:
       - Scan remote hosts (scan): guide/scan.md
       - Wait for ports (wait): guide/wait.md
       - Run on a free port (run): guide/run.md
+      - Stable project ports (port): guide/port.md
       - Dev servers (Vite, Node.js): guide/dev-servers.md
       - Project ports (doctor): guide/doctor.md
       - Interactive view (tui): guide/tui.md
@@ -133,6 +134,7 @@ nav:
           - servers: commands/portcheck_servers.md
           - list: commands/portcheck_list.md
           - mcp: commands/portcheck_mcp.md
+          - port: commands/portcheck_port.md
           - run: commands/portcheck_run.md
           - scan: commands/portcheck_scan.md
           - tui: commands/portcheck_tui.md

@@ -84,6 +84,10 @@ type App struct {
 	// current user are owned by (as inspect.ProcessInfo.User reports it).
 	Now         func() time.Time
 	CurrentUser func() (string, error)
+	// ConfigDir is the user's configuration directory (os.UserConfigDir);
+	// portcheck keeps its files in a portcheck folder there, or in
+	// $PORTCHECK_CONFIG_DIR when that is set.
+	ConfigDir func() (string, error)
 }
 
 // NewApp returns an App wired to the real operating system. When a
@@ -123,6 +127,7 @@ func NewApp() *App {
 		LookPath:      exec.LookPath,
 		Now:           time.Now,
 		CurrentUser:   currentUser,
+		ConfigDir:     os.UserConfigDir,
 	}
 }
 

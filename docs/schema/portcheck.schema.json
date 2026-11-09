@@ -21,9 +21,9 @@
         "required": ["name", "port"],
         "properties": {
           "name": {
-            "description": "Identifies the entry, e.g. \"web\". Usable with `portcheck run --port <name>`.",
+            "description": "Identifies the entry, e.g. \"web\". Usable with `portcheck run --port <name>`. \"auto\" is reserved for the project's own port (`portcheck port`).",
             "type": "string",
-            "pattern": "^(?![0-9]+$)[A-Za-z0-9][A-Za-z0-9._-]*$"
+            "pattern": "^(?![0-9]+$)(?!auto$)[A-Za-z0-9][A-Za-z0-9._-]*$"
           },
           "port": {
             "description": "Port number.",

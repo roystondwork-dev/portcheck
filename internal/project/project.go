@@ -147,6 +147,8 @@ func (c *Config) validate() error {
 			return invalid("%s: name is required", where)
 		case !nameRE.MatchString(p.Name) || isDigits(p.Name):
 			return invalid("%s: name must contain letters, digits, '.', '_' or '-', start with a letter or digit, and not be only digits", where)
+		case p.Name == "auto":
+			return invalid("%s: the name auto is reserved for 'portcheck run --port auto'", where)
 		case seen[p.Name]:
 			return invalid("%s: duplicate name", where)
 		case p.Port < 1 || p.Port > 65535:

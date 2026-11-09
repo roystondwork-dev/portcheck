@@ -33,6 +33,7 @@ portcheck run [flags] [--] <command> [args...]
   portcheck run --port 3000 --next -- npm run dev
   portcheck run --port 8080 --kill --yes -- ./server
   portcheck run -- python3 -m http.server {port}
+  portcheck run --port auto -- npm run dev     # this project's own port (see 'portcheck port')
   portcheck run --port 5173 --wait -- npx vite --port {port}
 ```
 
@@ -45,7 +46,7 @@ portcheck run [flags] [--] <command> [args...]
   -h, --help                    help for run
       --kill                    if --port is taken, stop the process holding it (asks first)
       --next                    if --port is taken, use the next free port above it
-  -p, --port string             port number, or a name from .portcheck.yaml (default: first free port in --range)
+  -p, --port string             port number, a name from .portcheck.yaml, or auto for this project's port (default: first free port in --range)
   -q, --quiet                   don't print portcheck's own messages
       --range string            ports to choose from when --port is not given (default "3000-9999")
       --wait                    report when the command starts accepting connections

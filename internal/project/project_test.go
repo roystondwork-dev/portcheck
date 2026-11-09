@@ -71,6 +71,7 @@ func TestParseErrors(t *testing.T) {
 		{"no name", entry("port: 1"), "ports[0]: name is required"},
 		{"bad name", entry("name: -web\n    port: 1"), "ports[0] (-web): name must"},
 		{"digit name", entry("name: \"3000\"\n    port: 3000"), "not be only digits"},
+		{"reserved name", entry("name: auto\n    port: 3000"), "the name auto is reserved"},
 		{"duplicate", "version: 1\nports:\n  - name: a\n    port: 1\n  - name: a\n    port: 2\n", "ports[1] (a): duplicate name"},
 		{"port range", entry("name: a\n    port: 70000"), "port must be between 1 and 65535"},
 		{"missing port", entry("name: a"), "port must be between"},

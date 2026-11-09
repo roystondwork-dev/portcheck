@@ -1,7 +1,7 @@
 # JSON output
 
 Every command that prints results (`list`, `check`, `free`, `kill`, `scan`, `wait`,
-`doctor`, `version`) accepts `--json` (or `-o json`) and prints one JSON document. (`run`
+`doctor`, `port`, `version`) accepts `--json` (or `-o json`) and prints one JSON document. (`run`
 hands stdout to the command it starts; with `--kill`, its kill report goes to
 stderr in the requested format.)
 
@@ -16,7 +16,7 @@ stderr in the requested format.)
 | Field | Meaning |
 |---|---|
 | `schemaVersion` | Version of this schema. It only increases when a field is removed or changes meaning. New optional fields can appear in any release. |
-| `kind` | Which command produced the document: `list`, `check`, `free`, `kill`, `scan`, `wait`, `doctor`, `version`. |
+| `kind` | Which command produced the document: `list`, `check`, `free`, `kill`, `scan`, `wait`, `doctor`, `port`, `ports` (`port --list`), `version`. |
 | `data` | The payload, described below. |
 
 With `list --watch`, one document is printed per refresh.
@@ -168,6 +168,27 @@ and `status` in scripts.
 `detected` means the browser seems to be installed for this user; `registered` means
 portcheck is its native messaging host, starting `path` for the extension IDs in
 `extensions`.
+
+## `port`
+
+`portcheck port` (and `--set`, `--forget`):
+
+```json
+{ "port": 3456, "project": "shop", "path": "/home/alice/code/shop", "assigned": false }
+```
+
+`assigned` is `true` when this call gave the project its port (the first time, or with
+`--set`). `--forget` adds `"forgotten": true`.
+
+## `ports`
+
+`portcheck port --list`:
+
+```json
+{ "projects": [ { "port": 3456, "project": "shop", "path": "/home/alice/code/shop", "lastUsed": "2026-11-09T12:00:00Z", "exists": true } ] }
+```
+
+`exists` is `false` when the project's folder is gone.
 
 ## `version`
 

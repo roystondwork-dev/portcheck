@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestProjectName(t *testing.T) {
+func TestProjectRoot(t *testing.T) {
 	t.Parallel()
 	root := filepath.VolumeName(os.TempDir()) + string(filepath.Separator)
 	home := filepath.Join(root, "home", "alice")
@@ -27,18 +27,18 @@ func TestProjectName(t *testing.T) {
 		{"", ""},
 		{root, ""},
 		{home, ""},
-		{shop, "shop"}, // the marker is in cwd
-		{filepath.Join(shop, "web", "src"), "shop"},                          // found further up
-		{filepath.Join(home, "code", "api", "cmd"), "api"},                   // .git counts
-		{filepath.Join(root, "srv", "app"), "app"},                           // a marker counts outside home too
-		{filepath.Join(home, "notes"), "notes"},                              // no marker: cwd's own name, inside home
-		{filepath.Join(home, "notes") + string(filepath.Separator), "notes"}, // cleaned
-		{filepath.Join(root, "var", "www"), ""},                              // no marker outside home: no project
-		{filepath.Join(root, "Windows", "system32"), ""},                     // e.g. Windows services
-		{deep, filepath.Base(deep)},                                          // gives up after maxProjectDepth
+		{shop, shop}, // the marker is in cwd
+		{filepath.Join(shop, "web", "src"), shop},                                                 // found further up
+		{filepath.Join(home, "code", "api", "cmd"), filepath.Join(home, "code", "api")},           // .git counts
+		{filepath.Join(root, "srv", "app"), filepath.Join(root, "srv", "app")},                    // a marker counts outside home too
+		{filepath.Join(home, "notes"), filepath.Join(home, "notes")},                              // no marker: cwd itself, inside home
+		{filepath.Join(home, "notes") + string(filepath.Separator), filepath.Join(home, "notes")}, // cleaned
+		{filepath.Join(root, "var", "www"), ""},                                                   // no marker outside home: no project
+		{filepath.Join(root, "Windows", "system32"), ""},                                          // e.g. Windows services
+		{deep, deep}, // gives up after maxProjectDepth
 	} {
-		if got := projectName(tc.cwd, home, exists); got != tc.want {
-			t.Errorf("projectName(%q) = %q, want %q", tc.cwd, got, tc.want)
+		if got := projectRoot(tc.cwd, home, exists); got != tc.want {
+			t.Errorf("projectRoot(%q) = %q, want %q", tc.cwd, got, tc.want)
 		}
 	}
 }
@@ -79,5 +79,13 @@ func TestProjectNameOnDisk(t *testing.T) {
 	}
 	if got := ProjectName(sub); got != filepath.Base(dir) {
 		t.Errorf("ProjectName(%q) = %q, want %q", sub, got, filepath.Base(dir))
+	}
+	if got := ProjectRoot(sub); got != dir {
+		t.Errorf("ProjectRoot(%q) = %q, want %q", sub, got, dir)
+	}
+	if home, err := os.UserHomeDir(); err == nil {
+		if got := ProjectName(home); got != "" {
+			t.Errorf("ProjectName(home) = %q, want none", got)
+		}
 	}
 }
