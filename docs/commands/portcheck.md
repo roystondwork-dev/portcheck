@@ -51,7 +51,9 @@ portcheck [port...] [flags]
 * [portcheck check](portcheck_check.md)	 - Check whether ports are free and show who holds them
 * [portcheck completion](portcheck_completion.md)	 - Generate the autocompletion script for the specified shell
 * [portcheck doctor](portcheck_doctor.md)	 - Check a project's ports against .portcheck.yaml
+* [portcheck explain](portcheck_explain.md)	 - Say who holds the port a failed command wanted (used by the shell hook)
 * [portcheck free](portcheck_free.md)	 - Find free ports
+* [portcheck init](portcheck_init.md)	 - Shell integration: explain "address already in use" after a command fails
 * [portcheck kill](portcheck_kill.md)	 - Stop the process listening on a port
 * [portcheck list](portcheck_list.md)	 - List sockets and the processes that own them
 * [portcheck mcp](portcheck_mcp.md)	 - Serve portcheck to AI assistants (Model Context Protocol)

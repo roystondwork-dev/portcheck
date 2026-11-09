@@ -92,7 +92,12 @@ fight over 3000 in the first place:
 portcheck run --port auto -- npm run dev    # or: PORT=$(portcheck port) npm run dev
 ```
 
-See [Stable project ports](../guide/port.md). In VS Code, JetBrains IDEs,
+See [Stable project ports](../guide/port.md).
+
+Or let your terminal explain the error whenever it happens, for any tool: add
+`eval "$(portcheck init zsh)"` to `~/.zshrc` (bash, fish and PowerShell work too), and a
+failed command that wanted a taken port is followed by who holds it and how to free it.
+See [Shell integration](../guide/shell.md). In VS Code, JetBrains IDEs,
 Neovim and the [browser](../guide/browser.md), portcheck names the holder as soon as your
 app hits the error.
 

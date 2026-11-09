@@ -148,6 +148,32 @@ detected on the wire. With `--open`, `results` contains only open ports, but
 `detail` and `fix` are human-readable and may change between releases; match on `ok`
 and `status` in scripts.
 
+## `explain`
+
+`data` describes the ports a command line probably listens on and which of them are taken:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `command` | string | the command line given |
+| `exitCode` | integer | the `--exit` status (default 1) |
+| `ports` | array | candidate ports, in the order found: `[{ "port": 3000, "source": "explicit" }]`. `source` is `explicit` (on the command line or in a `…PORT=` variable) or `default` (a known dev server's default port). Empty for exit statuses 0, 126, 127, 130, 148 and for portcheck itself |
+| `inUse` | array | the candidate ports something holds, as in [`check`](#check) (at most 3) |
+
+With the holder's [socket](#socket) shortened:
+
+```json
+{
+  "schemaVersion": 1,
+  "kind": "explain",
+  "data": {
+    "command": "vite --port 3000",
+    "exitCode": 1,
+    "ports": [{ "port": 3000, "source": "explicit" }],
+    "inUse": [{ "port": 3000, "proto": "tcp", "status": "in-use", "holders": [ { "pid": 41852, "process": { "name": "node" } } ] }]
+  }
+}
+```
+
 ## `browser`
 
 `portcheck browser status`, `install` and `uninstall` print the browsers they looked at:

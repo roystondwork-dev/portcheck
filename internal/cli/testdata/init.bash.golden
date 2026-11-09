@@ -1,0 +1,21 @@
+# portcheck shell integration (bash): https://roystondwork-dev.github.io/portcheck/guide/shell/
+__portcheck_seen=''
+__portcheck_prompt() {
+  local code=$? entry cmd
+  entry=$(HISTTIMEFORMAT='' builtin history 1)
+  if [[ $entry != "$__portcheck_seen" ]]; then
+    __portcheck_seen=$entry
+    case $code in 0|126|127|130|148) ;; *)
+      cmd=${entry#"${entry%%[![:space:]]*}"}
+      cmd=${cmd#*[[:space:]]}
+      cmd=${cmd#"${cmd%%[![:space:]]*}"}
+      [[ -n $cmd && $cmd != portcheck* ]] && '/opt/it'\''s here/portcheck' explain --exit "$code" -- "$cmd"
+    ;; esac
+  fi
+  return $code
+}
+__portcheck_seen=$(HISTTIMEFORMAT='' builtin history 1)
+case ";${PROMPT_COMMAND:-};" in
+  *";__portcheck_prompt;"*) ;;
+  *) PROMPT_COMMAND="__portcheck_prompt${PROMPT_COMMAND:+;$PROMPT_COMMAND}" ;;
+esac

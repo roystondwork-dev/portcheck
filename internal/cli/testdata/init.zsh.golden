@@ -1,0 +1,13 @@
+# portcheck shell integration (zsh): https://roystondwork-dev.github.io/portcheck/guide/shell/
+autoload -Uz add-zsh-hook
+typeset -g __portcheck_cmd=''
+__portcheck_preexec() { __portcheck_cmd=$1; }
+__portcheck_precmd() {
+  local code=$? cmd=$__portcheck_cmd
+  __portcheck_cmd=''
+  case $code in 0|126|127|130|148) return ;; esac
+  [[ -z $cmd || $cmd == portcheck* ]] && return
+  '/opt/it'\''s here/portcheck' explain --exit "$code" -- "$cmd"
+}
+add-zsh-hook preexec __portcheck_preexec
+add-zsh-hook precmd __portcheck_precmd

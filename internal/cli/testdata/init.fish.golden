@@ -1,0 +1,9 @@
+# portcheck shell integration (fish): https://roystondwork-dev.github.io/portcheck/guide/shell/
+function __portcheck_postexec --on-event fish_postexec
+    set -l code $status
+    contains -- $code 0 126 127 130 148; and return
+    set -l cmd (string trim -- $argv[1])
+    test -z "$cmd"; and return
+    string match -q 'portcheck*' -- $cmd; and return
+    '/opt/it\'s here/portcheck' explain --exit $code -- $cmd
+end

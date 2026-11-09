@@ -104,6 +104,7 @@ nav:
       - Stable project ports (port): guide/port.md
       - Dev servers (Vite, Node.js): guide/dev-servers.md
       - Project ports (doctor): guide/doctor.md
+      - Shell integration (init): guide/shell.md
       - Interactive view (tui): guide/tui.md
       - VS Code extension: guide/vscode.md
       - JetBrains plugin: guide/jetbrains.md
@@ -121,6 +122,8 @@ nav:
           - check: commands/portcheck_check.md
           - completion: commands/portcheck_completion.md
           - doctor: commands/portcheck_doctor.md
+          - explain: commands/portcheck_explain.md
+          - init: commands/portcheck_init.md
           - browser: commands/portcheck_browser.md
           - browser install: commands/portcheck_browser_install.md
           - browser status: commands/portcheck_browser_status.md

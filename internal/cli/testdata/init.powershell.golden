@@ -1,0 +1,16 @@
+# portcheck shell integration (PowerShell): https://roystondwork-dev.github.io/portcheck/guide/shell/
+$global:__portcheckPrompt = $function:prompt
+$global:__portcheckSeen = (Get-History -Count 1).Id
+function global:prompt {
+    $ok = $?
+    $code = $global:LASTEXITCODE
+    $h = Get-History -Count 1
+    if ($h -and $h.Id -ne $global:__portcheckSeen) {
+        $global:__portcheckSeen = $h.Id
+        if (-not $ok -and $code -and @(0, 126, 127, 130, 148) -notcontains $code -and $h.CommandLine -notlike 'portcheck*') {
+            & '/opt/it''s here/portcheck' explain --exit $code -- $h.CommandLine
+        }
+    }
+    $global:LASTEXITCODE = $code
+    & $global:__portcheckPrompt
+}
