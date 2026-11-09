@@ -2,7 +2,15 @@ import * as assert from "node:assert/strict";
 import * as vscode from "vscode";
 import type { PortcheckApi } from "../../extension";
 import type { PortRow } from "../../model";
-import { activateExtension, close, listen, portOf, rowFor, ScriptedUI, spawnHolder } from "./helpers";
+import {
+  activateExtension,
+  close,
+  listen,
+  portOf,
+  rowFor,
+  ScriptedUI,
+  spawnHolder,
+} from "./helpers";
 
 describe("portcheck extension", () => {
   let api: PortcheckApi;
@@ -35,39 +43,56 @@ describe("portcheck extension", () => {
     const port = portOf(server);
     const ui = new ScriptedUI();
     api.setUI(ui);
-    assert.equal(await vscode.commands.executeCommand("portcheck.checkPort", port), "in-use");
+    assert.equal(
+      await vscode.commands.executeCommand("portcheck.checkPort", port),
+      "in-use",
+    );
     assert.ok(ui.has(`Port ${port} is in use by`), ui.messages.join("\n"));
     await close(server);
-    assert.equal(await vscode.commands.executeCommand("portcheck.checkPort", port), "free");
+    assert.equal(
+      await vscode.commands.executeCommand("portcheck.checkPort", port),
+      "free",
+    );
     assert.ok(ui.has(`Port ${port} is free.`));
   });
 
   it("asks for a port when none is given, and stops if cancelled", async () => {
     const ui = new ScriptedUI([undefined]);
     api.setUI(ui);
-    assert.equal(await vscode.commands.executeCommand("portcheck.checkPort"), undefined);
+    assert.equal(
+      await vscode.commands.executeCommand("portcheck.checkPort"),
+      undefined,
+    );
     assert.ok(ui.has("input: Port to check"));
   });
 
   it("finds a free port and copies it", async () => {
     const ui = new ScriptedUI(["Copy"]);
     api.setUI(ui);
-    const port = await vscode.commands.executeCommand<number>("portcheck.findFreePort", "40000-40100");
+    const port = await vscode.commands.executeCommand<number>(
+      "portcheck.findFreePort",
+      "40000-40100",
+    );
     assert.ok(port >= 40000 && port <= 40100, `port ${port}`);
     assert.equal(await vscode.env.clipboard.readText(), String(port));
   });
 
   it("stops a real process after confirmation", async () => {
     const { child, port } = await spawnHolder();
-    const exited = new Promise<void>((resolve) => child.once("exit", () => {
-      resolve();
-    }));
+    const exited = new Promise<void>((resolve) =>
+      child.once("exit", () => {
+        resolve();
+      }),
+    );
     const row = await rowFor(api, port, child.pid);
     const ui = new ScriptedUI(["Stop"]);
     api.setUI(ui);
     const outcome = await vscode.commands.executeCommand("portcheck.stop", row);
     assert.equal(outcome, "terminated");
-    assert.ok(ui.has(`confirm: Stop`) && ui.has(`(pid ${child.pid}) on port ${port}?`), ui.messages.join("\n"));
+    assert.ok(
+      ui.has(`confirm: Stop`) && ui.has(`(pid ${child.pid}) on port ${port}?`),
+      ui.messages.join("\n"),
+    );
     await exited;
   });
 
@@ -76,8 +101,15 @@ describe("portcheck extension", () => {
     try {
       const row = await rowFor(api, port, child.pid);
       api.setUI(new ScriptedUI([undefined]));
-      assert.equal(await vscode.commands.executeCommand("portcheck.stop", row), undefined);
-      assert.equal(child.exitCode, null, "process was stopped despite cancelling");
+      assert.equal(
+        await vscode.commands.executeCommand("portcheck.stop", row),
+        undefined,
+      );
+      assert.equal(
+        child.exitCode,
+        null,
+        "process was stopped despite cancelling",
+      );
     } finally {
       child.kill();
     }
@@ -89,7 +121,10 @@ describe("portcheck extension", () => {
       const row = await rowFor(api, portOf(server), process.pid);
       const ui = new ScriptedUI(["Stop"]);
       api.setUI(ui);
-      assert.equal(await vscode.commands.executeCommand("portcheck.stop", row), "failed");
+      assert.equal(
+        await vscode.commands.executeCommand("portcheck.stop", row),
+        "failed",
+      );
       assert.ok(ui.has("refusing to kill"), ui.messages.join("\n"));
     } finally {
       await close(server);
@@ -98,11 +133,16 @@ describe("portcheck extension", () => {
 
   it("frees a port by number via the quick pick", async () => {
     const { child, port } = await spawnHolder();
-    const exited = new Promise<void>((resolve) => child.once("exit", () => {
-      resolve();
-    }));
+    const exited = new Promise<void>((resolve) =>
+      child.once("exit", () => {
+        resolve();
+      }),
+    );
     api.setUI(new ScriptedUI(["Stop"]));
-    assert.equal(await vscode.commands.executeCommand("portcheck.stopPort", port), "terminated");
+    assert.equal(
+      await vscode.commands.executeCommand("portcheck.stopPort", port),
+      "terminated",
+    );
     await exited;
   });
 
@@ -112,26 +152,49 @@ describe("portcheck extension", () => {
     await close(server);
     const ui = new ScriptedUI();
     api.setUI(ui);
-    assert.equal(await vscode.commands.executeCommand("portcheck.stopPort", port), undefined);
+    assert.equal(
+      await vscode.commands.executeCommand("portcheck.stopPort", port),
+      undefined,
+    );
     assert.ok(ui.has(`Nothing is listening on port ${port}.`));
   });
 
   it("never kills container proxies; offers the stop command instead", async () => {
     const row: PortRow = {
-      id: "x", port: 8080, proto: "tcp", kind: "container", label: ":8080  docker:web", description: "",
-      tooltip: "", contextValue: "port.container.tcp", pid: 1,
-      container: { name: "web", runtime: "docker", stopHint: "docker stop web" },
+      id: "x",
+      port: 8080,
+      proto: "tcp",
+      kind: "container",
+      label: ":8080  docker:web",
+      description: "",
+      tooltip: "",
+      contextValue: "port.container.tcp",
+      pid: 1,
+      container: {
+        name: "web",
+        runtime: "docker",
+        stopHint: "docker stop web",
+      },
     };
     const ui = new ScriptedUI(["Copy Command"]);
     api.setUI(ui);
-    assert.equal(await vscode.commands.executeCommand("portcheck.stop", row), "Copy Command");
+    assert.equal(
+      await vscode.commands.executeCommand("portcheck.stop", row),
+      "Copy Command",
+    );
     assert.equal(await vscode.env.clipboard.readText(), "docker stop web");
   });
 
   it("explains hidden owners with an elevated command", async () => {
     const row: PortRow = {
-      id: "y", port: 22, proto: "tcp", kind: "hidden", label: ":22  (owner hidden)", description: "",
-      tooltip: "", contextValue: "port.hidden.tcp",
+      id: "y",
+      port: 22,
+      proto: "tcp",
+      kind: "hidden",
+      label: ":22  (owner hidden)",
+      description: "",
+      tooltip: "",
+      contextValue: "port.hidden.tcp",
     };
     api.setUI(new ScriptedUI(["Copy Command"]));
     await vscode.commands.executeCommand("portcheck.stop", row);
@@ -150,12 +213,22 @@ describe("portcheck extension", () => {
     const good = config.get<string>("path");
     const ui = new ScriptedUI();
     api.setUI(ui);
-    await config.update("path", "/nonexistent/portcheck", vscode.ConfigurationTarget.Workspace);
+    await config.update(
+      "path",
+      "/nonexistent/portcheck",
+      vscode.ConfigurationTarget.Workspace,
+    );
     try {
       await api.view.refresh();
       assert.deepEqual(api.view.rows, []);
-      assert.equal(await vscode.commands.executeCommand("portcheck.checkPort", 1), undefined);
-      assert.ok(ui.has("error: portcheck: portcheck was not found"), ui.messages.join("\n"));
+      assert.equal(
+        await vscode.commands.executeCommand("portcheck.checkPort", 1),
+        undefined,
+      );
+      assert.ok(
+        ui.has("error: portcheck: portcheck was not found"),
+        ui.messages.join("\n"),
+      );
     } finally {
       await config.update("path", good, vscode.ConfigurationTarget.Workspace);
     }
@@ -164,7 +237,57 @@ describe("portcheck extension", () => {
 
   it("accepts refresh interval changes", async () => {
     const config = vscode.workspace.getConfiguration("portcheck");
-    await config.update("refreshInterval", 1, vscode.ConfigurationTarget.Workspace);
-    await config.update("refreshInterval", 0, vscode.ConfigurationTarget.Workspace);
+    await config.update(
+      "refreshInterval",
+      1,
+      vscode.ConfigurationTarget.Workspace,
+    );
+    await config.update(
+      "refreshInterval",
+      0,
+      vscode.ConfigurationTarget.Workspace,
+    );
+  });
+  it("mentions a long-running dev server once, and can be turned off", async () => {
+    // Pretend it's two days later, so the holder (running in this project) looks forgotten.
+    const later = Date.now() + 48 * 3_600_000;
+    const { child, port } = await spawnHolder();
+    const config = vscode.workspace.getConfiguration("portcheck");
+    try {
+      // Dismissed: nothing is stopped. Answering "Stop" here could stop other
+      // processes on a developer's machine that also look forgotten.
+      const ui = new ScriptedUI([undefined]);
+      api.setUI(ui);
+      const found = await api.forgotten.check(later);
+      assert.ok(
+        found.includes(child.pid as number),
+        `found ${found.join(",")}`,
+      );
+      assert.ok(ui.has(`(:${port})`), ui.messages.join("\n"));
+      assert.ok(ui.has("dev server"), ui.messages.join("\n"));
+      // Mentioned once per window.
+      assert.ok(
+        !(await api.forgotten.check(later)).includes(child.pid as number),
+      );
+
+      const { child: second } = await spawnHolder();
+      try {
+        api.setUI(new ScriptedUI(["Don't Show Again"]));
+        assert.ok(
+          (await api.forgotten.check(later)).includes(second.pid as number),
+        );
+        assert.equal(config.get<boolean>("forgottenServers.notify"), false);
+        assert.deepEqual(await api.forgotten.check(later), []);
+      } finally {
+        second.kill();
+      }
+    } finally {
+      child.kill();
+      await config.update(
+        "forgottenServers.notify",
+        undefined,
+        vscode.ConfigurationTarget.Global,
+      );
+    }
   });
 });

@@ -1,12 +1,32 @@
 import { readFileSync } from "node:fs";
 import * as path from "node:path";
 import { describe, expect, it } from "vitest";
-import { ancestry, buildRows, containerLabel, validatePort, viewRows } from "./model";
+import {
+  ancestry,
+  buildRows,
+  containerLabel,
+  validatePort,
+  viewRows,
+} from "./model";
 import type { Envelope, ListData, Socket } from "./schema";
 
-const goldenList = (JSON.parse(
-  readFileSync(path.join(__dirname, "..", "..", "..", "internal", "output", "testdata", "list.json.golden"), "utf8"),
-) as Envelope<ListData>).data;
+const goldenList = (
+  JSON.parse(
+    readFileSync(
+      path.join(
+        __dirname,
+        "..",
+        "..",
+        "..",
+        "internal",
+        "output",
+        "testdata",
+        "list.json.golden",
+      ),
+      "utf8",
+    ),
+  ) as Envelope<ListData>
+).data;
 
 describe("buildRows", () => {
   it("turns real list output into sorted rows", () => {
@@ -50,7 +70,10 @@ describe("buildRows", () => {
       state: "LISTEN",
       ...(pid === undefined ? {} : { pid, process: { pid, name: "java" } }),
     });
-    const rows = buildRows({ sockets: [sock("::", 7), sock("0.0.0.0", 7), sock("0.0.0.0", 8)], partial: false });
+    const rows = buildRows({
+      sockets: [sock("::", 7), sock("0.0.0.0", 7), sock("0.0.0.0", 8)],
+      partial: false,
+    });
     expect(rows).toHaveLength(2);
     expect(rows[0]?.description).toBe("tcp · 0.0.0.0, :: · pid 7");
     expect(rows[0]?.tooltip).not.toContain("Started by");
@@ -61,7 +84,15 @@ describe("buildRows", () => {
 
   it("handles unknown process names and processes without details", () => {
     const rows = buildRows({
-      sockets: [{ proto: "tcp", localAddress: "127.0.0.1", localPort: 1, state: "LISTEN", pid: 9 }],
+      sockets: [
+        {
+          proto: "tcp",
+          localAddress: "127.0.0.1",
+          localPort: 1,
+          state: "LISTEN",
+          pid: 9,
+        },
+      ],
       partial: false,
     });
     expect(rows[0]?.label).toBe(":1  ?");
@@ -79,7 +110,13 @@ describe("buildRows", () => {
           state: "LISTEN",
           pid: 15872,
           process: { pid: 15872, name: "wslrelay.exe" },
-          container: { name: "Ubuntu", runtime: "wsl", process: "node", processPid: 12, stopHint: "wsl -d Ubuntu --exec kill 12" },
+          container: {
+            name: "Ubuntu",
+            runtime: "wsl",
+            process: "node",
+            processPid: 12,
+            stopHint: "wsl -d Ubuntu --exec kill 12",
+          },
         },
       ],
       partial: false,
@@ -97,7 +134,13 @@ describe("buildRows", () => {
           localAddress: "0.0.0.0",
           localPort: 8080,
           state: "LISTEN",
-          container: { id: "abc", name: "api", image: "api:dev", runtime: "docker", stopHint: "docker stop api" },
+          container: {
+            id: "abc",
+            name: "api",
+            image: "api:dev",
+            runtime: "docker",
+            stopHint: "docker stop api",
+          },
         },
       ],
       partial: true,
@@ -113,18 +156,64 @@ describe("buildRows", () => {
   });
 });
 
+describe("process projects", () => {
+  it("shows the project and start time", () => {
+    const s = {
+      proto: "tcp",
+      localAddress: "127.0.0.1",
+      localPort: 5173,
+      state: "LISTEN",
+      pid: 10,
+      process: {
+        pid: 10,
+        name: "node",
+        project: "shop",
+        cwd: "/src/shop",
+        startTime: "2026-11-07T10:00:00.123Z",
+      },
+    } as Socket;
+    const [row] = buildRows({ partial: false, sockets: [s] });
+    expect(row?.description).toBe("tcp · 127.0.0.1 · pid 10 · shop");
+    expect(row?.processProject).toBe("shop");
+    expect(row?.tooltip).toContain("Project: **shop** (`/src/shop`)");
+    expect(row?.tooltip).toContain("Running since: 2026-11-07 10:00:00 UTC");
+    const bare = buildRows({
+      partial: false,
+      sockets: [{ ...s, process: { pid: 10, name: "node", project: "shop" } }],
+    });
+    expect(bare[0]?.tooltip.endsWith("Project: **shop**")).toBe(true);
+  });
+});
+
 describe("helpers", () => {
   it("containerLabel falls back from name to image to id", () => {
-    expect(containerLabel({ name: "web", runtime: "docker", stopHint: "" })).toBe("docker:web");
-    expect(containerLabel({ image: "redis", runtime: "podman", stopHint: "" })).toBe("podman:redis");
-    expect(containerLabel({ id: "abc", runtime: "docker", stopHint: "" })).toBe("docker:abc");
-    expect(containerLabel({ runtime: "docker", stopHint: "" })).toBe("docker:?");
+    expect(
+      containerLabel({ name: "web", runtime: "docker", stopHint: "" }),
+    ).toBe("docker:web");
+    expect(
+      containerLabel({ image: "redis", runtime: "podman", stopHint: "" }),
+    ).toBe("podman:redis");
+    expect(containerLabel({ id: "abc", runtime: "docker", stopHint: "" })).toBe(
+      "docker:abc",
+    );
+    expect(containerLabel({ runtime: "docker", stopHint: "" })).toBe(
+      "docker:?",
+    );
   });
 
   it("ancestry", () => {
     expect(ancestry(undefined)).toBe("");
     expect(ancestry({ pid: 1, name: "x" })).toBe("");
-    expect(ancestry({ pid: 1, name: "x", ancestors: [{ pid: 2, name: "a" }, { pid: 3, name: "b" }] })).toBe("a (2) ← b (3)");
+    expect(
+      ancestry({
+        pid: 1,
+        name: "x",
+        ancestors: [
+          { pid: 2, name: "a" },
+          { pid: 3, name: "b" },
+        ],
+      }),
+    ).toBe("a (2) ← b (3)");
   });
 
   it("validatePort", () => {
@@ -140,16 +229,28 @@ describe("helpers", () => {
 describe("viewRows", () => {
   const rows = buildRows(goldenList);
   it("hides UDP unless asked", () => {
-    expect(viewRows(rows, { showUdp: false, project: new Map() }).some((r) => r.proto === "udp")).toBe(false);
+    expect(
+      viewRows(rows, { showUdp: false, project: new Map() }).some(
+        (r) => r.proto === "udp",
+      ),
+    ).toBe(false);
     expect(viewRows(rows, { showUdp: true, project: new Map() })).toEqual(rows);
   });
 
   it("puts project ports first and names them", () => {
-    const v = viewRows(rows, { showUdp: true, project: new Map([[5432, "db"], [5353, "mdns"]]) });
+    const v = viewRows(rows, {
+      showUdp: true,
+      project: new Map([
+        [5432, "db"],
+        [5353, "mdns"],
+      ]),
+    });
     expect(v[0]).toMatchObject({ port: 5432, project: "db" });
     expect(v[0]?.description).toMatch(/^db · tcp/);
     expect(v[0]?.tooltip).toMatch(/^Project port \*\*db\*\*/);
     expect(v.find((r) => r.port === 5353)?.project).toBeUndefined(); // UDP ports aren't project ports
-    expect(v.slice(1).map((r) => r.port)).toEqual(rows.filter((r) => r.port !== 5432).map((r) => r.port));
+    expect(v.slice(1).map((r) => r.port)).toEqual(
+      rows.filter((r) => r.port !== 5432).map((r) => r.port),
+    );
   });
 });

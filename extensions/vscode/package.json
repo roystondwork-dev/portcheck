@@ -190,6 +190,17 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "When a command in the integrated terminal fails because a port is in use, show who holds it and offer a fix. Needs [shell integration](https://code.visualstudio.com/docs/terminal/shell-integration). Errors are always clickable links, whatever this setting."
+        },
+        "portcheck.forgottenServers.notify": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Every 30 minutes, check for dev servers that have been running in your projects for a long time (see `#portcheck.forgottenServers.afterHours#`) and offer to stop them. Each one is mentioned once per window."
+        },
+        "portcheck.forgottenServers.afterHours": {
+          "type": "number",
+          "default": 24,
+          "minimum": 1,
+          "markdownDescription": "How many hours a server runs in a project before portcheck asks whether you forgot it."
         }
       }
     },

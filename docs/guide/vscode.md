@@ -110,6 +110,23 @@ the command line, the user, and for containers the image and the command that st
 The view refreshes every 5 seconds while it's visible (setting
 `portcheck.refreshInterval`; `0` refreshes only on demand) and has a refresh button.
 
+## Forgotten dev servers
+
+Every 30 minutes, the extension looks for dev servers that have been running in your
+projects for more than a day, and offers to stop them:
+
+```text
+ⓘ 2 dev servers have been running for over a day: node in shop (:5173), python3 in api (:8000).
+                                          [Stop All 2]  [Show Ports]  [Don't Show Again]
+```
+
+Each server is mentioned once per window. **Stop All** stops them with portcheck's
+[safety guards](kill.md#safety). Change the threshold with
+`portcheck.forgottenServers.afterHours`, or turn the check off with
+`portcheck.forgottenServers.notify`. In the **Listening ports** view, each port also shows
+its project, and its tooltip says when it started. The same list is
+[`portcheck servers`](servers.md) in a terminal.
+
 ## Stopping a process
 
 Use the stop button on a row, or **portcheck: Stop What's Using a Port…** from the
@@ -153,6 +170,8 @@ on your laptop.
 | `portcheck.refreshInterval` | `5` | seconds between refreshes while the view is visible; `0` = manual |
 | `portcheck.showUdp` | `false` | show UDP ports in the view |
 | `portcheck.terminal.notify` | `true` | notify when a terminal command fails because its port is in use (errors are links either way) |
+| `portcheck.forgottenServers.notify` | `true` | every 30 minutes, offer to stop dev servers that have run in your projects for a long time |
+| `portcheck.forgottenServers.afterHours` | `24` | how many hours a server runs before it counts as forgotten |
 
 ## How it works
 

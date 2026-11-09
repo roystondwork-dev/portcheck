@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import * as vscode from "vscode";
 import { PortcheckClient, resolveBinary } from "./cli";
 import { registerCommands, type UI, vscodeUI } from "./commands";
+import { ForgottenServers } from "./forgottenWatcher";
 import { ProjectPorts } from "./project";
 import { TerminalFixes } from "./terminal";
 import { validatePort } from "./model";
@@ -14,6 +15,7 @@ export interface PortcheckApi {
   binary: () => string;
   view: PortsView;
   terminal: TerminalFixes;
+  forgotten: ForgottenServers;
   project: ProjectPorts;
   /** Replaces how the extension asks the user things (tests script the answers). */
   setUI: (ui: UI) => void;
@@ -38,7 +40,9 @@ export function activate(ctx: vscode.ExtensionContext): PortcheckApi {
   log.info(`using ${binary}`);
 
   const view = new PortsView(() => client, log);
-  const tree = vscode.window.createTreeView("portcheck.ports", { treeDataProvider: view });
+  const tree = vscode.window.createTreeView("portcheck.ports", {
+    treeDataProvider: view,
+  });
   view.attach(tree, settings().get<number>("refreshInterval", 5));
   view.setFilter(settings().get<boolean>("showUdp", false));
 
@@ -66,22 +70,60 @@ export function activate(ctx: vscode.ExtensionContext): PortcheckApi {
   );
 
   let ui: UI = vscodeUI;
-  const deps = { client: () => client, binary: () => binary, view, log, ui: () => ui };
+  const deps = {
+    client: () => client,
+    binary: () => binary,
+    view,
+    log,
+    ui: () => ui,
+  };
   registerCommands(ctx, deps);
-  const terminal = new TerminalFixes(deps, () => settings().get<boolean>("terminal.notify", true));
+  const terminal = new TerminalFixes(deps, () =>
+    settings().get<boolean>("terminal.notify", true),
+  );
+  const forgotten = new ForgottenServers(
+    deps,
+    () => ({
+      notify: settings().get<boolean>("forgottenServers.notify", true),
+      afterHours: settings().get<number>("forgottenServers.afterHours", 24),
+    }),
+    () =>
+      settings().update(
+        "forgottenServers.notify",
+        false,
+        vscode.ConfigurationTarget.Global,
+      ),
+  );
   const project = new ProjectPorts(deps, (ports) => {
     view.setFilter(settings().get<boolean>("showUdp", false), ports);
   });
   ctx.subscriptions.push(
     terminal,
+    forgotten,
     project,
-    vscode.commands.registerCommand("portcheck.fixPort", async (port?: number) => {
-      const p =
-        port ?? Number(await ui.input({ prompt: "Port to fix", placeHolder: "3000", validateInput: validatePort }));
-      return Number.isInteger(p) && p > 0 ? terminal.fix(p, vscode.window.activeTerminal) : undefined;
-    }),
+    vscode.commands.registerCommand(
+      "portcheck.fixPort",
+      async (port?: number) => {
+        const p =
+          port ??
+          Number(
+            await ui.input({
+              prompt: "Port to fix",
+              placeHolder: "3000",
+              validateInput: validatePort,
+            }),
+          );
+        return Number.isInteger(p) && p > 0
+          ? terminal.fix(p, vscode.window.activeTerminal)
+          : undefined;
+      },
+    ),
     vscode.commands.registerCommand("portcheck.toggleUdp", () =>
-      settings().update("showUdp", !settings().get<boolean>("showUdp", false), vscode.ConfigurationTarget.Global),
+      settings().update(
+        "showUdp",
+        !settings().get<boolean>("showUdp", false),
+        vscode.ConfigurationTarget.Global,
+      ),
     ),
   );
   void project.refresh();
@@ -91,6 +133,7 @@ export function activate(ctx: vscode.ExtensionContext): PortcheckApi {
     binary: () => binary,
     view,
     terminal,
+    forgotten,
     project,
     setUI: (u) => {
       ui = u;

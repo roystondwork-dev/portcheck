@@ -22,6 +22,10 @@ export interface ProcessInfo {
   exe?: string;
   startTime?: string;
   ancestors?: ProcessRef[];
+  /** The process's working directory. */
+  cwd?: string;
+  /** The project it runs in, e.g. "my-shop" (portcheck 0.11+). */
+  project?: string;
 }
 
 export interface ContainerInfo {

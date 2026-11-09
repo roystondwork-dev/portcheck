@@ -25,6 +25,8 @@ export interface PortRow {
   container?: ContainerInfo;
   /** The name the project's .portcheck.yaml gives this port. */
   project?: string;
+  /** The project the process runs in, from its working directory, e.g. "my-shop". */
+  processProject?: string;
 }
 
 /** "npm (4200) ← zsh (900)", or "" when unknown. */
@@ -51,7 +53,9 @@ function kindOf(s: Socket): OwnerKind {
 export function buildRows(data: ListData): PortRow[] {
   const groups = new Map<string, Socket[]>();
   for (const s of data.sockets) {
-    const owner = s.container ? `c:${containerLabel(s.container)}` : `p:${s.pid ?? 0}`;
+    const owner = s.container
+      ? `c:${containerLabel(s.container)}`
+      : `p:${s.pid ?? 0}`;
     const id = `${s.proto}:${s.localPort}:${owner}`;
     const g = groups.get(id);
     if (g) {
@@ -77,6 +81,9 @@ export function buildRows(data: ListData): PortRow[] {
     if (s.pid !== undefined) {
       desc.push(`pid ${s.pid}`);
     }
+    if (s.process?.project !== undefined && kind === "process") {
+      desc.push(s.process.project);
+    }
     const row: PortRow = {
       id,
       port: s.localPort,
@@ -96,34 +103,58 @@ export function buildRows(data: ListData): PortRow[] {
       if (a !== "") {
         row.ancestry = a;
       }
+      if (s.process.project !== undefined) {
+        row.processProject = s.process.project;
+      }
     }
     if (s.container !== undefined) {
       row.container = s.container;
     }
     rows.push(row);
   }
-  return rows.sort((a, b) => a.port - b.port || a.proto.localeCompare(b.proto) || a.label.localeCompare(b.label));
+  return rows.sort(
+    (a, b) =>
+      a.port - b.port ||
+      a.proto.localeCompare(b.proto) ||
+      a.label.localeCompare(b.label),
+  );
 }
 
 function tooltip(s: Socket, addresses: string[]): string {
-  const lines = [`**Port ${s.localPort}/${s.proto}** on ${addresses.map((a) => `\`${a}\``).join(", ")}`];
+  const lines = [
+    `**Port ${s.localPort}/${s.proto}** on ${addresses.map((a) => `\`${a}\``).join(", ")}`,
+  ];
   if (s.container) {
     const c = s.container;
-    lines.push(`Container: **${containerLabel(c)}**${c.image ? ` (${c.image})` : ""}`);
+    lines.push(
+      `Container: **${containerLabel(c)}**${c.image ? ` (${c.image})` : ""}`,
+    );
     lines.push(`Stop with: \`${c.stopHint}\``);
   }
   if (s.process) {
     const p = s.process;
-    lines.push(`Process: **${p.name}** (pid ${p.pid})${p.user ? ` · user ${p.user}` : ""}`);
+    lines.push(
+      `Process: **${p.name}** (pid ${p.pid})${p.user ? ` · user ${p.user}` : ""}`,
+    );
     const a = ancestry(p);
     if (a !== "") {
       lines.push(`Started by: ${a}`);
+    }
+    if (p.project !== undefined) {
+      lines.push(`Project: **${p.project}**${p.cwd ? ` (\`${p.cwd}\`)` : ""}`);
+    }
+    if (p.startTime !== undefined) {
+      lines.push(
+        `Running since: ${p.startTime.replace("T", " ").replace(/\.\d+/, "").replace("Z", " UTC")}`,
+      );
     }
     if (p.cmdline) {
       lines.push(`Command: \`${p.cmdline}\``);
     }
   } else if (!s.container) {
-    lines.push("The owner is hidden from your user. Run portcheck with elevated privileges to see it.");
+    lines.push(
+      "The owner is hidden from your user. Run portcheck with elevated privileges to see it.",
+    );
   }
   return lines.join("\n\n");
 }
@@ -154,11 +185,15 @@ export function viewRows(rows: readonly PortRow[], o: ViewOptions): PortRow[] {
     );
   }
   // Stable sort: project ports first, otherwise keep buildRows' order.
-  return out.sort((a, b) => Number(b.project !== undefined) - Number(a.project !== undefined));
+  return out.sort(
+    (a, b) => Number(b.project !== undefined) - Number(a.project !== undefined),
+  );
 }
 
 /** Validates a port typed by the user; returns an error message or undefined. */
 export function validatePort(value: string): string | undefined {
   const n = Number(value.trim());
-  return Number.isInteger(n) && n >= 1 && n <= 65535 ? undefined : "Enter a port between 1 and 65535";
+  return Number.isInteger(n) && n >= 1 && n <= 65535
+    ? undefined
+    : "Enter a port between 1 and 65535";
 }
