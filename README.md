@@ -95,6 +95,19 @@ For Chrome, Brave and Chromium, load the zip from the
 [latest release](https://github.com/roystondwork-dev/portcheck/releases/latest)
 ([guide](docs/guide/browser.md)).
 
+### Claude Code plugin
+
+One install adds portcheck's MCP tools and a skill that tells Claude when to use them, so
+"port 3000 is already in use" gets diagnosed and fixed in the conversation, asking before
+anything is stopped:
+
+```
+/plugin install portcheck --marketplace roystondwork-dev/portcheck
+```
+
+Or from your shell: `claude plugin marketplace add roystondwork-dev/portcheck`, then
+`claude plugin install portcheck@portcheck` ([guide](docs/guide/mcp.md#claude-code-plugin)).
+
 ### Highlights
 
 - **Same commands and output on every OS.** It replaces `lsof -i`, `netstat -ano`, `ss -ltnp` and `kill`.

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "portcheck": {
+      "command": "npx",
+      "args": ["-y", "portcheck-cli", "mcp"]
+    }
+  }
+}

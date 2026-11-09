@@ -31,6 +31,28 @@ Each tool returns the same [JSON](../json-schema.md) as the matching `--json` co
 assistant itself, and ports published by Docker, Podman or WSL get the right stop
 command instead.
 
+## Claude Code plugin
+
+The quickest way in Claude Code: one install adds portcheck's MCP tools **and** a skill that
+tells Claude how to handle a port conflict (look first, say what holds the port, ask before
+stopping anything, verify afterwards). It runs portcheck through `npx`, so Node.js is all
+you need. In a Claude Code session:
+
+```text
+/plugin install portcheck --marketplace roystondwork-dev/portcheck
+```
+
+Or from your shell:
+
+```sh
+claude plugin marketplace add roystondwork-dev/portcheck
+claude plugin install portcheck@portcheck
+```
+
+Then ask "my dev server says port 3000 is in use" or "what's running on 8080?". The skill
+also runs on demand as `/portcheck:portcheck`. If you already added portcheck's MCP server
+by hand (below), remove it (`claude mcp remove portcheck`) so the tools aren't listed twice.
+
 ## Set up
 
 [Install portcheck](../install.md) first, then add it to your assistant. If your

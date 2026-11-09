@@ -1,0 +1,15 @@
+{
+  "name": "portcheck",
+  "description": "portcheck for Claude Code: fix \"port already in use\" safely",
+  "owner": {
+    "name": "Royston D",
+    "url": "https://github.com/roystondwork-dev"
+  },
+  "plugins": [
+    {
+      "name": "portcheck",
+      "source": "./extensions/claude-code",
+      "description": "See which process holds a port and who started it, free it safely, or find a free port: portcheck's MCP tools plus a skill that tells Claude when to use them."
+    }
+  ]
+}

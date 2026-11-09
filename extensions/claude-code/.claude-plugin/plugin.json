@@ -1,0 +1,20 @@
+{
+  "name": "portcheck",
+  "version": "0.11.1",
+  "description": "Fix \"port already in use\": see which process holds a port and who started it, free it safely, or find a free port. Adds portcheck's MCP tools and a skill that tells Claude when to use them.",
+  "author": {
+    "name": "Royston D",
+    "url": "https://github.com/roystondwork-dev"
+  },
+  "homepage": "https://roystondwork-dev.github.io/portcheck/guide/mcp/",
+  "repository": "https://github.com/roystondwork-dev/portcheck",
+  "license": "MIT",
+  "keywords": [
+    "port",
+    "eaddrinuse",
+    "address-already-in-use",
+    "kill-port",
+    "dev-server",
+    "mcp"
+  ]
+}
