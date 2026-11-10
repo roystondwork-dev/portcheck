@@ -13,6 +13,7 @@
   <a href="https://scorecard.dev/viewer/?uri=github.com/roystondwork-dev/portcheck"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/roystondwork-dev/portcheck/badge"></a>
   <a href="https://www.bestpractices.dev/projects/15848"><img alt="OpenSSF Best Practices" src="https://www.bestpractices.dev/projects/15848/badge"></a>
   <a href="https://m8ven.ai/mcp/roystondwork-dev-portcheck-16nk7s?s=readme"><img alt="M8ven Score" src="https://m8ven.ai/badge/mcp/roystondwork-dev-portcheck-16nk7s?v=e90895f384a701ac8f233a679bd020d9&amp;variant=verified"></a>
+  <a href="https://plugins.jetbrains.com/plugin/35439-portcheck--port-in-use-fixer"><img alt="JetBrains Plugin" src="https://img.shields.io/jetbrains/plugin/v/35439?label=JetBrains"></a>
   <a href="https://pkg.go.dev/github.com/roystondwork-dev/portcheck"><img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/roystondwork-dev/portcheck.svg"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
 </p>
@@ -80,10 +81,11 @@ offers **Stop it and rerun**; the **Ports** tool window lists every listening po
 
 ![portcheck in IntelliJ IDEA: the run fails with "Address already in use", and a notification names the Python process holding port 3000 with Stop Python and rerun](docs/assets/jetbrains-stop-and-rerun.png)
 
-Install `portcheck-jetbrains-<version>.zip` from the
+Install **portcheck** from [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/35439-portcheck--port-in-use-fixer)
+(**Settings → Plugins → Marketplace**, search "portcheck"), or install
+`portcheck-jetbrains-<version>.zip` from the
 [latest release](https://github.com/roystondwork-dev/portcheck/releases/latest)
-(**Settings → Plugins → ⚙ → Install Plugin from Disk…**); it is in review on JetBrains Marketplace
-([guide](docs/guide/jetbrains.md)).
+(**Settings → Plugins → ⚙ → Install Plugin from Disk…**) ([guide](docs/guide/jetbrains.md)).
 
 ### Browser extension
 

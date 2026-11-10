@@ -6,11 +6,11 @@ is built in.
 
 ## Install
 
-!!! note "Status"
-    The plugin is on its way to [JetBrains Marketplace](https://plugins.jetbrains.com/).
-    Until it's listed, install it from a release.
+In the IDE open **Settings → Plugins → Marketplace**, search for **portcheck** and click
+**Install**. It's listed on
+[JetBrains Marketplace](https://plugins.jetbrains.com/plugin/35439-portcheck--port-in-use-fixer).
 
-Download `portcheck-jetbrains-<version>.zip` from the
+To install without the Marketplace, download `portcheck-jetbrains-<version>.zip` from the
 [latest release](https://github.com/roystondwork-dev/portcheck/releases/latest), then in
 the IDE open **Settings → Plugins → ⚙ → Install Plugin from Disk…** and choose the zip.
 It carries portcheck for macOS, Linux and Windows (x64 and arm64) and uses the right

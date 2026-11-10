@@ -11,7 +11,6 @@
 * **docker:** Docker image on ghcr.io and a Dev Container feature ([c65cdc8](https://github.com/roystondwork-dev/portcheck/commit/c65cdc8de96c19f99bf67c83be9ec4b95ff6351f))
 * **init:** shell hook that explains "address already in use" after a command fails ([539b6e2](https://github.com/roystondwork-dev/portcheck/commit/539b6e21ed405d69b3b90bba80b61cf0d9282d76))
 * **net:** IP addresses, devices on the local network, and DNS lookups ([f24954a](https://github.com/roystondwork-dev/portcheck/commit/f24954a52fc5e05c07db7e7dfa06817dcc7475d6))
-* **net:** IP addresses, devices on the local network, and DNS lookups ([fc6d7cd](https://github.com/roystondwork-dev/portcheck/commit/fc6d7cd183e6f73089cd681edb5f715642ca4419))
 * **port:** every project gets its own remembered port ([1e0e844](https://github.com/roystondwork-dev/portcheck/commit/1e0e8449205818b69a4500f7776946f5b214afb0))
 * **tray:** show each port's project and start time; offer to stop forgotten dev servers ([913a836](https://github.com/roystondwork-dev/portcheck/commit/913a8368254483c953e23b1e3bc926d5ce339809))
 * **tunnel:** show where SSH tunnels and kubectl port-forwards lead ([0a9ffc8](https://github.com/roystondwork-dev/portcheck/commit/0a9ffc88375b78d60b0ca847b4c35bd9139bbe79))
