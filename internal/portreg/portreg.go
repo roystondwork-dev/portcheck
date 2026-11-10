@@ -16,6 +16,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/roystondwork-dev/portcheck/pkg/portspec"
@@ -139,10 +140,16 @@ func (r *Registry) load(setAside bool) (*File, error) {
 	return &f, nil
 }
 
-// createTemp and rename are variables so tests can make writing fail.
+// createTemp, rename and openLock are variables so tests can make them fail.
 var (
 	createTemp = os.CreateTemp
 	rename     = os.Rename
+	openLock   = func(path string) (*os.File, error) {
+		return os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600) //nolint:gosec // our own lock file in portcheck's config folder
+	}
+	// retryDenied is whether "access denied" while creating the lock means
+	// the lock is being released (Windows), rather than a real permission error.
+	retryDenied = runtime.GOOS == "windows"
 )
 
 // write replaces the registry file atomically: a temporary file in the same
@@ -172,12 +179,16 @@ func (r *Registry) lock() (unlock func(), err error) {
 	path := r.Path + ".lock"
 	deadline := r.now().Add(r.lockTimeout)
 	for {
-		lf, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600) //nolint:gosec // our own lock file in portcheck's config folder
+		lf, err := openLock(path)
 		if err == nil {
 			_ = lf.Close()
 			return func() { _ = os.Remove(path) }, nil
 		}
-		if !errors.Is(err, fs.ErrExist) {
+		// On Windows, a lock file another process has just removed can't be
+		// created again for a moment: that fails with "access denied", not
+		// "exists". Wait for it like for a held lock.
+		busy := errors.Is(err, fs.ErrExist) || (retryDenied && errors.Is(err, fs.ErrPermission))
+		if !busy {
 			return nil, fmt.Errorf("lock the port registry: %w", err)
 		}
 		if st, serr := os.Stat(path); serr == nil && r.now().Sub(st.ModTime()) > r.staleAfter {

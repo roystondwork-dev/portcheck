@@ -3,8 +3,10 @@ package portreg
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -235,6 +237,34 @@ func TestLockOpenError(t *testing.T) {
 	r := &Registry{Path: filepath.Join(t.TempDir(), "missing", FileName), lockTimeout: time.Second, staleAfter: time.Second, now: time.Now}
 	if _, err := r.lock(); err == nil || errors.Is(err, ErrLocked) {
 		t.Errorf("lock() = %v, want an open error", err)
+	}
+}
+
+// Not parallel: it swaps the package's openLock and retryDenied.
+func TestLockDeniedWhileReleased(t *testing.T) {
+	r := &Registry{Path: filepath.Join(t.TempDir(), FileName), lockTimeout: time.Second, staleAfter: time.Minute, now: time.Now}
+	denied := &fs.PathError{Op: "open", Path: r.Path + ".lock", Err: fs.ErrPermission}
+	real := openLock
+	defer func() { openLock, retryDenied = real, runtime.GOOS == "windows" }()
+	tries := 0
+	openLock = func(path string) (*os.File, error) {
+		if tries++; tries == 1 {
+			return nil, denied // Windows, while another process removes the lock
+		}
+		return real(path)
+	}
+
+	retryDenied = true
+	unlock, err := r.lock()
+	if err != nil || tries != 2 {
+		t.Fatalf("lock() = %v after %d tries, want success on the second", err, tries)
+	}
+	unlock()
+
+	// Elsewhere "access denied" is a real permission error.
+	retryDenied, tries = false, 0
+	if _, err := r.lock(); !errors.Is(err, fs.ErrPermission) || tries != 1 {
+		t.Errorf("lock() = %v after %d tries, want the permission error at once", err, tries)
 	}
 }
 
