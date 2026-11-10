@@ -295,4 +295,34 @@ describe("portcheck extension", () => {
       );
     }
   });
+
+  it("shows this machine's addresses and copies one", async () => {
+    const ui = new ScriptedUI(); // picks the first item: the primary address
+    api.setUI(ui);
+    const copied = await vscode.commands.executeCommand<string | undefined>(
+      "portcheck.showIp",
+    );
+    assert.ok(ui.has("Show My Public Address"), ui.messages.join("\n"));
+    if (copied !== undefined) {
+      // A runner always has an address; it's copied as is.
+      assert.equal(await vscode.env.clipboard.readText(), copied);
+      assert.ok(ui.has(`Copied ${copied}.`), ui.messages.join("\n"));
+    }
+  });
+
+  it("looks up an address and lists devices", async () => {
+    const ui = new ScriptedUI([], ["127.0.0.1", undefined]);
+    api.setUI(ui);
+    assert.equal(
+      await vscode.commands.executeCommand("portcheck.lookup", "localhost"),
+      "127.0.0.1",
+    );
+    assert.equal(await vscode.env.clipboard.readText(), "127.0.0.1");
+    // Cancelled: nothing is copied, and the probe is offered but not run.
+    assert.equal(
+      await vscode.commands.executeCommand("portcheck.networkDevices"),
+      undefined,
+    );
+    assert.ok(ui.has("Probe for More Devices"), ui.messages.join("\n"));
+  });
 });

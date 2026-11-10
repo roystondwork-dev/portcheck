@@ -4,11 +4,14 @@
 import * as path from "node:path";
 import {
   type CheckData,
+  type DevicesData,
   type DoctorData,
   type Envelope,
   type FreeData,
   type KillData,
   type ListData,
+  type LookupData,
+  type NetData,
   SCHEMA_VERSION,
   type VersionData,
 } from "./schema";
@@ -20,7 +23,11 @@ export interface ExecResult {
 }
 
 /** Runs a program; resolves with its exit code instead of rejecting on non-zero exit. */
-export type ExecFn = (file: string, args: readonly string[], timeoutMs: number) => Promise<ExecResult>;
+export type ExecFn = (
+  file: string,
+  args: readonly string[],
+  timeoutMs: number,
+) => Promise<ExecResult>;
 
 export class PortcheckError extends Error {
   constructor(
@@ -53,7 +60,12 @@ export function resolveBinary(o: ResolveOptions): string {
     return o.configured.trim();
   }
   const exe = o.platform === "win32" ? "portcheck.exe" : "portcheck";
-  const bundled = path.join(o.extensionPath, "bin", `${o.platform}-${o.arch}`, exe);
+  const bundled = path.join(
+    o.extensionPath,
+    "bin",
+    `${o.platform}-${o.arch}`,
+    exe,
+  );
   return o.exists(bundled) ? bundled : exe;
 }
 
@@ -71,17 +83,28 @@ export class PortcheckClient {
    * (e.g. 1 = "port in use" for check). Output must be a schema v1 envelope
    * of the expected kind.
    */
-  async run<T>(kind: string, args: readonly string[], okCodes: readonly number[] = [0]): Promise<T> {
+  async run<T>(
+    kind: string,
+    args: readonly string[],
+    okCodes: readonly number[] = [0],
+  ): Promise<T> {
     const r = await this.exec(this.binary, [...args, "--json"], this.timeoutMs);
     const out = r.stdout.trim();
     if (!okCodes.includes(r.code) || out === "") {
-      throw new PortcheckError(firstLine(r.stderr) ?? `portcheck exited with status ${r.code}`, r.code, errorDetail(r.stderr));
+      throw new PortcheckError(
+        firstLine(r.stderr) ?? `portcheck exited with status ${r.code}`,
+        r.code,
+        errorDetail(r.stderr),
+      );
     }
     let env: Envelope<T>;
     try {
       env = JSON.parse(out) as Envelope<T>;
     } catch {
-      throw new PortcheckError(`portcheck printed invalid JSON for "${kind}"`, r.code);
+      throw new PortcheckError(
+        `portcheck printed invalid JSON for "${kind}"`,
+        r.code,
+      );
     }
     if (env.schemaVersion !== SCHEMA_VERSION) {
       throw new PortcheckError(
@@ -90,7 +113,10 @@ export class PortcheckClient {
       );
     }
     if (env.kind !== kind) {
-      throw new PortcheckError(`expected "${kind}" output from portcheck, got "${env.kind}"`, r.code);
+      throw new PortcheckError(
+        `expected "${kind}" output from portcheck, got "${env.kind}"`,
+        r.code,
+      );
     }
     return env.data;
   }
@@ -100,11 +126,19 @@ export class PortcheckClient {
   }
 
   check(port: number, proto: "tcp" | "udp" = "tcp"): Promise<CheckData> {
-    return this.run<CheckData>("check", ["check", String(port), "--proto", proto], [0, 1]);
+    return this.run<CheckData>(
+      "check",
+      ["check", String(port), "--proto", proto],
+      [0, 1],
+    );
   }
 
   free(range: string, count = 1): Promise<FreeData> {
-    return this.run<FreeData>("free", ["free", range, "-n", String(count)], [0, 1]);
+    return this.run<FreeData>(
+      "free",
+      ["free", range, "-n", String(count)],
+      [0, 1],
+    );
   }
 
   /** Stops a process. Exit codes 1, 3 and 4 still carry per-process results. */
@@ -118,7 +152,33 @@ export class PortcheckClient {
 
   /** Checks a project's .portcheck.yaml. Exit code 2 (missing or invalid file) is an error. */
   doctor(config: string): Promise<DoctorData> {
-    return this.run<DoctorData>("doctor", ["doctor", "--config", config], [0, 1]);
+    return this.run<DoctorData>(
+      "doctor",
+      ["doctor", "--config", config],
+      [0, 1],
+    );
+  }
+
+  /** This machine's addresses; withPublic also asks ipify for the public address. */
+  net(withPublic = false): Promise<NetData> {
+    return this.run<NetData>("net", withPublic ? ["net", "--public"] : ["net"]);
+  }
+
+  /** Devices on the local network; probe first sends connection attempts to find more. */
+  devices(probe = false): Promise<DevicesData> {
+    return this.run<DevicesData>(
+      "devices",
+      probe ? ["net", "devices", "--probe"] : ["net", "devices"],
+    );
+  }
+
+  /** DNS and address facts. Exit code 1 (a name didn't resolve) still carries results. */
+  lookup(queries: readonly string[]): Promise<LookupData> {
+    return this.run<LookupData>(
+      "lookup",
+      ["net", "lookup", ...queries],
+      [0, 1],
+    );
   }
 
   version(): Promise<VersionData> {

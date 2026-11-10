@@ -156,6 +156,16 @@ command palette.
 | **portcheck: Refresh** | reloads the view |
 | **portcheck: Show Log** | the extension's log, useful when reporting issues |
 
+### Network commands
+
+The [`net` commands](net.md), from the Command Palette. Choosing an entry copies it.
+
+| Command | What it does |
+|---|---|
+| **portcheck: Show My IP Addresses** | your addresses, the main one first: copy it to open your dev server from a phone on the same Wi-Fi. **Show My Public Address** asks ipify.org, the only part that contacts the internet |
+| **portcheck: Devices on My Network** | devices your computer has seen, with the router and this machine marked; **Probe for More Devices** finds others, after a confirmation (only private networks) |
+| **portcheck: Look Up a Domain or IP** | DNS records for a domain, or the name, class and (on your network) device for an address |
+
 ## Remote development
 
 The extension runs where your code runs. In **Remote-SSH**, **WSL** and **Dev

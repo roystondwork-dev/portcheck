@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { lookup, networkDevices, showIP } from "./netCommands";
 import type { PortcheckClient } from "./cli";
 import { buildRows, containerLabel, type PortRow, validatePort } from "./model";
 import type { PortsView } from "./portsView";
@@ -9,18 +10,27 @@ export interface UI {
   warn(message: string, ...items: string[]): PromiseLike<string | undefined>;
   error(message: string): PromiseLike<unknown>;
   /** A modal question; returns the chosen item or undefined if cancelled. */
-  confirm(message: string, detail: string, ...items: string[]): PromiseLike<string | undefined>;
+  confirm(
+    message: string,
+    detail: string,
+    ...items: string[]
+  ): PromiseLike<string | undefined>;
   input(options: vscode.InputBoxOptions): PromiseLike<string | undefined>;
-  pick<T extends vscode.QuickPickItem>(items: T[], placeHolder: string): PromiseLike<T | undefined>;
+  pick<T extends vscode.QuickPickItem>(
+    items: T[],
+    placeHolder: string,
+  ): PromiseLike<T | undefined>;
 }
 
 export const vscodeUI: UI = {
   info: (m, ...items) => vscode.window.showInformationMessage(m, ...items),
   warn: (m, ...items) => vscode.window.showWarningMessage(m, ...items),
   error: (m) => vscode.window.showErrorMessage(m),
-  confirm: (m, detail, ...items) => vscode.window.showWarningMessage(m, { modal: true, detail }, ...items),
+  confirm: (m, detail, ...items) =>
+    vscode.window.showWarningMessage(m, { modal: true, detail }, ...items),
   input: (o) => vscode.window.showInputBox(o),
-  pick: (items, placeHolder) => vscode.window.showQuickPick(items, { placeHolder }),
+  pick: (items, placeHolder) =>
+    vscode.window.showQuickPick(items, { placeHolder }),
 };
 
 export interface Deps {
@@ -67,43 +77,60 @@ export function registerCommands(ctx: vscode.ExtensionContext, d: Deps): void {
   reg("portcheck.checkPort", (port?: number) => checkPort(d, port));
   reg("portcheck.stopPort", (port?: number) => stopPort(d, port));
   reg("portcheck.findFreePort", (range?: string) => findFreePort(d, range));
+  reg("portcheck.showIp", () => showIP(d));
+  reg("portcheck.networkDevices", () => networkDevices(d));
+  reg("portcheck.lookup", (input?: string) => lookup(d, input));
 }
 
 async function askPort(d: Deps, prompt: string): Promise<number | undefined> {
-  const v = await d.ui().input({ prompt, placeHolder: "3000", validateInput: validatePort });
+  const v = await d
+    .ui()
+    .input({ prompt, placeHolder: "3000", validateInput: validatePort });
   return v === undefined ? undefined : Number(v.trim());
 }
 
 /** Stops what holds a row's port: a process via portcheck kill, otherwise guidance. */
-export async function stopRow(d: Deps, row: PortRow): Promise<string | undefined> {
+export async function stopRow(
+  d: Deps,
+  row: PortRow,
+): Promise<string | undefined> {
   if (row.container) {
     const c = row.container;
-    const pick = await d.ui().info(
-      `Port ${row.port} belongs to ${containerLabel(c)}. Stop it there instead: ${c.stopHint}`,
-      "Run in Terminal",
-      "Copy Command",
-    );
+    const pick = await d
+      .ui()
+      .info(
+        `Port ${row.port} belongs to ${containerLabel(c)}. Stop it there instead: ${c.stopHint}`,
+        "Run in Terminal",
+        "Copy Command",
+      );
     return runOrCopy(pick, c.stopHint);
   }
   if (row.pid === undefined) {
     const cmd = elevatedKill(d, row.port);
-    const pick = await d.ui().warn(
-      `The owner of port ${row.port} is hidden from your user. Stopping it needs elevated privileges: ${cmd}`,
-      "Run in Terminal",
-      "Copy Command",
-    );
+    const pick = await d
+      .ui()
+      .warn(
+        `The owner of port ${row.port} is hidden from your user. Stopping it needs elevated privileges: ${cmd}`,
+        "Run in Terminal",
+        "Copy Command",
+      );
     return runOrCopy(pick, cmd);
   }
 
-  const detail = [row.ancestry ? `Started by ${row.ancestry}.` : "", "portcheck asks it to exit, then forces it if needed."]
+  const detail = [
+    row.ancestry ? `Started by ${row.ancestry}.` : "",
+    "portcheck asks it to exit, then forces it if needed.",
+  ]
     .filter((s) => s !== "")
     .join("\n");
-  const choice = await d.ui().confirm(
-    `Stop ${row.processName ?? "the process"} (pid ${row.pid}) on port ${row.port}?`,
-    detail,
-    "Stop",
-    "Force Kill",
-  );
+  const choice = await d
+    .ui()
+    .confirm(
+      `Stop ${row.processName ?? "the process"} (pid ${row.pid}) on port ${row.port}?`,
+      detail,
+      "Stop",
+      "Force Kill",
+    );
   if (choice === undefined) {
     return undefined;
   }
@@ -111,7 +138,11 @@ export async function stopRow(d: Deps, row: PortRow): Promise<string | undefined
 }
 
 /** Stops a process with portcheck kill (its guards apply) and reports the outcome. */
-export async function killRow(d: Deps, pid: number, force = false): Promise<string | undefined> {
+export async function killRow(
+  d: Deps,
+  pid: number,
+  force = false,
+): Promise<string | undefined> {
   const res = await d.client().kill(pid, force);
   const r = res.results[0];
   await d.view.refresh();
@@ -119,7 +150,11 @@ export async function killRow(d: Deps, pid: number, force = false): Promise<stri
     return undefined;
   }
   if (r.outcome === "failed") {
-    void d.ui().error(`Could not stop ${r.name ?? "the process"} (pid ${r.pid}): ${r.error ?? "unknown error"}`);
+    void d
+      .ui()
+      .error(
+        `Could not stop ${r.name ?? "the process"} (pid ${r.pid}): ${r.error ?? "unknown error"}`,
+      );
   } else {
     void d.ui().info(`${r.name ?? "Process"} (pid ${r.pid}): ${r.outcome}.`);
   }
@@ -138,7 +173,10 @@ export function elevatedKill(d: Deps, port: number): string {
   return `${process.platform === "win32" ? "" : "sudo "}"${d.binary()}" kill ${port}`;
 }
 
-async function runOrCopy(pick: string | undefined, command: string): Promise<string | undefined> {
+async function runOrCopy(
+  pick: string | undefined,
+  command: string,
+): Promise<string | undefined> {
   if (pick === "Run in Terminal") {
     runInTerminal(command);
   } else if (pick === "Copy Command") {
@@ -147,10 +185,16 @@ async function runOrCopy(pick: string | undefined, command: string): Promise<str
   return pick;
 }
 
-export async function rowsForPort(d: Deps, port: number): Promise<{ status: string; rows: PortRow[] }> {
+export async function rowsForPort(
+  d: Deps,
+  port: number,
+): Promise<{ status: string; rows: PortRow[] }> {
   const res = await d.client().check(port);
   const st = res.ports[0];
-  return { status: st?.status ?? "free", rows: buildRows({ sockets: st?.holders ?? [], partial: false }) };
+  return {
+    status: st?.status ?? "free",
+    rows: buildRows({ sockets: st?.holders ?? [], partial: false }),
+  };
 }
 
 async function checkPort(d: Deps, port?: number): Promise<string | undefined> {
@@ -164,27 +208,44 @@ async function checkPort(d: Deps, port?: number): Promise<string | undefined> {
     return status;
   }
   if (status === "denied") {
-    void d.ui().warn(`Port ${port} can't be used by your user (permission denied).`);
+    void d
+      .ui()
+      .warn(`Port ${port} can't be used by your user (permission denied).`);
     return status;
   }
-  const who = rows.map((r) => r.label.replace(/^:\d+\s+/, "") + (r.pid === undefined ? "" : ` (pid ${r.pid})`)).join(", ");
-  const pick = await d.ui().warn(`Port ${port} is in use${who ? ` by ${who}` : ""}.`, "Stop It");
+  const who = rows
+    .map(
+      (r) =>
+        r.label.replace(/^:\d+\s+/, "") +
+        (r.pid === undefined ? "" : ` (pid ${r.pid})`),
+    )
+    .join(", ");
+  const pick = await d
+    .ui()
+    .warn(`Port ${port} is in use${who ? ` by ${who}` : ""}.`, "Stop It");
   if (pick === "Stop It") {
     await stopPort(d, port);
   }
   return status;
 }
 
-export async function stopPort(d: Deps, port?: number): Promise<string | undefined> {
+export async function stopPort(
+  d: Deps,
+  port?: number,
+): Promise<string | undefined> {
   port ??= await askPort(d, "Port to free");
   if (port === undefined) {
     return undefined;
   }
   const { status, rows } = await rowsForPort(d, port);
   if (rows.length === 0) {
-    void d.ui().info(
-      status === "free" ? `Nothing is listening on port ${port}.` : `Port ${port} is ${status}, but its owner isn't visible.`,
-    );
+    void d
+      .ui()
+      .info(
+        status === "free"
+          ? `Nothing is listening on port ${port}.`
+          : `Port ${port} is ${status}, but its owner isn't visible.`,
+      );
     return undefined;
   }
   let row = rows[0];
@@ -198,8 +259,13 @@ export async function stopPort(d: Deps, port?: number): Promise<string | undefin
   return row ? stopRow(d, row) : undefined;
 }
 
-async function findFreePort(d: Deps, range?: string): Promise<number | undefined> {
-  range ??= await d.ui().input({ prompt: "Range to search", value: DEFAULT_FREE_RANGE });
+async function findFreePort(
+  d: Deps,
+  range?: string,
+): Promise<number | undefined> {
+  range ??= await d
+    .ui()
+    .input({ prompt: "Range to search", value: DEFAULT_FREE_RANGE });
   if (range === undefined) {
     return undefined;
   }

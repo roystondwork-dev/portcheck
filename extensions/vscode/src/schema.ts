@@ -104,3 +104,44 @@ export interface DoctorData {
   ok: boolean;
   checks: DoctorCheck[];
 }
+
+/** `portcheck net` (portcheck 0.12+). */
+export interface NetData {
+  interfaces: {
+    name: string;
+    mac?: string;
+    mtu?: number;
+    kind: "loopback" | "vpn" | "virtual" | "physical";
+    addresses: { address: string; class: string; version: "IPv4" | "IPv6" }[];
+  }[];
+  primary?: { ipv4?: string; ipv6?: string; interface?: string };
+  gateways?: string[];
+  dns?: string[];
+  public?: string[];
+  warnings?: string[];
+}
+
+/** `portcheck net devices`. */
+export interface DevicesData {
+  devices: {
+    ip: string;
+    mac?: string;
+    vendor?: string;
+    name?: string;
+    interface?: string;
+    gateway?: boolean;
+    self?: boolean;
+  }[];
+  probed?: string;
+  warnings?: string[];
+}
+
+/** `portcheck net lookup`. */
+export interface LookupData {
+  results: {
+    query: string;
+    kind: "domain" | "ip";
+    records: { type: string; value: string; note?: string }[];
+    error?: string;
+  }[];
+}

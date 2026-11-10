@@ -119,6 +119,24 @@
         "title": "Show/Hide UDP Ports",
         "category": "portcheck",
         "icon": "$(filter)"
+      },
+      {
+        "command": "portcheck.showIp",
+        "title": "Show My IP Addresses",
+        "icon": "$(globe)",
+        "category": "portcheck"
+      },
+      {
+        "command": "portcheck.networkDevices",
+        "title": "Devices on My Network",
+        "icon": "$(device-desktop)",
+        "category": "portcheck"
+      },
+      {
+        "command": "portcheck.lookup",
+        "title": "Look Up a Domain or IP",
+        "icon": "$(search)",
+        "category": "portcheck"
       }
     ],
     "menus": {
