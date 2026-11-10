@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.12.0](https://github.com/roystondwork-dev/portcheck/compare/v0.11.1...v0.12.0) (2026-11-10)
+
+
+### Features
+
+* **action:** GitHub Action to wait for services and run portcheck in CI ([75af389](https://github.com/roystondwork-dev/portcheck/commit/75af3891d839bbba3324ec21920515a2a0d2dc99))
+* **claude-code:** Claude Code plugin with portcheck's MCP tools and a skill ([1d49b4a](https://github.com/roystondwork-dev/portcheck/commit/1d49b4a88bb03d1ec7b87f0d4471b1016a5ce102))
+* **containers:** name Docker Compose services and suggest docker compose stop ([6c112c7](https://github.com/roystondwork-dev/portcheck/commit/6c112c7c1676927189b64394b1fe1f741d4f6100))
+* **docker:** Docker image on ghcr.io and a Dev Container feature ([c65cdc8](https://github.com/roystondwork-dev/portcheck/commit/c65cdc8de96c19f99bf67c83be9ec4b95ff6351f))
+* **init:** shell hook that explains "address already in use" after a command fails ([539b6e2](https://github.com/roystondwork-dev/portcheck/commit/539b6e21ed405d69b3b90bba80b61cf0d9282d76))
+* **net:** IP addresses, devices on the local network, and DNS lookups ([f24954a](https://github.com/roystondwork-dev/portcheck/commit/f24954a52fc5e05c07db7e7dfa06817dcc7475d6))
+* **net:** IP addresses, devices on the local network, and DNS lookups ([fc6d7cd](https://github.com/roystondwork-dev/portcheck/commit/fc6d7cd183e6f73089cd681edb5f715642ca4419))
+* **port:** every project gets its own remembered port ([1e0e844](https://github.com/roystondwork-dev/portcheck/commit/1e0e8449205818b69a4500f7776946f5b214afb0))
+* **tray:** show each port's project and start time; offer to stop forgotten dev servers ([913a836](https://github.com/roystondwork-dev/portcheck/commit/913a8368254483c953e23b1e3bc926d5ce339809))
+* **tunnel:** show where SSH tunnels and kubectl port-forwards lead ([0a9ffc8](https://github.com/roystondwork-dev/portcheck/commit/0a9ffc88375b78d60b0ca847b4c35bd9139bbe79))
+* **vscode:** network commands: my IP addresses, devices on my network, lookup ([f2b4452](https://github.com/roystondwork-dev/portcheck/commit/f2b4452896a7456a2ffb24e4480116157ad10884))
+* **vscode:** offer to stop dev servers that have run for over a day; show each port's project ([9f3f1f1](https://github.com/roystondwork-dev/portcheck/commit/9f3f1f17ffc173c67a1c94e00377088e975505a0))
+
+
+### Bug Fixes
+
+* **action:** read command output as JSON in the test and docs ([09bd907](https://github.com/roystondwork-dev/portcheck/commit/09bd907dc05522d064a2fa82cd42c42bcc1c5651))
+* **explain:** name macOS AirPlay Receiver on ports 5000 and 7000 instead of suggesting kill ([6856c7f](https://github.com/roystondwork-dev/portcheck/commit/6856c7fb46bac56e68a647007087c312f40ea2c0))
+* **port:** retry the registry lock on Windows while another process releases it ([e87d4a1](https://github.com/roystondwork-dev/portcheck/commit/e87d4a18d4c93bc3bcdd57e18e7226443f4ab8ba))
+* **servers:** don't treat system folders as projects; fix the forgotten-servers test ([82af29b](https://github.com/roystondwork-dev/portcheck/commit/82af29bee926e224792f59cc0955363d79b52e82))
+
+
+### Build & Release
+
+* **deps:** bump github.com/ebitengine/purego ([0edb941](https://github.com/roystondwork-dev/portcheck/commit/0edb941126c1ed1516f0620c12ed707cf8afd9f9))
+* **deps:** bump the browser-npm-deps group across 1 directory with 7 updates ([47954dc](https://github.com/roystondwork-dev/portcheck/commit/47954dc552f07ed17a66fe102f227d677ece6440))
+* **deps:** bump the npm-deps group across 1 directory with 5 updates ([5336190](https://github.com/roystondwork-dev/portcheck/commit/5336190a43853eebc783aaec7a2e713ec90514b3))
+* go mod tidy ([8170eee](https://github.com/roystondwork-dev/portcheck/commit/8170eee4d2621cbaab88a53750ed66b8a49d93ac))
+* go mod tidy ([83b52f8](https://github.com/roystondwork-dev/portcheck/commit/83b52f883be0a5c39eb59f1cd1bbbd56e13a019a))
+
 ## [0.11.1](https://github.com/roystondwork-dev/portcheck/compare/v0.11.0...v0.11.1) (2026-11-09)
 
 
