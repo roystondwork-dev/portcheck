@@ -108,7 +108,9 @@ secret either: each logs in with the same OIDC identity (trusted publishing). Th
 Registry entry is `server.json` at the repository root (`io.github.roystondwork-dev/portcheck`,
 pointing at `npx portcheck-cli mcp`); release-please bumps its versions, and the
 registry checks them against `mcpName` in the published npm package, so it's
-published right after npm.
+published right after npm. If that attempt fails (for example, npm was still
+propagating the new version), run the **MCP Registry** workflow by hand with the tag:
+`gh workflow run mcp-registry.yml -f tag=vX.Y.Z`.
 
 ## Local dry run
 
