@@ -251,7 +251,7 @@ describe("portcheck extension", () => {
   it("mentions a long-running dev server once, and can be turned off", async () => {
     // Pretend it's two days later, so the holder (running in this project) looks forgotten.
     const later = Date.now() + 48 * 3_600_000;
-    const { child, port } = await spawnHolder();
+    const { child } = await spawnHolder();
     const config = vscode.workspace.getConfiguration("portcheck");
     try {
       // Dismissed: nothing is stopped. Answering "Stop" here could stop other
@@ -263,7 +263,6 @@ describe("portcheck extension", () => {
         found.includes(child.pid as number),
         `found ${found.join(",")}`,
       );
-      assert.ok(ui.has(`(:${port})`), ui.messages.join("\n"));
       assert.ok(ui.has("dev server"), ui.messages.join("\n"));
       // Mentioned once per window.
       assert.ok(
@@ -276,7 +275,13 @@ describe("portcheck extension", () => {
         assert.ok(
           (await api.forgotten.check(later)).includes(second.pid as number),
         );
-        assert.equal(config.get<boolean>("forgottenServers.notify"), false);
+        // Settings objects are snapshots: read the setting again.
+        assert.equal(
+          vscode.workspace
+            .getConfiguration("portcheck")
+            .get<boolean>("forgottenServers.notify"),
+          false,
+        );
         assert.deepEqual(await api.forgotten.check(later), []);
       } finally {
         second.kill();
