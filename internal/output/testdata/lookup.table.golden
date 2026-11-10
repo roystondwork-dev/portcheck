@@ -1,0 +1,7 @@
+QUERY         TYPE   VALUE                                                                     NOTE
+────────────────────────────────────────────────────────────────────────────────────────────────────────────
+example.com   A      192.0.2.80                                                                public
+example.com   MX     mail.example.com                                                          preference 10
+example.com   TXT    v=spf1 include:example.net v=spf1 include:example.net v=spf1 include:...
+192.168.1.20  CLASS  private                                                                   IPv4
+192.168.1.20  LOCAL  on a local network                                                        en0

@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "kind": "net",
+  "data": {
+    "interfaces": [
+      {
+        "name": "lo0",
+        "mtu": 16384,
+        "kind": "loopback",
+        "addresses": [
+          {
+            "address": "127.0.0.1/8",
+            "class": "loopback",
+            "version": "IPv4"
+          },
+          {
+            "address": "::1/128",
+            "class": "loopback",
+            "version": "IPv6"
+          }
+        ]
+      },
+      {
+        "name": "en0",
+        "mac": "00:00:5e:00:53:0a",
+        "mtu": 1500,
+        "kind": "physical",
+        "addresses": [
+          {
+            "address": "192.168.1.10/24",
+            "class": "private",
+            "version": "IPv4"
+          },
+          {
+            "address": "fe80::1/64",
+            "class": "link-local",
+            "version": "IPv6"
+          }
+        ]
+      },
+      {
+        "name": "utun3",
+        "mtu": 1380,
+        "kind": "vpn",
+        "addresses": [
+          {
+            "address": "100.64.0.5/32",
+            "class": "shared",
+            "version": "IPv4"
+          }
+        ]
+      },
+      {
+        "name": "bridge0",
+        "mtu": 0,
+        "kind": "virtual",
+        "addresses": []
+      }
+    ],
+    "primary": {
+      "ipv4": "192.168.1.10",
+      "interface": "en0"
+    },
+    "gateways": [
+      "192.168.1.1"
+    ],
+    "dns": [
+      "192.168.1.1"
+    ],
+    "public": [
+      "203.0.113.7"
+    ],
+    "warnings": [
+      "example warning"
+    ]
+  }
+}

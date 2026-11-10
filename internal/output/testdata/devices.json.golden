@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "kind": "devices",
+  "data": {
+    "devices": [
+      {
+        "ip": "192.168.1.1",
+        "mac": "00:00:5e:00:53:01",
+        "name": "router.lan",
+        "interface": "en0",
+        "gateway": true
+      },
+      {
+        "ip": "192.168.1.10",
+        "mac": "00:00:5e:00:53:0a",
+        "interface": "en0",
+        "self": true
+      },
+      {
+        "ip": "192.168.1.20",
+        "mac": "b8:27:eb:00:00:20",
+        "vendor": "Raspberry Pi",
+        "interface": "en0"
+      },
+      {
+        "ip": "192.168.1.30",
+        "interface": "en0"
+      }
+    ],
+    "probed": "192.168.1.0/24",
+    "warnings": [
+      "neighbour cache: example"
+    ]
+  }
+}

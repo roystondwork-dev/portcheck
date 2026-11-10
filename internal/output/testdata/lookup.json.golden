@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "lookup",
+  "data": {
+    "results": [
+      {
+        "query": "example.com",
+        "kind": "domain",
+        "records": [
+          {
+            "type": "A",
+            "value": "192.0.2.80",
+            "note": "public"
+          },
+          {
+            "type": "MX",
+            "value": "mail.example.com",
+            "note": "preference 10"
+          },
+          {
+            "type": "TXT",
+            "value": "v=spf1 include:example.net v=spf1 include:example.net v=spf1 include:example.net v=spf1 include:example.net v=spf1 include:example.net "
+          }
+        ]
+      },
+      {
+        "query": "192.168.1.20",
+        "kind": "ip",
+        "records": [
+          {
+            "type": "CLASS",
+            "value": "private",
+            "note": "IPv4"
+          },
+          {
+            "type": "LOCAL",
+            "value": "on a local network",
+            "note": "en0"
+          }
+        ]
+      },
+      {
+        "query": "nope.invalid",
+        "kind": "domain",
+        "records": [],
+        "error": "nope.invalid doesn't resolve"
+      }
+    ]
+  }
+}

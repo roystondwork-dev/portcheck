@@ -57,6 +57,7 @@ portcheck [port...] [flags]
 * [portcheck kill](portcheck_kill.md)	 - Stop the process listening on a port
 * [portcheck list](portcheck_list.md)	 - List sockets and the processes that own them
 * [portcheck mcp](portcheck_mcp.md)	 - Serve portcheck to AI assistants (Model Context Protocol)
+* [portcheck net](portcheck_net.md)	 - Show this machine's IP addresses, gateway and DNS servers
 * [portcheck port](portcheck_port.md)	 - This project's own port, the same every time
 * [portcheck run](portcheck_run.md)	 - Run a command on a free port (sets $PORT)
 * [portcheck scan](portcheck_scan.md)	 - Check which TCP ports are reachable on remote hosts

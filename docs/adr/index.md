@@ -14,6 +14,7 @@ feedback for at least 5 days; see
 | [0005](0005-browser-extension.md) | A browser extension that talks to portcheck through native messaging | Accepted |
 | [0006](0006-jetbrains-plugin.md) | A JetBrains plugin as a thin client of the portcheck CLI | Accepted |
 | [0007](0007-mcp-server.md) | An MCP server for AI coding assistants | Accepted |
+| [0008](0008-net-commands.md) | `net`: local network facts, opt-in network access | Accepted |
 
 To propose a new one, copy the latest ADR, number it sequentially, set **Status:
 Proposed**, and open a pull request.

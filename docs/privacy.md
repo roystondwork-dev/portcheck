@@ -22,7 +22,16 @@ popup and tooltip only, and stays on your computer.
 ## The VS Code extension and the CLI
 
 They run `portcheck` locally and show its results. They don't send anything over the
-network, except `portcheck scan`, which connects only to the hosts you name.
+network, except:
+
+- `portcheck scan`, which connects only to the hosts you name;
+- `portcheck net --public`, which asks [ipify](https://www.ipify.org) (`api.ipify.org`
+  and `api6.ipify.org`) for your public address, only when you pass `--public`;
+- `portcheck net devices --probe`, which tries TCP connections to a few ports on the
+  hosts of your local network, only when you pass `--probe`.
+
+`portcheck net` otherwise reads your own machine, and `net lookup` and device names
+use your system's DNS resolver.
 
 ## Contact
 

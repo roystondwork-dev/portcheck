@@ -26,6 +26,7 @@ import (
 	"github.com/roystondwork-dev/portcheck/pkg/freeport"
 	"github.com/roystondwork-dev/portcheck/pkg/inspect"
 	"github.com/roystondwork-dev/portcheck/pkg/killer"
+	"github.com/roystondwork-dev/portcheck/pkg/netinfo"
 	"github.com/roystondwork-dev/portcheck/pkg/portspec"
 	"github.com/roystondwork-dev/portcheck/pkg/scan"
 	"github.com/roystondwork-dev/portcheck/pkg/waitfor"
@@ -88,6 +89,11 @@ type App struct {
 	// portcheck keeps its files in a portcheck folder there, or in
 	// $PORTCHECK_CONFIG_DIR when that is set.
 	ConfigDir func() (string, error)
+	// Net reads this machine's network facts; DNS is the system resolver;
+	// NetGet fetches the public address for `net --public`.
+	Net    netinfo.Source
+	DNS    netinfo.DNSResolver
+	NetGet netinfo.Getter
 }
 
 // NewApp returns an App wired to the real operating system. When a
@@ -128,6 +134,9 @@ func NewApp() *App {
 		Now:           time.Now,
 		CurrentUser:   currentUser,
 		ConfigDir:     os.UserConfigDir,
+		Net:           netinfo.NewSystem(),
+		DNS:           net.DefaultResolver,
+		NetGet:        netinfo.HTTPGet,
 	}
 }
 

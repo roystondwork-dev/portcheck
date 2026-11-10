@@ -1,0 +1,9 @@
+INTERFACE,ADDRESS,CLASS,MAC,NOTE
+lo0,127.0.0.1/8,loopback,-,
+lo0,::1/128,loopback,-,
+en0,192.168.1.10/24,private,00:00:5e:00:53:0a,primary
+en0,fe80::1/64,link-local,00:00:5e:00:53:0a,
+utun3,100.64.0.5/32,shared,-,vpn
+gateway,192.168.1.1,private,-,
+dns,192.168.1.1,private,-,
+public,203.0.113.7,public,-,from ipify

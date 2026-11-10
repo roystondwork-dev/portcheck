@@ -99,6 +99,7 @@ nav:
       - Stop a process (kill): guide/kill.md
       - Forgotten dev servers (servers): guide/servers.md
       - Scan remote hosts (scan): guide/scan.md
+      - "Network: IPs, devices, lookup (net)": guide/net.md
       - Wait for ports (wait): guide/wait.md
       - Run on a free port (run): guide/run.md
       - Stable project ports (port): guide/port.md
@@ -138,6 +139,10 @@ nav:
           - list: commands/portcheck_list.md
           - mcp: commands/portcheck_mcp.md
           - port: commands/portcheck_port.md
+          - net: commands/portcheck_net.md
+          - net devices: commands/portcheck_net_devices.md
+          - net ip: commands/portcheck_net_ip.md
+          - net lookup: commands/portcheck_net_lookup.md
           - run: commands/portcheck_run.md
           - scan: commands/portcheck_scan.md
           - tui: commands/portcheck_tui.md
@@ -165,3 +170,4 @@ nav:
           - "0005: Browser extension": adr/0005-browser-extension.md
           - "0006: JetBrains plugin": adr/0006-jetbrains-plugin.md
           - "0007: MCP server": adr/0007-mcp-server.md
+          - "0008: net commands": adr/0008-net-commands.md

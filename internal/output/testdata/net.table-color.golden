@@ -1,0 +1,10 @@
+[1mINTERFACE[m  [1mADDRESS[m          [1mCLASS[m       [1mMAC[m                [1mNOTE[m
+[90m───────────[m[90m─────────────────[m[90m────────────[m[90m───────────────────[m[90m──────────[m
+lo0        127.0.0.1/8      [90mloopback[m    -                  [36m[m
+lo0        ::1/128          [90mloopback[m    -                  [36m[m
+en0        192.168.1.10/24  [32mprivate[m     00:00:5e:00:53:0a  [36mprimary[m
+en0        fe80::1/64       [32mlink-local[m  00:00:5e:00:53:0a  [36m[m
+utun3      100.64.0.5/32    [90mshared[m      -                  [36mvpn[m
+[90mgateway[m    192.168.1.1      [32mprivate[m     -                  [36m[m
+[90mdns[m        192.168.1.1      [32mprivate[m     -                  [36m[m
+[90mpublic[m     203.0.113.7      [33mpublic[m      -                  [36mfrom ipify[m

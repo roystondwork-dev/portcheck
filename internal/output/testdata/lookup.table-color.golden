@@ -1,0 +1,7 @@
+[1mQUERY[m         [1mTYPE[m   [1mVALUE[m                                                                     [1mNOTE[m
+[90m──────────────[m[90m───────[m[90m──────────────────────────────────────────────────────────────────────────[m[90m─────────────[m
+example.com   [36mA[m      192.0.2.80                                                                [33mpublic[m
+example.com   [36mMX[m     mail.example.com                                                          preference 10
+example.com   [36mTXT[m    v=spf1 include:example.net v=spf1 include:example.net v=spf1 include:...
+192.168.1.20  [36mCLASS[m  [32mprivate[m                                                                   IPv4
+192.168.1.20  [36mLOCAL[m  on a local network                                                        en0

@@ -15,6 +15,7 @@ import (
 	"github.com/roystondwork-dev/portcheck/internal/testutil"
 	"github.com/roystondwork-dev/portcheck/pkg/freeport"
 	"github.com/roystondwork-dev/portcheck/pkg/inspect"
+	"github.com/roystondwork-dev/portcheck/pkg/netinfo"
 	"github.com/roystondwork-dev/portcheck/pkg/scan"
 )
 
@@ -66,15 +67,55 @@ var (
 
 var colorEnv = []string{"CLICOLOR_FORCE=1", "TERM=xterm-256color"}
 
+var (
+	netIdentity = netinfo.Identity{
+		Interfaces: []netinfo.Interface{
+			{Name: "lo0", MTU: 16384, Kind: netinfo.KindLoopback, Prefixes: []netip.Prefix{netip.MustParsePrefix("127.0.0.1/8"), netip.MustParsePrefix("::1/128")}},
+			{Name: "en0", MAC: "00:00:5e:00:53:0a", MTU: 1500, Kind: netinfo.KindPhysical, Prefixes: []netip.Prefix{netip.MustParsePrefix("192.168.1.10/24"), netip.MustParsePrefix("fe80::1/64")}},
+			{Name: "utun3", MTU: 1380, Kind: netinfo.KindVPN, Prefixes: []netip.Prefix{netip.MustParsePrefix("100.64.0.5/32")}},
+			{Name: "bridge0", Kind: netinfo.KindVirtual},
+		},
+		Primary4:         netip.MustParseAddr("192.168.1.10"),
+		PrimaryInterface: "en0",
+		Gateways:         []netip.Addr{netip.MustParseAddr("192.168.1.1")},
+		DNS:              []netip.Addr{netip.MustParseAddr("192.168.1.1")},
+		Public:           []netip.Addr{netip.MustParseAddr("203.0.113.7")},
+		Warnings:         []string{"example warning"},
+	}
+	netDevices = []netinfo.Device{
+		{IP: netip.MustParseAddr("192.168.1.1"), MAC: "00:00:5e:00:53:01", Name: "router.lan", Interface: "en0", Gateway: true},
+		{IP: netip.MustParseAddr("192.168.1.10"), MAC: "00:00:5e:00:53:0a", Interface: "en0", Self: true},
+		{IP: netip.MustParseAddr("192.168.1.20"), MAC: "b8:27:eb:00:00:20", Vendor: "Raspberry Pi", Interface: "en0"},
+		{IP: netip.MustParseAddr("192.168.1.30"), Interface: "en0"},
+	}
+	netLookups = []netinfo.LookupResult{
+		{Query: "example.com", Kind: "domain", Records: []netinfo.Record{
+			{Type: "A", Value: "192.0.2.80", Note: "public"},
+			{Type: "MX", Value: "mail.example.com", Note: "preference 10"},
+			{Type: "TXT", Value: strings.Repeat("v=spf1 include:example.net ", 5)},
+		}},
+		{Query: "192.168.1.20", Kind: "ip", Records: []netinfo.Record{
+			{Type: "CLASS", Value: "private", Note: "IPv4"},
+			{Type: "LOCAL", Value: "on a local network", Note: "en0"},
+		}},
+		{Query: "nope.invalid", Kind: "domain", Err: "nope.invalid doesn't resolve"},
+	}
+)
+
 func docs() map[string]Document {
 	return map[string]Document{
-		"list":       ListDoc(&inspect.Result{Sockets: sockets, Partial: true}, false),
-		"list-wide":  ListDoc(&inspect.Result{Sockets: sockets, Partial: true}, true),
-		"list-empty": ListDoc(&inspect.Result{}, false),
-		"check":      CheckDoc(statuses),
-		"free":       FreeDoc([]uint16{3001, 3002}),
-		"free-empty": FreeDoc(nil),
-		"kill":       KillDoc(killResults),
+		"list":          ListDoc(&inspect.Result{Sockets: sockets, Partial: true}, false),
+		"list-wide":     ListDoc(&inspect.Result{Sockets: sockets, Partial: true}, true),
+		"list-empty":    ListDoc(&inspect.Result{}, false),
+		"check":         CheckDoc(statuses),
+		"free":          FreeDoc([]uint16{3001, 3002}),
+		"free-empty":    FreeDoc(nil),
+		"kill":          KillDoc(killResults),
+		"net":           NetDoc(netIdentity),
+		"net-empty":     NetDoc(netinfo.Identity{}),
+		"devices":       DevicesDoc(netDevices, "192.168.1.0/24", []string{"neighbour cache: example"}),
+		"devices-empty": DevicesDoc(nil, "", nil),
+		"lookup":        LookupDoc(netLookups),
 		"servers": ServersDoc([]ServerJSON{
 			{ProcessJSON: ProcessInfoJSON(node), Ports: []uint16{3000, 24678}, UptimeSeconds: 50 * 3600},
 			{ProcessJSON: ProcessJSON{PID: 77, Name: "hugo", Project: "docs"}, Ports: []uint16{1313}},

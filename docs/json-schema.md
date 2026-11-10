@@ -231,6 +231,73 @@ portcheck is its native messaging host, starting `path` for the extension IDs in
 
 `exists` is `false` when the project's folder is gone.
 
+## `net`
+
+```json
+{
+  "interfaces": [
+    { "name": "en0", "mac": "00:00:5e:00:53:0a", "mtu": 1500, "kind": "physical",
+      "addresses": [ { "address": "192.168.1.10/24", "class": "private", "version": "IPv4" } ] }
+  ],
+  "primary": { "ipv4": "192.168.1.10", "ipv6": "2001:db8::10", "interface": "en0" },
+  "gateways": ["192.168.1.1"],
+  "dns": ["192.168.1.1"],
+  "public": ["203.0.113.7"],
+  "warnings": ["DNS servers: not supported on this operating system"]
+}
+```
+
+| Field | Notes |
+|---|---|
+| `interfaces[].kind` | `loopback`, `vpn`, `virtual` or `physical` (a guess from the name) |
+| `addresses[].class` | `loopback`, `link-local`, `private`, `shared` (100.64.0.0/10), `multicast`, `unspecified` or `public` |
+| `primary` | the addresses used to reach the internet; omitted fields mean no such route |
+| `public` | only with `--public` (from ipify) |
+| `warnings` | facts that couldn't be read; also printed on stderr |
+
+## `devices`
+
+From `portcheck net devices`.
+
+```json
+{
+  "devices": [
+    { "ip": "192.168.1.1", "mac": "00:00:5e:00:53:01", "name": "router.lan", "interface": "en0", "gateway": true },
+    { "ip": "192.168.1.10", "mac": "00:00:5e:00:53:0a", "interface": "en0", "self": true },
+    { "ip": "192.168.1.20", "mac": "b8:27:eb:00:00:20", "vendor": "Raspberry Pi", "interface": "en0" }
+  ],
+  "probed": "192.168.1.0/24",
+  "warnings": []
+}
+```
+
+`vendor` is a hint from the MAC address, or `private (randomized) MAC`. `probed` is the
+network probed with `--probe`. A device found by probing but missing from the neighbour
+cache has only `ip`.
+
+## `lookup`
+
+From `portcheck net lookup`. One result per query, in the order given.
+
+```json
+{
+  "results": [
+    { "query": "example.com", "kind": "domain", "records": [
+        { "type": "A", "value": "192.0.2.80", "note": "public" },
+        { "type": "MX", "value": "mail.example.com", "note": "preference 10" } ] },
+    { "query": "192.168.1.20", "kind": "ip", "records": [
+        { "type": "CLASS", "value": "private", "note": "IPv4" },
+        { "type": "LOCAL", "value": "on a local network", "note": "en0" },
+        { "type": "MAC", "value": "b8:27:eb:00:00:20", "note": "Raspberry Pi" } ] },
+    { "query": "nope.invalid", "kind": "domain", "records": [], "error": "nope.invalid doesn't resolve: …" }
+  ]
+}
+```
+
+Record types: `A`, `AAAA`, `CNAME`, `MX`, `NS`, `TXT` and `PTR`, plus `CLASS`, `LOCAL`
+(`this machine` or `on a local network`, with the interface in `note`) and `MAC` for
+addresses.
+
 ## `version`
 
 ```json
