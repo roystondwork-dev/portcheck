@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"syscall"
 	"time"
 )
 
@@ -117,11 +116,11 @@ func describe(err error) string {
 	switch {
 	case errors.As(err, &dnsErr) && dnsErr.IsNotFound:
 		return "host not found: " + dnsErr.Name
-	case errors.Is(err, syscall.ECONNREFUSED):
+	case isAny(err, errRefused):
 		return "connection refused"
-	case errors.Is(err, syscall.ECONNRESET):
+	case isAny(err, errReset):
 		return "connection reset"
-	case errors.Is(err, syscall.EHOSTUNREACH), errors.Is(err, syscall.ENETUNREACH):
+	case isAny(err, errUnreachable):
 		return "host unreachable"
 	case errors.Is(err, os.ErrDeadlineExceeded), errors.Is(err, context.DeadlineExceeded):
 		return "timed out"
@@ -130,6 +129,15 @@ func describe(err error) string {
 	default:
 		return lastPart(err.Error())
 	}
+}
+
+func isAny(err error, targets []error) bool {
+	for _, t := range targets {
+		if errors.Is(err, t) {
+			return true
+		}
+	}
+	return false
 }
 
 // lastPart drops Go's "Get "https://…": dial tcp …:" prefixes.
