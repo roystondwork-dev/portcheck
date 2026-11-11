@@ -13,16 +13,20 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
 
 	"fyne.io/systray"
 
+	"github.com/roystondwork-dev/portcheck/internal/buildinfo"
+	"github.com/roystondwork-dev/portcheck/internal/notify"
 	"github.com/roystondwork-dev/portcheck/internal/tray"
 	"github.com/roystondwork-dev/portcheck/pkg/containers"
 	"github.com/roystondwork-dev/portcheck/pkg/inspect"
 	"github.com/roystondwork-dev/portcheck/pkg/killer"
+	"github.com/roystondwork-dev/portcheck/pkg/monitor"
 	"github.com/roystondwork-dev/portcheck/pkg/wsl"
 )
 
@@ -56,6 +60,15 @@ func onReady(ctx context.Context) {
 	}
 	lister := inspect.NewSystem(opts...)
 	k := killer.New()
+	// Uptime monitors from `portcheck monitor add`, checked in the background.
+	runner := &monitor.Runner{
+		Check:   monitor.NewChecker("portcheck-tray/" + buildinfo.Get().Version).Check,
+		Tracker: &monitor.Tracker{},
+	}
+	var sup *monitor.Supervisor
+	if path := monitorsFile(); path != "" {
+		sup = &monitor.Supervisor{Path: path, Runner: runner}
+	}
 	t := tray.New(tray.Deps{
 		List: func(ctx context.Context) ([]inspect.Socket, error) {
 			res, err := lister.List(ctx, inspect.Filter{ListeningOnly: true})
@@ -72,8 +85,37 @@ func onReady(ctx context.Context) {
 		User:  currentUser(),
 		Every: 3 * time.Second,
 		Now:   time.Now,
+		Monitors: func() []tray.MonitorView {
+			if sup == nil {
+				return nil
+			}
+			return tray.MonitorViews(sup.Targets(), runner.Tracker.States())
+		},
 	}, menu{})
+	if sup != nil {
+		n := notify.System(runtime.GOOS, notify.Exec)
+		runner.OnEvent = func(e monitor.Event) {
+			_ = n.Notify(ctx, "portcheck", e.Message())
+			t.Refresh(ctx)
+		}
+		go sup.Run(ctx)
+	}
 	go t.Run(ctx)
+}
+
+// monitorsFile is the monitors file `portcheck monitor` uses: in
+// $PORTCHECK_CONFIG_DIR, or the portcheck folder of the user's configuration
+// directory. Empty if there's no such directory.
+func monitorsFile() string {
+	dir := os.Getenv("PORTCHECK_CONFIG_DIR")
+	if dir == "" {
+		base, err := os.UserConfigDir()
+		if err != nil {
+			return ""
+		}
+		dir = filepath.Join(base, "portcheck")
+	}
+	return filepath.Join(dir, monitor.FileName)
 }
 
 // currentUser is the name inspect reports as a process's user.

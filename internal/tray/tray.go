@@ -124,6 +124,8 @@ type Deps struct {
 	// menu offers to stop it (default DefaultStaleAfter).
 	Now        func() time.Time
 	StaleAfter time.Duration
+	// Monitors, if set, returns the uptime monitors to show (see MonitorViews).
+	Monitors func() []MonitorView
 }
 
 // Tray keeps the menu in sync with the machine's ports.
@@ -131,14 +133,15 @@ type Tray struct {
 	d    Deps
 	menu Menu
 
-	mu      sync.Mutex
-	all     bool
-	shown   string // signature of the menu on screen
-	title   string // the menu bar title and tooltip on screen
-	summary string
-	status  string // the last action's result, shown in the tooltip
-	entries []Entry
-	stale   []Entry // entries running longer than StaleAfter, oldest first
+	mu       sync.Mutex
+	all      bool
+	shown    string // signature of the menu on screen
+	title    string // the menu bar title and tooltip on screen
+	summary  string
+	status   string // the last action's result, shown in the tooltip
+	entries  []Entry
+	stale    []Entry // entries running longer than StaleAfter, oldest first
+	monitors []MonitorView
 }
 
 // New returns a tray drawing into menu.
@@ -162,6 +165,10 @@ func (t *Tray) Run(ctx context.Context) {
 // Refresh lists the ports and redraws the menu if they changed.
 func (t *Tray) Refresh(ctx context.Context) {
 	sockets, err := t.d.List(ctx)
+	var monitors []MonitorView
+	if t.d.Monitors != nil {
+		monitors = t.d.Monitors()
+	}
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	var entries, stale []Entry
@@ -175,10 +182,12 @@ func (t *Tray) Refresh(ctx context.Context) {
 	} else {
 		sig += err.Error()
 	}
+	// A monitor's state changes rarely (Since moves only when it does).
+	sig += fmt.Sprintf(" %+v", monitors)
 	if sig == t.shown {
 		return
 	}
-	t.shown, t.entries, t.stale = sig, entries, stale
+	t.shown, t.entries, t.stale, t.monitors = sig, entries, stale, monitors
 	t.draw(ctx, err)
 }
 
@@ -196,6 +205,14 @@ func (t *Tray) draw(ctx context.Context, err error) {
 	default:
 		t.title, t.summary = strconv.Itoa(len(t.entries)), fmt.Sprintf("%d ports listening", len(t.entries))
 	}
+	if _, down := monitorCounts(t.monitors); down > 0 {
+		t.title = strings.TrimSpace(t.title + " ⚠" + strconv.Itoa(down))
+		noun := "services"
+		if down == 1 {
+			noun = "service"
+		}
+		t.summary += fmt.Sprintf("; %d monitored %s down", down, noun)
+	}
 	m.Add(t.summary, "").Disable()
 	m.SetTitle(t.title, t.tooltip())
 	if len(t.stale) > 0 {
@@ -206,6 +223,10 @@ func (t *Tray) draw(ctx context.Context, err error) {
 		t.addEntry(ctx, e)
 	}
 	if len(t.entries) > 0 {
+		m.Separator()
+	}
+	if t.d.Monitors != nil {
+		t.addMonitors(t.monitors)
 		m.Separator()
 	}
 	label := "Show All Ports"

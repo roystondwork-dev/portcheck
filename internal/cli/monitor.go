@@ -1,9 +1,7 @@
 package cli
 
 import (
-	"context"
 	"fmt"
-	"os"
 	"path/filepath"
 	"sync/atomic"
 	"time"
@@ -16,7 +14,7 @@ import (
 
 // defaultMonitorReload is how often `monitor run` looks for changes to the
 // monitors file.
-const defaultMonitorReload = 15 * time.Second
+const defaultMonitorReload = monitor.DefaultReload
 
 func (c *cli) newMonitorCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -279,70 +277,33 @@ func (c *cli) runMonitorRun(cmd *cobra.Command, f monitorRunFlags) error {
 			}
 		},
 	}
-	path, err := c.monitorsPath()
+	// Load once first, so a broken file is an error rather than a warning.
+	path, _, err := c.loadMonitors()
 	if err != nil {
 		return err
 	}
-	for first := true; ; first = false {
-		stamp := fileStamp(path)
-		file, err := monitor.Load(path)
-		if err != nil {
-			if first {
-				return fmt.Errorf("%w; fix the file or remove it", err)
+	loaded := false // OnLoad runs on this goroutine, one call at a time
+	sup := &monitor.Supervisor{
+		Path:   path,
+		Runner: runner,
+		Reload: f.reload,
+		OnLoad: func(file *monitor.File, err error) {
+			if loaded {
+				fmt.Fprintln(c.app.Stderr, "Monitors changed; reloading.")
 			}
-			fmt.Fprintf(c.app.Stderr, "portcheck: %v; still using the previous monitors\n", err)
-		} else {
-			names := map[string]bool{}
-			for _, t := range file.Monitors {
-				names[t.Name] = true
-			}
-			tracker.Forget(names)
-			if len(file.Monitors) == 0 {
+			loaded = true
+			switch {
+			case err != nil:
+				fmt.Fprintf(c.app.Stderr, "portcheck: %v; still using the previous monitors\n", err)
+			case len(file.Monitors) == 0:
 				fmt.Fprintln(c.app.Stderr, "No monitors yet; add one with 'portcheck monitor add <url>'. Waiting for changes…")
-			} else {
+			default:
 				fmt.Fprintf(c.app.Stderr, "Monitoring %s (Ctrl-C to stop)…\n", plural(len(file.Monitors), "service"))
 			}
-		}
-		if !c.runUntilChanged(ctx, runner, file, path, stamp, f.reload) {
-			return nil // stopped (Ctrl-C)
-		}
-		fmt.Fprintln(c.app.Stderr, "Monitors changed; reloading.")
+		},
 	}
-}
-
-// runUntilChanged runs the monitors in file (if any) until the file changes
-// (true) or ctx ends (false).
-func (c *cli) runUntilChanged(ctx context.Context, runner *monitor.Runner, file *monitor.File, path string, stamp string, every time.Duration) bool {
-	runCtx, cancel := context.WithCancel(ctx)
-	done := make(chan struct{})
-	go func() {
-		defer close(done)
-		if file != nil {
-			runner.Run(runCtx, file.Monitors)
-		}
-	}()
-	defer func() { cancel(); <-done }()
-	tick := time.NewTicker(every)
-	defer tick.Stop()
-	for {
-		select {
-		case <-ctx.Done():
-			return false
-		case <-tick.C:
-			if fileStamp(path) != stamp {
-				return true
-			}
-		}
-	}
-}
-
-// fileStamp identifies a version of a file: its size and modification time.
-func fileStamp(path string) string {
-	st, err := os.Stat(path)
-	if err != nil {
-		return "missing"
-	}
-	return fmt.Sprintf("%d/%d", st.Size(), st.ModTime().UnixNano())
+	sup.Run(ctx)
+	return nil // stopped (Ctrl-C)
 }
 
 func plural(n int, word string) string {
