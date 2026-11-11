@@ -72,6 +72,14 @@ To avoid false alarms:
 Edits to the monitors file (from `monitor add` in another terminal, or by hand) are picked
 up while `run` is running. `--no-notify` prints alerts without notifications.
 
+!!! tip "On macOS: keep alerts on screen"
+    macOS shows banners for about 5 seconds; missed ones stay in Notification Center
+    (click the clock). portcheck's notifications are listed under **Script Editor** in
+    **System Settings → Notifications**, because they're shown through macOS's built-in
+    `osascript`. Set its alert style to **Persistent** (older macOS: **Alerts**) to keep
+    them until you close them. On Linux, notifications need `notify-send` (package
+    `libnotify-bin` or `libnotify`).
+
 ### In the background
 
 `portcheck monitor run` stops when its terminal closes. For checks whenever you're logged
