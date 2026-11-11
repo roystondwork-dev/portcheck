@@ -116,15 +116,24 @@ func (c *cli) runPort(cmd *cobra.Command, f portFlags) error {
 	return c.printer.Print(output.PortDoc(p))
 }
 
+// configDir is portcheck's configuration folder: $PORTCHECK_CONFIG_DIR, or a
+// portcheck folder in the user's configuration directory.
+func (c *cli) configDir() (string, error) {
+	if dir := envValue(c.app.Environ, configDirEnv); dir != "" {
+		return dir, nil
+	}
+	base, err := c.app.ConfigDir()
+	if err != nil {
+		return "", fmt.Errorf("find the configuration folder: %w (set %s)", err, configDirEnv)
+	}
+	return filepath.Join(base, "portcheck"), nil
+}
+
 // registry opens the port registry in portcheck's configuration folder.
 func (c *cli) registry() (*portreg.Registry, error) {
-	dir := envValue(c.app.Environ, configDirEnv)
-	if dir == "" {
-		base, err := c.app.ConfigDir()
-		if err != nil {
-			return nil, fmt.Errorf("find the configuration folder: %w (set %s)", err, configDirEnv)
-		}
-		dir = filepath.Join(base, "portcheck")
+	dir, err := c.configDir()
+	if err != nil {
+		return nil, err
 	}
 	return portreg.New(dir, func(format string, a ...any) {
 		fmt.Fprintf(c.app.Stderr, "portcheck: "+format+"\n", a...)
