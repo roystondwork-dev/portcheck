@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.14.0](https://github.com/roystondwork-dev/portcheck/compare/v0.13.0...v0.14.0) (2026-11-11)
+
+
+### Features
+
+* **monitor:** portcheck monitor: watch URLs and ports and warn when one goes down ([6c1e03e](https://github.com/roystondwork-dev/portcheck/commit/6c1e03e05d0e7fec0d0836fb15dc686a459c46b8))
+* **tray:** run uptime monitors in the background with desktop notifications ([133ed59](https://github.com/roystondwork-dev/portcheck/commit/133ed5939edf11dd05beb1ba3fd3cf776dc7ffc2))
+* **vscode:** Monitors in Network Tools; docs for uptime monitors ([43286d5](https://github.com/roystondwork-dev/portcheck/commit/43286d5ae7ac6cc7a605b219bb7cf9be47b3a0d5))
+* **vscode:** watch ports and see project ports in Network Tools ([2e95939](https://github.com/roystondwork-dev/portcheck/commit/2e9593936ab956ce14e1e336b66b75ea4f84dc70))
+
+
+### Bug Fixes
+
+* **monitor:** say "connection refused" on Windows too; macOS notification tips ([2f863de](https://github.com/roystondwork-dev/portcheck/commit/2f863dec6225816071d24c59bf468405ec10e539))
+
 ## [0.13.0](https://github.com/roystondwork-dev/portcheck/compare/v0.12.0...v0.13.0) (2026-11-11)
 
 
