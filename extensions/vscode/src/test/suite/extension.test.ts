@@ -328,6 +328,17 @@ describe("portcheck extension", () => {
   });
 
   describe("Network Tools panel", () => {
+    /** The next result shown in a section (Project ports also load on open). */
+    const nextReply = (section: string) =>
+      new Promise<Result>((resolve) => {
+        const sub = api.netTools.onDidReply((r) => {
+          if (r.section === section) {
+            sub.dispose();
+            resolve(r);
+          }
+        });
+      });
+
     before(async () => {
       await vscode.commands.executeCommand("portcheck.networkTools");
     });
@@ -428,12 +439,7 @@ describe("portcheck extension", () => {
       const server = await listen();
       const port = portOf(server);
       try {
-        const reply = new Promise<Result>((resolve) => {
-          const sub = api.netTools.onDidReply((r) => {
-            sub.dispose();
-            resolve(r);
-          });
-        });
+        const reply = nextReply("ports");
         assert.equal(
           await vscode.commands.executeCommand("portcheck.networkTools", {
             type: "check",
@@ -477,12 +483,7 @@ describe("portcheck extension", () => {
         assert.equal(first.rows[0]?.cells[1], "in use");
         assert.ok(api.netTools.watching);
         // Free the port; the next check (2 s later) notices.
-        const next = new Promise<Result>((resolve) => {
-          const sub = api.netTools.onDidReply((r) => {
-            sub.dispose();
-            resolve(r);
-          });
-        });
+        const next = nextReply("ports");
         await close(server);
         const r = await next;
         assert.equal(r.rows[0]?.cells[1], "free");
