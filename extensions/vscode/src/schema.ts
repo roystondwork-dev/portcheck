@@ -167,3 +167,36 @@ export interface ScanData {
     durationMs: number;
   };
 }
+
+/** A monitor from `portcheck monitor list` (portcheck 0.14+). */
+export interface MonitorTarget {
+  name: string;
+  url?: string;
+  address?: string;
+  every?: string;
+  timeout?: string;
+  status?: string;
+  contains?: string;
+}
+
+/** `portcheck monitor list`. */
+export interface MonitorsData {
+  file: string;
+  monitors: MonitorTarget[];
+}
+
+/** One check from `portcheck monitor check`. */
+export interface MonitorResult {
+  name: string;
+  endpoint: string;
+  up: boolean;
+  status?: number;
+  latencyMs: number;
+  error?: string;
+  at: string;
+}
+
+/** `portcheck monitor check`. */
+export interface MonitorCheckData {
+  results: MonitorResult[];
+}

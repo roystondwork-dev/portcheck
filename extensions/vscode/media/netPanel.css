@@ -49,7 +49,8 @@ label {
 label.wide {
   flex: 1 1 280px;
 }
-input {
+input,
+select {
   min-width: 200px;
   padding: 5px 8px;
   color: var(--vscode-input-foreground);
@@ -58,7 +59,11 @@ input {
   border-radius: 2px;
   font-family: var(--vscode-editor-font-family);
 }
-input:focus {
+select {
+  min-width: 80px;
+}
+input:focus,
+select:focus {
   outline: 1px solid var(--vscode-focusBorder);
   outline-offset: -1px;
 }

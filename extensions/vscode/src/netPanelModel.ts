@@ -8,12 +8,15 @@ import type {
   DevicesData,
   DoctorData,
   LookupData,
+  MonitorCheckData,
+  MonitorsData,
   NetData,
   ScanData,
 } from "./schema";
 
 /** The panel's sections. */
-export type Section = "ports" | "project" | "lookup" | "addresses" | "devices";
+export type Section =
+  "ports" | "project" | "monitors" | "lookup" | "addresses" | "devices";
 
 /** What the webview asks for. */
 export type Request =
@@ -27,7 +30,13 @@ export type Request =
   | { type: "watch"; host: string; ports: string }
   | { type: "unwatch" }
   /** The workspace's .portcheck.yaml checks. */
-  | { type: "project" };
+  | { type: "project" }
+  /** Uptime monitors: check them, add one, remove one. */
+  | { type: "monitors" }
+  | { type: "monitorAdd"; target: string; every: string; contains: string }
+  | { type: "monitorRemove"; name: string }
+  /** Opens an http(s) URL in the browser. */
+  | { type: "open"; url: string };
 
 /** How a row is marked: a green, red, amber or neutral pill. */
 export type Tone = "ok" | "bad" | "warn" | "info";
@@ -41,6 +50,10 @@ export interface Row {
   stopPort?: number;
   /** Its status changed since the previous check (while watching). */
   changed?: boolean;
+  /** A monitor the row's Remove button removes. */
+  remove?: string;
+  /** A URL the row's Open button opens. */
+  open?: string;
 }
 
 /** What the panel shows for a section. */
@@ -84,6 +97,31 @@ export function parseRequest(msg: unknown): Request | undefined {
       return { type: "unwatch" };
     case "project":
       return { type: "project" };
+    case "monitors":
+      return { type: "monitors" };
+    case "monitorAdd": {
+      const target = str("target");
+      return target === undefined
+        ? undefined
+        : {
+            type: "monitorAdd",
+            target,
+            every: str("every") ?? "",
+            contains: str("contains") ?? "",
+          };
+    }
+    case "monitorRemove": {
+      const name = str("name");
+      return name === undefined || name === ""
+        ? undefined
+        : { type: "monitorRemove", name };
+    }
+    case "open": {
+      const url = str("url");
+      return url !== undefined && /^https?:\/\/[^\s]+$/.test(url)
+        ? { type: "open", url }
+        : undefined;
+    }
     case "lookup": {
       const text = str("text");
       return text === undefined ? undefined : { type: "lookup", text };
@@ -522,6 +560,144 @@ export function projectMissingResult(invalid: boolean): Result {
         summary:
           "No .portcheck.yaml in this workspace. Add one to list your project's ports and check them here.",
       };
+}
+
+/** The schedules the panel offers when adding a monitor. */
+export const MONITOR_EVERY = ["30s", "1m", "5m", "15m"];
+
+/**
+ * Checks a monitor to add: a URL, host:port or port, how often, and the
+ * text the response must contain. Returns the cleaned values or a message.
+ */
+export function parseMonitorAdd(
+  target: string,
+  every: string,
+  contains: string,
+): { target: string; every: string; contains: string } | string {
+  const t = target.trim();
+  if (t === "") {
+    return "Enter a URL (https://example.com/health), host:port or port.";
+  }
+  if (/\s/.test(t) || t.startsWith("-")) {
+    return "Enter one URL, host:port or port.";
+  }
+  const isURL = /^https?:\/\//.test(t);
+  if (!isURL && !/^(\[[^\]]+\]|[^:/]+):\d+$/.test(t) && !/^\d+$/.test(t)) {
+    return "Enter a URL starting with http:// or https://, host:port, or a port.";
+  }
+  if (!MONITOR_EVERY.includes(every)) {
+    return `Choose how often to check: ${MONITOR_EVERY.join(", ")}.`;
+  }
+  const c = contains.trim();
+  if (c !== "" && !isURL) {
+    return '"Must contain" only works for URLs.';
+  }
+  return { target: t, every, contains: c };
+}
+
+/** What the panel remembers about a monitor between checks. */
+export interface MonitorMemory {
+  fails: number;
+  down: boolean;
+  /** When it went down (ms since epoch), for "back up after". */
+  since: number;
+}
+
+/** Failed checks in a row before a monitor counts as down (as the CLI). */
+export const MONITOR_THRESHOLD = 2;
+
+/**
+ * Applies a round of checks to what's remembered: a monitor goes down after
+ * MONITOR_THRESHOLD failures in a row (one message), and comes back up on
+ * the next success (one message). Monitors no longer checked are forgotten.
+ */
+export function trackMonitors(
+  previous: ReadonlyMap<string, MonitorMemory>,
+  data: MonitorCheckData,
+  now: number,
+): { next: Map<string, MonitorMemory>; messages: string[] } {
+  const next = new Map<string, MonitorMemory>();
+  const messages: string[] = [];
+  for (const r of data.results) {
+    const before = previous.get(r.name) ?? { fails: 0, down: false, since: 0 };
+    if (r.up) {
+      if (before.down) {
+        messages.push(
+          `${r.name} is back up after ${minutes(now - before.since)}`,
+        );
+      }
+      next.set(r.name, { fails: 0, down: false, since: 0 });
+      continue;
+    }
+    const fails = before.fails + 1;
+    const down = before.down || fails >= MONITOR_THRESHOLD;
+    if (down && !before.down) {
+      messages.push(`${r.name} is down: ${r.error ?? "no answer"}`);
+    }
+    next.set(r.name, { fails, down, since: before.down ? before.since : now });
+  }
+  return { next, messages };
+}
+
+function minutes(ms: number): string {
+  const m = Math.round(ms / 60000);
+  return m < 1 ? "less than a minute" : plural(m, "minute");
+}
+
+/** The Monitors section: each monitor with its last check. */
+export function monitorsResult(
+  list: MonitorsData,
+  check: MonitorCheckData,
+  memory: ReadonlyMap<string, MonitorMemory>,
+): Result {
+  if (list.monitors.length === 0) {
+    return {
+      type: "result",
+      section: "monitors",
+      columns: [],
+      rows: [],
+      summary:
+        "No monitors yet. Add a URL (e.g. a /ping or /health endpoint) or host:port above.",
+    };
+  }
+  const byName = new Map(check.results.map((r) => [r.name, r]));
+  let down = 0;
+  const rows = list.monitors.map((m): Row => {
+    const endpoint = m.url ?? m.address ?? "";
+    const r = byName.get(m.name);
+    const remembered = memory.get(m.name);
+    const row: Row = {
+      cells: [m.name, "checking", "", endpoint],
+      copy: endpoint,
+      remove: m.name,
+    };
+    if (m.url !== undefined) {
+      row.open = m.url;
+    }
+    if (r !== undefined) {
+      const isDown = remembered?.down ?? !r.up;
+      const status = r.up ? "up" : isDown ? "down" : "failing";
+      const detail = r.up
+        ? `${r.status === undefined ? "accepts connections" : `HTTP ${r.status}`} · ${Math.round(r.latencyMs)} ms`
+        : (r.error ?? "no answer");
+      row.cells = [m.name, status, detail, endpoint];
+      row.tone = r.up ? "ok" : isDown ? "bad" : "warn";
+      if (!r.up && isDown) {
+        down++;
+      }
+    }
+    return row;
+  });
+  return {
+    type: "result",
+    section: "monitors",
+    columns: ["Name", "Status", "Details", "Checks"],
+    rows,
+    summary:
+      down === 0
+        ? `${plural(rows.length, "monitor")}: none down. Checked every minute while this panel is open.`
+        : `${plural(rows.length, "monitor")}: ${down} down. Checked every minute while this panel is open.`,
+  };
 }
 
 function plural(n: number, word: string): string {

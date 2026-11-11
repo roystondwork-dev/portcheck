@@ -298,6 +298,43 @@ Record types: `A`, `AAAA`, `CNAME`, `MX`, `NS`, `TXT` and `PTR`, plus `CLASS`, `
 (`this machine` or `on a local network`, with the interface in `note`) and `MAC` for
 addresses.
 
+## `monitors`
+
+`portcheck monitor list` (portcheck 0.14+):
+
+```json
+{
+  "file": "/Users/me/Library/Application Support/portcheck/monitors.yaml",
+  "monitors": [
+    { "name": "example.com/health", "url": "https://example.com/health", "every": "30s", "contains": "ok" },
+    { "name": "postgres", "address": "db.internal:5432" }
+  ]
+}
+```
+
+Each monitor has a `name` and either a `url` or an `address`. `every`, `timeout`,
+`status` and `contains` are present when set; their defaults are `1m`, `10s` and
+`200-299`.
+
+## `monitorCheck`
+
+`portcheck monitor check`:
+
+```json
+{
+  "results": [
+    { "name": "example.com/health", "endpoint": "https://example.com/health", "up": true,
+      "status": 200, "latencyMs": 84.6, "at": "2026-11-11T10:42:05.123+05:30" },
+    { "name": "postgres", "endpoint": "db.internal:5432", "up": false,
+      "error": "connection refused", "latencyMs": 2.1, "at": "2026-11-11T10:42:05.120+05:30" }
+  ]
+}
+```
+
+`status` is the HTTP status, for URLs that answered. `error` says why a check failed, in
+plain words (`connection refused`, `HTTP 503 Service Unavailable`,
+`the response doesn't contain "ok"`, `no answer within 10s`).
+
 ## `version`
 
 ```json

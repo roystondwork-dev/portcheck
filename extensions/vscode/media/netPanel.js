@@ -8,7 +8,7 @@
   const state = vscode.getState() || {};
 
   /** Which column of each section gets a coloured status pill. @type {Record<string, number>} */
-  const PILL_COLUMN = { ports: 1, project: 2 };
+  const PILL_COLUMN = { ports: 1, project: 2, monitors: 1 };
 
   /** @param {string} section */
   function out(section) {
@@ -51,7 +51,10 @@
     vscode.postMessage(msg);
   }
 
-  // Forms: Check ports and Look up.
+  /** The monitor just submitted, to empty the form once it's added. @type {string | undefined} */
+  let addedTarget;
+
+  // Forms: Check ports, Monitors and Look up.
   for (const form of document.querySelectorAll("form")) {
     const f = /** @type {HTMLFormElement} */ (form);
     for (const input of f.querySelectorAll("input")) {
@@ -63,6 +66,9 @@
     f.addEventListener("submit", (e) => {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(f));
+      if (f.dataset.request === "monitorAdd") {
+        addedTarget = String(data.target);
+      }
       Object.assign(state, data);
       vscode.setState(state);
       setBusy(f, true);
@@ -170,7 +176,7 @@
   }
 
   window.addEventListener("message", (event) => {
-    /** @type {{type: string, section: string, columns: string[], rows: {cells: string[], tone?: string, copy?: string, stopPort?: number, changed?: boolean}[], summary?: string, error?: string, watching?: boolean, request?: any}} */
+    /** @type {{type: string, section: string, columns: string[], rows: {cells: string[], tone?: string, copy?: string, stopPort?: number, changed?: boolean, open?: string, remove?: string}[], summary?: string, error?: string, watching?: boolean, request?: any}} */
     const r = event.data;
     if (r.type === "fill") {
       void fill(r.request);
@@ -183,6 +189,26 @@
     setBusy(o, false);
     if (r.section === "ports") {
       setWatching(r.watching === true);
+    }
+    // After adding a monitor, empty the form once it shows up in the list.
+    if (r.section === "monitors" && addedTarget !== undefined) {
+      if (
+        r.rows.some(
+          (row) =>
+            row.cells[3] === addedTarget ||
+            row.cells[3] === `localhost:${addedTarget}`,
+        )
+      ) {
+        for (const name of ["target", "contains"]) {
+          const input = /** @type {HTMLInputElement} */ (
+            document.querySelector(`#monitors input[name="${name}"]`)
+          );
+          input.value = "";
+          delete state[name];
+        }
+        vscode.setState(state);
+      }
+      addedTarget = undefined;
     }
     requestAnimationFrame(() =>
       o
@@ -235,6 +261,22 @@
         );
         actions.append(copy);
       }
+      if (row.open) {
+        const open = text("button", "Open", "link");
+        open.title = `Open ${row.open} in the browser`;
+        open.addEventListener("click", () =>
+          send({ type: "open", url: row.open }),
+        );
+        actions.append(open);
+      }
+      if (row.remove) {
+        const remove = text("button", "Remove", "link danger");
+        remove.title = `Stop monitoring ${row.remove} (asks first)`;
+        remove.addEventListener("click", () =>
+          send({ type: "monitorRemove", name: row.remove }),
+        );
+        actions.append(remove);
+      }
       if (row.stopPort) {
         const stop = text("button", "Stop", "link danger");
         stop.title = `Stop what's using port ${row.stopPort} (asks first)`;
@@ -252,4 +294,6 @@
   // Project ports load on their own; the section says if there's no file.
   setBusy(out("project"), true);
   send({ type: "project" });
+  setBusy(out("monitors"), true);
+  send({ type: "monitors" });
 })();

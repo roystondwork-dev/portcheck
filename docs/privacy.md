@@ -29,6 +29,9 @@ network, except:
   and `api6.ipify.org`) for your public address, only when you pass `--public`;
 - `portcheck net devices --probe`, which tries TCP connections to a few ports on the
   hosts of your local network, only when you pass `--probe`.
+- uptime monitors you add with `portcheck monitor add` (or in VS Code's Network Tools),
+  which send an HTTP GET request or open a TCP connection to each URL or address you
+  added, on the schedule you chose, from your device. Results stay on your device.
 
 `portcheck net` otherwise reads your own machine, and `net lookup` and device names
 use your system's DNS resolver.

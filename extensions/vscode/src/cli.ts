@@ -11,6 +11,8 @@ import {
   type KillData,
   type ListData,
   type LookupData,
+  type MonitorCheckData,
+  type MonitorsData,
   type NetData,
   type ScanData,
   SCHEMA_VERSION,
@@ -185,6 +187,53 @@ export class PortcheckClient {
   /** Which TCP ports accept connections on a host. Exit code 1 (none open) still carries results. */
   scan(host: string, ports: string): Promise<ScanData> {
     return this.run<ScanData>("scan", ["scan", host, "-p", ports], [0, 1]);
+  }
+
+  /** The uptime monitors in portcheck's monitors file. */
+  monitors(): Promise<MonitorsData> {
+    return this.run<MonitorsData>("monitors", ["monitor", "list"]);
+  }
+
+  /** Checks every monitor once. Exit code 1 (one is down) still carries results. */
+  monitorCheck(): Promise<MonitorCheckData> {
+    return this.run<MonitorCheckData>(
+      "monitorCheck",
+      ["monitor", "check"],
+      [0, 1],
+    );
+  }
+
+  /** Adds a monitor; resolves with portcheck's message. */
+  monitorAdd(
+    target: string,
+    opts: { every?: string; contains?: string } = {},
+  ): Promise<string> {
+    const args = ["monitor", "add", target];
+    if (opts.every) {
+      args.push("--every", opts.every);
+    }
+    if (opts.contains) {
+      args.push("--contains", opts.contains);
+    }
+    return this.runText(args);
+  }
+
+  /** Removes a monitor by name, URL or address. */
+  monitorRemove(name: string): Promise<string> {
+    return this.runText(["monitor", "remove", name]);
+  }
+
+  /** Runs a command whose output is text, not JSON. */
+  private async runText(args: readonly string[]): Promise<string> {
+    const r = await this.exec(this.binary, args, this.timeoutMs);
+    if (r.code !== 0) {
+      throw new PortcheckError(
+        firstLine(r.stderr) ?? `portcheck exited with status ${r.code}`,
+        r.code,
+        errorDetail(r.stderr),
+      );
+    }
+    return r.stdout.trim();
   }
 
   version(): Promise<VersionData> {

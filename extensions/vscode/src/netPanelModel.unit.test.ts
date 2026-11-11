@@ -8,6 +8,9 @@ import {
   lookupResult,
   markChanges,
   MAX_PORTS,
+  type MonitorMemory,
+  monitorsResult,
+  parseMonitorAdd,
   parseHost,
   parseLookup,
   parsePorts,
@@ -19,6 +22,7 @@ import {
   type Row,
   rowStates,
   scanResult,
+  trackMonitors,
   watchInterval,
 } from "./netPanelModel";
 import type { CheckData, ScanData } from "./schema";
@@ -677,5 +681,207 @@ describe("project ports", () => {
       summary: expect.stringMatching(/No .portcheck.yaml/) as unknown,
     });
     expect(projectMissingResult(true).error).toMatch(/Problems/);
+  });
+});
+
+describe("monitors", () => {
+  it("parses monitor requests and refuses odd URLs to open", () => {
+    expect(parseRequest({ type: "monitors" })).toEqual({ type: "monitors" });
+    expect(parseRequest({ type: "monitorAdd", target: "https://a/" })).toEqual({
+      type: "monitorAdd",
+      target: "https://a/",
+      every: "",
+      contains: "",
+    });
+    expect(
+      parseRequest({
+        type: "monitorAdd",
+        target: "a:1",
+        every: "5m",
+        contains: "x",
+      }),
+    ).toEqual({
+      type: "monitorAdd",
+      target: "a:1",
+      every: "5m",
+      contains: "x",
+    });
+    expect(parseRequest({ type: "monitorAdd" })).toBeUndefined();
+    expect(parseRequest({ type: "monitorRemove", name: "site" })).toEqual({
+      type: "monitorRemove",
+      name: "site",
+    });
+    expect(parseRequest({ type: "monitorRemove", name: "" })).toBeUndefined();
+    expect(parseRequest({ type: "open", url: "https://a.example/x" })).toEqual({
+      type: "open",
+      url: "https://a.example/x",
+    });
+    for (const url of [
+      "file:///etc/passwd",
+      "javascript:alert(1)",
+      "https://a b",
+      3,
+    ]) {
+      expect(parseRequest({ type: "open", url })).toBeUndefined();
+    }
+  });
+
+  it("checks what's added", () => {
+    expect(parseMonitorAdd(" https://a/health ", "1m", " pong ")).toEqual({
+      target: "https://a/health",
+      every: "1m",
+      contains: "pong",
+    });
+    expect(parseMonitorAdd("db.internal:5432", "5m", "")).toEqual({
+      target: "db.internal:5432",
+      every: "5m",
+      contains: "",
+    });
+    expect(parseMonitorAdd("[::1]:80", "30s", "")).toMatchObject({
+      target: "[::1]:80",
+    });
+    expect(parseMonitorAdd("3000", "15m", "")).toMatchObject({
+      target: "3000",
+    });
+    expect(parseMonitorAdd("  ", "1m", "")).toMatch(/Enter a URL/);
+    expect(parseMonitorAdd("a b", "1m", "")).toMatch(/one URL/);
+    expect(parseMonitorAdd("--every", "1m", "")).toMatch(/one URL/);
+    expect(parseMonitorAdd("ftp://a/", "1m", "")).toMatch(/http:\/\/ or https/);
+    expect(parseMonitorAdd("example.com", "1m", "")).toMatch(
+      /http:\/\/ or https/,
+    );
+    expect(parseMonitorAdd("https://a/", "2s", "")).toMatch(/how often/);
+    expect(parseMonitorAdd("a:1", "1m", "x")).toMatch(/only works for URLs/);
+  });
+
+  const up = (name: string) => ({
+    name,
+    endpoint: "e",
+    up: true,
+    latencyMs: 1,
+    at: "",
+  });
+  const down = (name: string, error?: string) => ({
+    name,
+    endpoint: "e",
+    up: false,
+    latencyMs: 1,
+    at: "",
+    ...(error === undefined ? {} : { error }),
+  });
+
+  it("warns once after two failures, and once when it's back", () => {
+    let mem = new Map<string, MonitorMemory>();
+    const step = (results: ReturnType<typeof up>[], now: number) => {
+      const r = trackMonitors(mem, { results }, now);
+      mem = r.next;
+      return r.messages;
+    };
+    expect(step([up("site"), down("db", "refused")], 0)).toEqual([]);
+    expect(
+      step([down("site", "timed out"), down("db", "refused")], 60_000),
+    ).toEqual(["db is down: refused"]);
+    expect(step([down("site"), down("db", "refused")], 120_000)).toEqual([
+      "site is down: no answer",
+    ]);
+    expect(step([up("site"), up("db")], 30 * 60_000)).toEqual([
+      "site is back up after 28 minutes",
+      "db is back up after 29 minutes",
+    ]);
+    expect(step([down("site")], 31 * 60_000)).toEqual([]);
+    expect(mem.has("db")).toBe(false); // no longer checked: forgotten
+    mem = new Map([["x", { fails: 2, down: true, since: 0 }]]);
+    expect(step([up("x")], 20_000)).toEqual([
+      "x is back up after less than a minute",
+    ]);
+    mem = new Map([["x", { fails: 2, down: true, since: 0 }]]);
+    expect(step([up("x")], 60_000)).toEqual(["x is back up after 1 minute"]);
+  });
+
+  it("shows each monitor with its last check", () => {
+    const list = {
+      file: "/c/monitors.yaml",
+      monitors: [
+        { name: "site", url: "https://a/" },
+        { name: "db", address: "db:5432" },
+        { name: "api", url: "https://api/" },
+        { name: "cache", address: "cache:6379" },
+        { name: "new", url: "https://new/" },
+      ],
+    };
+    const check = {
+      results: [
+        { ...up("site"), status: 200, latencyMs: 84.4 },
+        { ...up("db"), latencyMs: 1.2 },
+        down("api", "HTTP 503 Service Unavailable"),
+        down("cache"),
+      ],
+    };
+    const memory = new Map<string, MonitorMemory>([
+      ["api", { fails: 2, down: true, since: 0 }],
+      ["cache", { fails: 1, down: false, since: 0 }],
+    ]);
+    const r = monitorsResult(list, check, memory);
+    expect(r.summary).toBe(
+      "5 monitors: 1 down. Checked every minute while this panel is open.",
+    );
+    expect(r.rows).toEqual([
+      {
+        cells: ["site", "up", "HTTP 200 · 84 ms", "https://a/"],
+        tone: "ok",
+        copy: "https://a/",
+        remove: "site",
+        open: "https://a/",
+      },
+      {
+        cells: ["db", "up", "accepts connections · 1 ms", "db:5432"],
+        tone: "ok",
+        copy: "db:5432",
+        remove: "db",
+      },
+      {
+        cells: ["api", "down", "HTTP 503 Service Unavailable", "https://api/"],
+        tone: "bad",
+        copy: "https://api/",
+        remove: "api",
+        open: "https://api/",
+      },
+      {
+        cells: ["cache", "failing", "no answer", "cache:6379"],
+        tone: "warn",
+        copy: "cache:6379",
+        remove: "cache",
+      },
+      {
+        cells: ["new", "checking", "", "https://new/"],
+        copy: "https://new/",
+        remove: "new",
+        open: "https://new/",
+      },
+    ]);
+    // Without memory (first round), a failure counts as down.
+    expect(
+      monitorsResult(
+        { file: "f", monitors: [{ name: "x", address: "x:1" }] },
+        { results: [down("x")] },
+        new Map(),
+      ).rows[0]?.cells[1],
+    ).toBe("down");
+    expect(
+      monitorsResult(
+        { file: "f", monitors: [{ name: "w" }] },
+        { results: [up("w")] },
+        new Map(),
+      ).summary,
+    ).toBe(
+      "1 monitor: none down. Checked every minute while this panel is open.",
+    );
+    const empty = monitorsResult(
+      { file: "f", monitors: [] },
+      { results: [] },
+      new Map(),
+    );
+    expect(empty.rows).toEqual([]);
+    expect(empty.summary).toMatch(/No monitors yet/);
   });
 });

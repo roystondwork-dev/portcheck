@@ -48,6 +48,7 @@ Fixes for the error you're seeing: [Node.js, Next.js, Vite](https://roystondwork
 | 📡 | `portcheck scan db.internal -p 5432` | Rate-limited TCP connect checks of remote hosts. No root needed |
 | 🌍 | `portcheck net` · `net devices` · `net lookup` | Your IP addresses, gateway and DNS; the devices on your network, with vendor hints; DNS facts about a name or address ([guide](docs/guide/net.md)) |
 | ⏳ | `portcheck wait db:5432 -t 60s` | Block until services accept connections, or until a port is free. Built for CI, also as a [GitHub Action](docs/guide/github-action.md) |
+| 📡 | `portcheck monitor add https://example.com/health` | Uptime monitors for URLs and ports, checked from your device; `monitor run`, the tray app or VS Code warn you when one goes down and when it's back. [More](docs/guide/monitor.md) |
 | ▶️ | `portcheck run --port 3000 --next -- npm run dev` | Start a command on a free port (`$PORT`, `{port}`); take the next one or stop the holder |
 | 📌 | `PORT=$(portcheck port) npm run dev` | Every project gets its own remembered port, so two projects never fight over 3000 ([guide](docs/guide/port.md)) |
 | 🩺 | `portcheck doctor` | Check the ports listed in `.portcheck.yaml` and get a fix for each problem |

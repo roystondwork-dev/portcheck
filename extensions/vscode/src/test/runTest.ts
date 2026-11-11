@@ -8,15 +8,22 @@ import { runTests } from "@vscode/test-electron";
 async function main(): Promise<void> {
   const root = path.resolve(__dirname, "..", "..");
   const exe = process.platform === "win32" ? "portcheck.exe" : "portcheck";
-  const binary = process.env.PORTCHECK_BIN ?? path.join(root, "..", "..", "bin", exe);
+  const binary =
+    process.env.PORTCHECK_BIN ?? path.join(root, "..", "..", "bin", exe);
   if (!fs.existsSync(binary)) {
-    throw new Error(`portcheck binary not found at ${binary}; run "make build" in the repository root`);
+    throw new Error(
+      `portcheck binary not found at ${binary}; run "make build" in the repository root`,
+    );
   }
   const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "portcheck-ws-"));
   fs.mkdirSync(path.join(workspace, ".vscode"));
   fs.writeFileSync(
     path.join(workspace, ".vscode", "settings.json"),
-    JSON.stringify({ "portcheck.path": binary, "portcheck.refreshInterval": 0 }, null, 2),
+    JSON.stringify(
+      { "portcheck.path": binary, "portcheck.refreshInterval": 0 },
+      null,
+      2,
+    ),
   );
   await runTests({
     version: process.env.VSCODE_TEST_VERSION ?? "stable",
@@ -34,7 +41,12 @@ async function main(): Promise<void> {
       // startup ("CodeWindow: detected unresponsive") while setting one up.
       "--disable-gpu",
     ],
-    extensionTestsEnv: { PORTCHECK_TEST_BINARY: binary },
+    extensionTestsEnv: {
+      PORTCHECK_TEST_BINARY: binary,
+      // portcheck's own files (monitors, port registry) go in a temporary
+      // folder, never the developer's real one.
+      PORTCHECK_CONFIG_DIR: fs.mkdtempSync(path.join(os.tmpdir(), "pccfg-")),
+    },
   });
 }
 
