@@ -13,6 +13,9 @@ import {
   isLocal,
   lookupResult,
   markChanges,
+  type MonitorMemory,
+  monitorsResult,
+  parseMonitorAdd,
   parseHost,
   parseLookup,
   parsePorts,
@@ -24,6 +27,7 @@ import {
   type Result,
   rowStates,
   scanResult,
+  trackMonitors,
   type Section,
   watchInterval,
 } from "./netPanelModel";
@@ -39,7 +43,14 @@ const SECTION_OF: Record<Request["type"], Section | undefined> = {
   watch: "ports",
   unwatch: undefined,
   project: "project",
+  monitors: "monitors",
+  monitorAdd: "monitors",
+  monitorRemove: "monitors",
+  open: undefined,
 };
+
+/** How often the panel checks the monitors while it's open. */
+const MONITOR_EVERY_MS = 60_000;
 
 interface Watch {
   host: string;
@@ -59,6 +70,10 @@ export class NetPanel implements vscode.Disposable {
   /** Fires with each result the panel shows (tests wait on it). */
   readonly onDidReply = this.replied.event;
   private watch: Watch | undefined;
+  private monitorMemory = new Map<string, MonitorMemory>();
+  private monitorTimer: ReturnType<typeof setInterval> | undefined;
+  /** The Monitors table on screen, shown again when an action changes nothing. */
+  private lastMonitors: Result | undefined;
 
   constructor(
     private readonly d: Deps,
@@ -106,6 +121,7 @@ export class NetPanel implements vscode.Disposable {
     });
     panel.onDidDispose(() => {
       this.stopWatch();
+      this.stopMonitors();
       this.panel = undefined;
     });
     this.panel = panel;
@@ -180,6 +196,51 @@ export class NetPanel implements vscode.Disposable {
       }
       case "project":
         return this.projectResult();
+      case "monitors":
+        this.startMonitors();
+        return this.monitorsRound();
+      case "monitorAdd": {
+        const add = parseMonitorAdd(req.target, req.every, req.contains);
+        if (typeof add === "string") {
+          void this.d.ui().warn(add);
+          return this.lastMonitors;
+        }
+        let msg: string;
+        try {
+          msg = await this.d.client().monitorAdd(add.target, {
+            every: add.every,
+            ...(add.contains === "" ? {} : { contains: add.contains }),
+          });
+        } catch (err) {
+          void this.d
+            .ui()
+            .error(
+              `portcheck: ${err instanceof Error ? err.message : String(err)}`,
+            );
+          return this.lastMonitors;
+        }
+        void this.d.ui().info(msg.split("\n")[0] ?? msg);
+        this.startMonitors();
+        return this.monitorsRound();
+      }
+      case "monitorRemove": {
+        const ok = await this.d
+          .ui()
+          .confirm(
+            `Remove the monitor ${req.name}?`,
+            "It stops being checked here, in the tray app and by portcheck monitor run.",
+            "Remove",
+          );
+        if (ok !== "Remove") {
+          return this.lastMonitors;
+        }
+        await this.d.client().monitorRemove(req.name);
+        this.monitorMemory.delete(req.name);
+        return this.monitorsRound();
+      }
+      case "open":
+        await vscode.env.openExternal(vscode.Uri.parse(req.url));
+        return undefined;
       case "lookup": {
         const queries = parseLookup(req.text);
         return typeof queries === "string"
@@ -280,6 +341,59 @@ export class NetPanel implements vscode.Disposable {
     this.watch = undefined;
   }
 
+  /** Lists and checks the monitors, and says what changed since last time. */
+  private async monitorsRound(): Promise<Result> {
+    const client = this.d.client();
+    let list;
+    try {
+      list = await client.monitors();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return errorResult(
+        "monitors",
+        /unknown command/.test(msg)
+          ? "Monitors need portcheck 0.14 or later; update portcheck or the extension."
+          : msg,
+      );
+    }
+    const check =
+      list.monitors.length === 0
+        ? { results: [] }
+        : await client.monitorCheck();
+    const { next, messages } = trackMonitors(
+      this.monitorMemory,
+      check,
+      Date.now(),
+    );
+    this.monitorMemory = next;
+    for (const m of messages) {
+      void (m.includes(" is down: ")
+        ? this.d.ui().warn(`portcheck: ${m}`)
+        : this.d.ui().info(`portcheck: ${m}`));
+    }
+    this.lastMonitors = monitorsResult(list, check, this.monitorMemory);
+    return this.lastMonitors;
+  }
+
+  /** Checks the monitors every minute while the panel is open. */
+  private startMonitors(): void {
+    if (this.monitorTimer !== undefined) {
+      return;
+    }
+    this.monitorTimer = setInterval(() => {
+      void this.handle({ type: "monitors" }).then((r) => {
+        if (r) {
+          this.post(r);
+        }
+      });
+    }, MONITOR_EVERY_MS);
+  }
+
+  private stopMonitors(): void {
+    clearInterval(this.monitorTimer);
+    this.monitorTimer = undefined;
+  }
+
   private async projectResult(): Promise<Result> {
     await this.project.refresh();
     return this.project.data
@@ -289,6 +403,7 @@ export class NetPanel implements vscode.Disposable {
 
   dispose(): void {
     this.stopWatch();
+    this.stopMonitors();
     this.panel?.dispose();
     this.replied.dispose();
   }
@@ -333,6 +448,18 @@ function html(webview: vscode.Webview, media: vscode.Uri): string {
     <div class="actions">
       <button class="secondary" data-request="project">Check again</button>
     </div>
+    <div class="out" aria-live="polite"></div>
+  </section>
+
+  <section id="monitors">
+    <h2>Monitors</h2>
+    <p class="hint">Uptime checks for URLs (a /ping or /health endpoint) and ports. They run on this device: here while this panel is open, and in the background with the portcheck tray app or <code>portcheck monitor run</code>. You're warned when one goes down and when it's back.</p>
+    <form data-request="monitorAdd">
+      <label class="wide">URL, host:port or port <input name="target" placeholder="https://example.com/health" spellcheck="false" autocomplete="off" required></label>
+      <label>Every <select name="every"><option>30s</option><option selected>1m</option><option>5m</option><option>15m</option></select></label>
+      <label>Must contain (optional) <input name="contains" placeholder="pong" spellcheck="false" autocomplete="off"></label>
+      <button type="submit">Add</button>
+    </form>
     <div class="out" aria-live="polite"></div>
   </section>
 

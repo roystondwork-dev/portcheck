@@ -163,6 +163,43 @@ describe("PortcheckClient", () => {
     });
   });
 
+  it("builds the arguments of the monitor commands", async () => {
+    const calls: string[][] = [];
+    const c = new PortcheckClient("pc", (f, a, t) => {
+      calls.push([...a]);
+      const kind = a[1] === "list" ? "monitors" : "monitorCheck";
+      return fakeExec({
+        stdout: a.includes("--json")
+          ? JSON.stringify({ schemaVersion: 1, kind, data: {} })
+          : "Added x.\n",
+        code: a[1] === "check" ? 1 : 0,
+      })(f, a, t);
+    });
+    await c.monitors();
+    await c.monitorCheck();
+    expect(await c.monitorAdd("https://a/")).toBe("Added x.");
+    await c.monitorAdd("db:5432", { every: "5m", contains: "ok" });
+    await c.monitorRemove("db:5432");
+    expect(calls).toEqual([
+      ["monitor", "list", "--json"],
+      ["monitor", "check", "--json"],
+      ["monitor", "add", "https://a/"],
+      ["monitor", "add", "db:5432", "--every", "5m", "--contains", "ok"],
+      ["monitor", "remove", "db:5432"],
+    ]);
+    const failing = new PortcheckClient(
+      "pc",
+      fakeExec({
+        stderr: "portcheck: a monitor named x already exists\n",
+        code: 2,
+      }),
+    );
+    await expect(failing.monitorAdd("x")).rejects.toThrow(/already exists/);
+    await expect(
+      new PortcheckClient("pc", fakeExec({ code: 3 })).monitorRemove("x"),
+    ).rejects.toThrow(/status 3/);
+  });
+
   it("accepts expected non-zero exit codes", async () => {
     const c = new PortcheckClient(
       "pc",

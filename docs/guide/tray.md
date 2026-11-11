@@ -37,6 +37,12 @@ on; the menu lists them.
   **Show All Ports** adds other users' processes and system services.
 - The menu refreshes every 3 seconds; the result of the last action is in the icon's
   tooltip.
+- **Uptime monitors:** the monitors you add with
+  [`portcheck monitor add`](monitor.md) run in the background while the tray app is
+  running. A **Monitors** section lists them (✓ up, ✗ down with the reason, … checking),
+  the icon shows how many are down (`3 ⚠1`), and a desktop notification says when one
+  goes down (after 2 failed checks in a row) and when it's back. Each monitor's submenu
+  opens the URL or copies it.
 
 ## Install
 

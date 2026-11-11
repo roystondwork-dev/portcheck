@@ -496,6 +496,66 @@ describe("portcheck extension", () => {
       }
     });
 
+    it("adds, checks and removes an uptime monitor", async () => {
+      assert.ok(
+        process.env.PORTCHECK_CONFIG_DIR,
+        "tests must not touch the real monitors file",
+      );
+      const ui = new ScriptedUI();
+      api.setUI(ui);
+      const empty = await api.netTools.handle({ type: "monitors" });
+      assert.match(empty?.summary ?? "", /No monitors yet/);
+
+      const server = await listen();
+      const port = portOf(server);
+      const target = `127.0.0.1:${port}`;
+      const added = await api.netTools.handle({
+        type: "monitorAdd",
+        target,
+        every: "30s",
+        contains: "",
+      });
+      assert.deepEqual(added?.rows[0]?.cells.slice(0, 2), [target, "up"]);
+      assert.ok(ui.has(`Added ${target}`), ui.messages.join("\n"));
+
+      // Bad input changes nothing and says why.
+      const same = await api.netTools.handle({
+        type: "monitorAdd",
+        target: "example.com",
+        every: "1m",
+        contains: "",
+      });
+      assert.equal(same?.rows.length, 1);
+      assert.ok(ui.has("http:// or https://"), ui.messages.join("\n"));
+
+      // The service stops: one failure is "failing", the second is "down".
+      await close(server);
+      const failing = await api.netTools.handle({ type: "monitors" });
+      assert.equal(failing?.rows[0]?.cells[1], "failing");
+      const down = await api.netTools.handle({ type: "monitors" });
+      assert.equal(down?.rows[0]?.cells[1], "down");
+      assert.ok(
+        ui.has(`${target} is down: connection refused`),
+        ui.messages.join("\n"),
+      );
+
+      // Cancelled: nothing changes. Confirmed: it's gone.
+      api.setUI(new ScriptedUI([undefined]));
+      const kept = await api.netTools.handle({
+        type: "monitorRemove",
+        name: target,
+      });
+      assert.equal(kept?.rows.length, 1);
+      const confirm = new ScriptedUI(["Remove"]);
+      api.setUI(confirm);
+      const removed = await api.netTools.handle({
+        type: "monitorRemove",
+        name: target,
+      });
+      assert.deepEqual(removed?.rows, []);
+      assert.ok(confirm.has(`confirm: Remove the monitor ${target}?`));
+    });
+
     it("copies a value", async () => {
       api.setUI(new ScriptedUI());
       await api.netTools.handle({ type: "copy", text: "192.0.2.1" });
