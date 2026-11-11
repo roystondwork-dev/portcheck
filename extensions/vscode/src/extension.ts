@@ -103,9 +103,17 @@ export function activate(ctx: vscode.ExtensionContext): PortcheckApi {
   const netTools = new NetPanel(deps, ctx.extensionUri);
   ctx.subscriptions.push(
     netTools,
-    vscode.commands.registerCommand("portcheck.networkTools", () => {
-      netTools.show();
-    }),
+    // Optionally with a request to run, e.g. { type: "check", host, ports }.
+    vscode.commands.registerCommand(
+      "portcheck.networkTools",
+      async (request?: unknown) => {
+        if (request === undefined) {
+          netTools.show();
+          return true;
+        }
+        return netTools.run(request);
+      },
+    ),
     terminal,
     forgotten,
     project,

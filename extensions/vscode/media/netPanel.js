@@ -82,14 +82,66 @@
     });
   }
 
+  /**
+   * Types a value into an input, a character at a time, so a request run
+   * from a command reads like one typed by hand.
+   * @param {HTMLInputElement} input
+   * @param {string} value
+   */
+  async function type(input, value) {
+    input.focus();
+    input.value = "";
+    for (const ch of value) {
+      input.value += ch;
+      await new Promise((r) => setTimeout(r, 45));
+    }
+  }
+
+  /**
+   * Runs a request sent by the extension (portcheck.networkTools with an
+   * argument): forms are filled in and submitted, the rest is sent as is.
+   * @param {any} req
+   */
+  async function fill(req) {
+    const form = /** @type {HTMLFormElement | null} */ (
+      document.querySelector(`form[data-request="${req.type}"]`)
+    );
+    if (!form) {
+      if (req.type !== "stop" && !(req.type === "devices" && req.probe)) {
+        setBusy(out(req.type), true);
+      }
+      send(req);
+      return;
+    }
+    form
+      .closest("section")
+      ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    for (const input of form.querySelectorAll("input")) {
+      if (typeof req[input.name] === "string") {
+        await type(input, req[input.name]);
+      }
+    }
+    await new Promise((r) => setTimeout(r, 250));
+    form.requestSubmit();
+  }
+
   window.addEventListener("message", (event) => {
-    /** @type {{type: string, section: string, columns: string[], rows: {cells: string[], tone?: string, copy?: string, stopPort?: number}[], summary?: string, error?: string}} */
+    /** @type {{type: string, section: string, columns: string[], rows: {cells: string[], tone?: string, copy?: string, stopPort?: number}[], summary?: string, error?: string, request?: any}} */
     const r = event.data;
+    if (r.type === "fill") {
+      void fill(r.request);
+      return;
+    }
     if (r.type !== "result") {
       return;
     }
     const o = out(r.section);
     setBusy(o, false);
+    requestAnimationFrame(() =>
+      o
+        .closest("section")
+        ?.scrollIntoView({ block: "nearest", behavior: "smooth" }),
+    );
     if (r.error) {
       o.replaceChildren(text("p", r.error, "error"));
       return;
@@ -145,4 +197,6 @@
     parts.push(table);
     o.replaceChildren(...parts);
   });
+
+  send({ type: "ready" });
 })();

@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import * as vscode from "vscode";
 import type { PortcheckApi } from "../../extension";
 import type { PortRow } from "../../model";
+import type { Result } from "../../netPanelModel";
 import {
   activateExtension,
   close,
@@ -420,6 +421,43 @@ describe("portcheck extension", () => {
       assert.ok(
         ui.has("confirm: Probe your local network"),
         ui.messages.join("\n"),
+      );
+    });
+
+    it("runs a request given to the command in the real webview", async () => {
+      const server = await listen();
+      const port = portOf(server);
+      try {
+        const reply = new Promise<Result>((resolve) => {
+          const sub = api.netTools.onDidReply((r) => {
+            sub.dispose();
+            resolve(r);
+          });
+        });
+        assert.equal(
+          await vscode.commands.executeCommand("portcheck.networkTools", {
+            type: "check",
+            host: "localhost",
+            ports: String(port),
+          }),
+          true,
+        );
+        // The webview typed the values, submitted the form, and got this back.
+        const r = await reply;
+        assert.equal(r.section, "ports");
+        assert.ok(
+          r.rows.some((x) => x.stopPort === port),
+          JSON.stringify(r),
+        );
+      } finally {
+        await close(server);
+      }
+      assert.equal(
+        await vscode.commands.executeCommand("portcheck.networkTools", {
+          type: "copy",
+          text: "x",
+        }),
+        false,
       );
     });
 

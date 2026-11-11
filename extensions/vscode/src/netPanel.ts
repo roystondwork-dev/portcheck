@@ -34,8 +34,13 @@ const SECTION_OF: Record<Request["type"], Section | undefined> = {
 
 export class NetPanel implements vscode.Disposable {
   private panel: vscode.WebviewPanel | undefined;
-  /** The last request per section, to run again after a Stop. */
+  /** The last port check, to run again after a Stop. */
   private lastCheck: Request | undefined;
+  /** Settles once the webview's script is listening. */
+  private ready: Promise<void> = Promise.resolve();
+  private readonly replied = new vscode.EventEmitter<Result>();
+  /** Fires with each result the panel shows (tests wait on it). */
+  readonly onDidReply = this.replied.event;
 
   constructor(
     private readonly d: Deps,
@@ -60,17 +65,47 @@ export class NetPanel implements vscode.Disposable {
       },
     );
     panel.iconPath = vscode.Uri.joinPath(media, "ports.svg");
+    let markReady = () => {};
+    this.ready = new Promise((resolve) => {
+      markReady = resolve;
+    });
     panel.webview.html = html(panel.webview, media);
     panel.webview.onDidReceiveMessage(async (msg: unknown) => {
+      if ((msg as { type?: unknown } | null)?.type === "ready") {
+        markReady();
+        return;
+      }
       const reply = await this.handle(msg);
       if (reply) {
         void panel.webview.postMessage(reply);
+        this.replied.fire(reply);
       }
     });
     panel.onDidDispose(() => {
       this.panel = undefined;
     });
     this.panel = panel;
+  }
+
+  /**
+   * Opens the panel and runs a request in it as if typed there, e.g.
+   * { type: "check", host: "db.internal", ports: "5432" } or
+   * { type: "lookup", text: "example.com" }. Returns false for anything
+   * that isn't a request the panel can run.
+   */
+  async run(msg: unknown): Promise<boolean> {
+    const req = parseRequest(msg);
+    if (req === undefined || req.type === "copy") {
+      return false;
+    }
+    this.show();
+    await this.ready;
+    return (
+      (await this.panel?.webview.postMessage({
+        type: "fill",
+        request: req,
+      })) === true
+    );
   }
 
   /**
@@ -149,6 +184,7 @@ export class NetPanel implements vscode.Disposable {
 
   dispose(): void {
     this.panel?.dispose();
+    this.replied.dispose();
   }
 }
 
