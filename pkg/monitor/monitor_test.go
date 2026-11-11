@@ -469,3 +469,62 @@ func TestRunnerCheckAll(t *testing.T) {
 		t.Errorf("interval = %s", d)
 	}
 }
+
+func TestSupervisor(t *testing.T) {
+	t.Parallel()
+	path := filepath.Join(t.TempDir(), FileName)
+	if Stamp(path) != "missing" {
+		t.Error("Stamp(missing) is not missing")
+	}
+	checked := make(chan string, 16)
+	loads := make(chan error, 16)
+	s := &Supervisor{
+		Path: path,
+		Runner: &Runner{
+			Check: func(_ context.Context, tg Target) Result {
+				checked <- tg.Name
+				return Result{Name: tg.Name, Up: true}
+			},
+			Tracker:  &Tracker{},
+			Interval: func(Target) time.Duration { return time.Hour },
+		},
+		Reload: 5 * time.Millisecond,
+		OnLoad: func(_ *File, err error) { loads <- err },
+	}
+	ctx, cancel := context.WithCancel(t.Context())
+	done := make(chan struct{})
+	go func() { s.Run(ctx); close(done) }()
+	if err := <-loads; err != nil || len(s.Targets()) != 0 {
+		t.Fatalf("first load: %v, %v", err, s.Targets())
+	}
+	write := func(text string) {
+		if err := os.WriteFile(path, []byte(text), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write("version: 1\nmonitors:\n  - {name: a, address: 'a:1'}\n")
+	if err := <-loads; err != nil {
+		t.Fatalf("second load: %v", err)
+	}
+	if name := <-checked; name != "a" {
+		t.Errorf("checked %q", name)
+	}
+	write("version: 1\nmonitors: [\n")
+	if err := <-loads; err == nil {
+		t.Error("broken file loaded")
+	}
+	// The previous monitors keep running.
+	if got := s.Targets(); len(got) != 1 || got[0].Name != "a" {
+		t.Errorf("targets after a bad load = %+v", got)
+	}
+	cancel()
+	<-done
+}
+
+func TestSupervisorDefaults(t *testing.T) {
+	t.Parallel()
+	s := &Supervisor{Path: filepath.Join(t.TempDir(), FileName), Runner: &Runner{Tracker: &Tracker{}}}
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	s.Run(ctx) // returns at once; no OnLoad needed
+}
