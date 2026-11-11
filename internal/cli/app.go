@@ -21,11 +21,13 @@ import (
 
 	"github.com/roystondwork-dev/portcheck/internal/buildinfo"
 	"github.com/roystondwork-dev/portcheck/internal/nativehost"
+	"github.com/roystondwork-dev/portcheck/internal/notify"
 	"github.com/roystondwork-dev/portcheck/internal/tui"
 	"github.com/roystondwork-dev/portcheck/pkg/containers"
 	"github.com/roystondwork-dev/portcheck/pkg/freeport"
 	"github.com/roystondwork-dev/portcheck/pkg/inspect"
 	"github.com/roystondwork-dev/portcheck/pkg/killer"
+	"github.com/roystondwork-dev/portcheck/pkg/monitor"
 	"github.com/roystondwork-dev/portcheck/pkg/netinfo"
 	"github.com/roystondwork-dev/portcheck/pkg/portspec"
 	"github.com/roystondwork-dev/portcheck/pkg/scan"
@@ -94,6 +96,10 @@ type App struct {
 	Net    netinfo.Source
 	DNS    netinfo.DNSResolver
 	NetGet netinfo.Getter
+	// MonitorCheck runs one monitor check; Notify shows desktop notifications
+	// for `monitor run`.
+	MonitorCheck func(ctx context.Context, t monitor.Target) monitor.Result
+	Notify       notify.Notifier
 }
 
 // NewApp returns an App wired to the real operating system. When a
@@ -137,6 +143,8 @@ func NewApp() *App {
 		Net:           netinfo.NewSystem(),
 		DNS:           net.DefaultResolver,
 		NetGet:        netinfo.HTTPGet,
+		MonitorCheck:  monitor.NewChecker("portcheck/" + buildinfo.Get().Version).Check,
+		Notify:        notify.System(runtime.GOOS, notify.Exec),
 	}
 }
 
