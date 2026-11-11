@@ -325,4 +325,108 @@ describe("portcheck extension", () => {
     );
     assert.ok(ui.has("Probe for More Devices"), ui.messages.join("\n"));
   });
+
+  describe("Network Tools panel", () => {
+    before(async () => {
+      await vscode.commands.executeCommand("portcheck.networkTools");
+    });
+
+    it("shows who holds a local port, and that a free one is free", async () => {
+      const server = await listen();
+      const port = portOf(server);
+      try {
+        const busy = await api.netTools.handle({
+          type: "check",
+          host: "localhost",
+          ports: String(port),
+        });
+        assert.equal(busy?.section, "ports");
+        const row = busy.rows.find((r) => r.copy === String(process.pid));
+        assert.ok(row, JSON.stringify(busy));
+        assert.equal(row.cells[1], "in use");
+        assert.equal(row.stopPort, port);
+      } finally {
+        await close(server);
+      }
+      const free = await api.netTools.handle({
+        type: "check",
+        host: "",
+        ports: String(port),
+      });
+      assert.deepEqual(free?.rows[0]?.cells.slice(0, 2), [
+        `${port}/tcp`,
+        "free",
+      ]);
+    });
+
+    it("checks another host's ports by connecting", async () => {
+      const server = await listen();
+      const port = portOf(server);
+      try {
+        // The IPv4-mapped form of loopback isn't "this machine" to the panel,
+        // so it takes the remote path (portcheck scan) but still reaches the
+        // test server.
+        const r = await api.netTools.handle({
+          type: "check",
+          host: "::ffff:127.0.0.1",
+          ports: String(port),
+        });
+        assert.deepEqual(r?.columns, ["Port", "Status", "Details", "Host"]);
+        assert.deepEqual(r.rows[0]?.cells.slice(0, 2), [String(port), "open"]);
+        assert.equal(r.rows[0].tone, "ok");
+      } finally {
+        await close(server);
+      }
+    });
+
+    it("explains bad input instead of running anything", async () => {
+      const r = await api.netTools.handle({
+        type: "check",
+        host: "10.0.0.0/24",
+        ports: "80",
+      });
+      assert.match(r?.error ?? "", /one host name/);
+      const p = await api.netTools.handle({
+        type: "check",
+        host: "localhost",
+        ports: "http",
+      });
+      assert.match(p?.error ?? "", /not a port/);
+      assert.equal(await api.netTools.handle({ type: "nope" }), undefined);
+    });
+
+    it("looks up a name and lists this machine's addresses", async () => {
+      const r = await api.netTools.handle({
+        type: "lookup",
+        text: "localhost",
+      });
+      assert.equal(r?.section, "lookup");
+      assert.ok(
+        r.rows.some((x) => x.copy === "127.0.0.1" || x.copy === "::1"),
+        JSON.stringify(r),
+      );
+      const a = await api.netTools.handle({ type: "addresses" });
+      assert.equal(a?.section, "addresses");
+      assert.equal(a.error, undefined);
+    });
+
+    it("asks before probing the network, and does nothing if cancelled", async () => {
+      const ui = new ScriptedUI([undefined]);
+      api.setUI(ui);
+      assert.equal(
+        await api.netTools.handle({ type: "devices", probe: true }),
+        undefined,
+      );
+      assert.ok(
+        ui.has("confirm: Probe your local network"),
+        ui.messages.join("\n"),
+      );
+    });
+
+    it("copies a value", async () => {
+      api.setUI(new ScriptedUI());
+      await api.netTools.handle({ type: "copy", text: "192.0.2.1" });
+      assert.equal(await vscode.env.clipboard.readText(), "192.0.2.1");
+    });
+  });
 });

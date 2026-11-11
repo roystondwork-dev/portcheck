@@ -123,10 +123,11 @@ describe("PortcheckClient", () => {
     const kindOf: Record<string, string> = {
       devices: "devices",
       lookup: "lookup",
+      scan: "scan",
     };
     const c = new PortcheckClient("pc", (f, a, t) => {
       calls.push([...a]);
-      const kind = kindOf[a[1] ?? ""] ?? "net";
+      const kind = kindOf[a[1] ?? ""] ?? kindOf[a[0] ?? ""] ?? "net";
       return fakeExec({
         stdout: JSON.stringify({ schemaVersion: 1, kind, data: {} }),
       })(f, a, t);
@@ -136,12 +137,14 @@ describe("PortcheckClient", () => {
     await c.devices();
     await c.devices(true);
     await c.lookup(["example.com", "1.1.1.1"]);
+    await c.scan("db.internal", "5432,6379");
     expect(calls).toEqual([
       ["net", "--json"],
       ["net", "--public", "--json"],
       ["net", "devices", "--json"],
       ["net", "devices", "--probe", "--json"],
       ["net", "lookup", "example.com", "1.1.1.1", "--json"],
+      ["scan", "db.internal", "-p", "5432,6379", "--json"],
     ]);
     // A name that doesn't resolve (exit 1) still returns results.
     const failed = new PortcheckClient(

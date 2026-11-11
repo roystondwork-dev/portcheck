@@ -143,6 +143,22 @@ command palette.
 - For a **hidden owner**, it offers the elevated command (`sudo portcheck kill 22`) to
   run in a terminal.
 
+## Network Tools
+
+**portcheck: Open Network Tools** (the antenna button in the **Listening ports** title
+bar, or the Command Palette) opens a tab where you type and see results in tables:
+
+| Section | What you enter | What you see |
+|---|---|---|
+| **Check ports** | a host (default `localhost`) and ports: `3000`, `80,443` or `8000-8100` | On this machine: **free**, or **in use** with the process, its PID and project, and a **Stop** button (it asks first, and portcheck's safety guards apply). On another host: **open**, **closed** or **filtered** for each port, with the service name and latency |
+| **Look up a domain or IP** | `example.com 192.168.1.20` | DNS records for each domain; the name and class of each address |
+| **My addresses** | (a button) | your addresses, gateway and DNS servers; **Show public address too** asks ipify.org, the only part that contacts the internet |
+| **Devices on my network** | (a button) | devices your computer has seen; **Probe for more…** finds others, after a confirmation |
+
+Every row has a **Copy** button. Checking another host connects to each port like
+[`portcheck scan`](../commands/portcheck_scan.md), up to 1,024 ports at a time: only check
+hosts you own or are allowed to test.
+
 ## Commands
 
 | Command | What it does |
@@ -152,6 +168,7 @@ command palette.
 | **portcheck: Stop What's Using a Port…** | as above, by port number |
 | **portcheck: Fix a Busy Port…** | the fix menu above, for any port |
 | **portcheck: Check Project Ports (.portcheck.yaml)** | re-runs `doctor` and offers fixes (also the status bar item) |
+| **portcheck: Open Network Tools** | the [Network Tools](#network-tools) panel |
 | **portcheck: Show/Hide UDP Ports** | toggles `portcheck.showUdp` |
 | **portcheck: Refresh** | reloads the view |
 | **portcheck: Show Log** | the extension's log, useful when reporting issues |

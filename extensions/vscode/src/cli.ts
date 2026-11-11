@@ -12,6 +12,7 @@ import {
   type ListData,
   type LookupData,
   type NetData,
+  type ScanData,
   SCHEMA_VERSION,
   type VersionData,
 } from "./schema";
@@ -179,6 +180,11 @@ export class PortcheckClient {
       ["net", "lookup", ...queries],
       [0, 1],
     );
+  }
+
+  /** Which TCP ports accept connections on a host. Exit code 1 (none open) still carries results. */
+  scan(host: string, ports: string): Promise<ScanData> {
+    return this.run<ScanData>("scan", ["scan", host, "-p", ports], [0, 1]);
   }
 
   version(): Promise<VersionData> {

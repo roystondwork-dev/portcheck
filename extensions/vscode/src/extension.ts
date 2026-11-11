@@ -6,6 +6,7 @@ import { ForgottenServers } from "./forgottenWatcher";
 import { ProjectPorts } from "./project";
 import { TerminalFixes } from "./terminal";
 import { validatePort } from "./model";
+import { NetPanel } from "./netPanel";
 import { nodeExec } from "./nodeExec";
 import { PortsView } from "./portsView";
 
@@ -17,6 +18,8 @@ export interface PortcheckApi {
   terminal: TerminalFixes;
   forgotten: ForgottenServers;
   project: ProjectPorts;
+  /** The Network Tools panel. */
+  netTools: NetPanel;
   /** Replaces how the extension asks the user things (tests script the answers). */
   setUI: (ui: UI) => void;
   /** The extension's own notifications and menus, for wrapping in setUI. */
@@ -97,7 +100,12 @@ export function activate(ctx: vscode.ExtensionContext): PortcheckApi {
   const project = new ProjectPorts(deps, (ports) => {
     view.setFilter(settings().get<boolean>("showUdp", false), ports);
   });
+  const netTools = new NetPanel(deps, ctx.extensionUri);
   ctx.subscriptions.push(
+    netTools,
+    vscode.commands.registerCommand("portcheck.networkTools", () => {
+      netTools.show();
+    }),
     terminal,
     forgotten,
     project,
@@ -135,6 +143,7 @@ export function activate(ctx: vscode.ExtensionContext): PortcheckApi {
     terminal,
     forgotten,
     project,
+    netTools,
     setUI: (u) => {
       ui = u;
     },

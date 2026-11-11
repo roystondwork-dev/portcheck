@@ -17,6 +17,9 @@ See what's using your ports, and free them safely, without leaving the editor.
 - Container and WSL ports show the right command (`docker stop web`) instead of killing
   the proxy.
 - **Check a port** and **find a free port** from the command palette.
+- **Network Tools** panel: type a host and ports to see what holds them on this machine,
+  or which accept connections on another host; look up domains and IPs; see your
+  addresses and the devices on your network. Every result has a Copy button.
 - Works in Remote-SSH, WSL and Dev Containers: it runs where your code runs.
 
 The extension runs the [portcheck](https://github.com/roystondwork-dev/portcheck) CLI,

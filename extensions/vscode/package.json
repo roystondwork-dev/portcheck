@@ -137,6 +137,12 @@
         "title": "Look Up a Domain or IP",
         "icon": "$(search)",
         "category": "portcheck"
+      },
+      {
+        "command": "portcheck.networkTools",
+        "title": "Open Network Tools",
+        "icon": "$(radio-tower)",
+        "category": "portcheck"
       }
     ],
     "menus": {
@@ -150,6 +156,11 @@
           "command": "portcheck.toggleUdp",
           "when": "view == portcheck.ports",
           "group": "navigation@2"
+        },
+        {
+          "command": "portcheck.networkTools",
+          "when": "view == portcheck.ports",
+          "group": "navigation@3"
         }
       ],
       "view/item/context": [

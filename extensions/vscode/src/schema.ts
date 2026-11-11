@@ -145,3 +145,25 @@ export interface LookupData {
     error?: string;
   }[];
 }
+
+/** `portcheck scan`. */
+export interface ScanData {
+  results: {
+    host: string;
+    address: string;
+    port: number;
+    state: "open" | "closed" | "filtered" | "error";
+    service?: string;
+    latencyMs?: number;
+    error?: string;
+  }[];
+  summary: {
+    hosts: number;
+    ports: number;
+    open: number;
+    closed: number;
+    filtered: number;
+    errors: number;
+    durationMs: number;
+  };
+}

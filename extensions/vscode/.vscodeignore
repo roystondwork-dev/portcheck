@@ -5,6 +5,8 @@
 !bin/**
 !media/icon.png
 !media/ports.svg
+!media/netPanel.js
+!media/netPanel.css
 !package.json
 !README.md
 !CHANGELOG.md

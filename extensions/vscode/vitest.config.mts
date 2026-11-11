@@ -13,6 +13,7 @@ export default defineConfig({
         "src/matcher.ts",
         "src/model.ts",
         "src/netModel.ts",
+        "src/netPanelModel.ts",
         "src/nodeExec.ts",
         "src/projectModel.ts",
       ],
