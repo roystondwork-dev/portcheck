@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.13.0](https://github.com/roystondwork-dev/portcheck/compare/v0.12.0...v0.13.0) (2026-11-11)
+
+
+### Features
+
+* **vscode:** Network Tools panel to check ports, look up names and see addresses ([44b6f73](https://github.com/roystondwork-dev/portcheck/commit/44b6f731b9429f4509d7380305ee1a71c3dd5848))
+* **vscode:** Open Network Tools can run a check or lookup given to it ([d1ea5a7](https://github.com/roystondwork-dev/portcheck/commit/d1ea5a700ab00aa181230325055ed2d1f78022b6))
+
+
+### Documentation
+
+* link the JetBrains Marketplace listing; drop duplicate changelog entry ([720029b](https://github.com/roystondwork-dev/portcheck/commit/720029b995d95154ca866b2819965e47b161973d))
+* **vscode:** Network Tools demo and the command's optional request ([ff9358e](https://github.com/roystondwork-dev/portcheck/commit/ff9358e0bd48ba4e4c967ca8a2a45a6b0d22cba1))
+* **vscode:** trim the end of the Network Tools demo ([99254f2](https://github.com/roystondwork-dev/portcheck/commit/99254f2b5c99b765d7ea3cd5746d259171cf59bb))
+
+
+### Build & Release
+
+* **deps:** bump the go-deps group across 1 directory with 3 updates ([39d2bde](https://github.com/roystondwork-dev/portcheck/commit/39d2bde3999a148cbf9a666bfd4de29fbed3dbbd))
+* Go 1.27.4 for GO-2026-6859 (net/http) ([48151f3](https://github.com/roystondwork-dev/portcheck/commit/48151f34a528fa5d5c87c7e5dcf969223c3f1f66))
+
 ## [0.12.0](https://github.com/roystondwork-dev/portcheck/compare/v0.11.1...v0.12.0) (2026-11-10)
 
 
