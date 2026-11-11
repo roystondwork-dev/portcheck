@@ -67,6 +67,11 @@ fixes it: stop it and re-run, or re-run on the next free port.
 
 ![portcheck in VS Code: npm run dev fails with EADDRINUSE, the extension names the process holding port 3000, stops it and re-runs the command](docs/assets/portcheck-vscode-demo.gif)
 
+The **Network Tools** panel checks ports on this machine or another host, looks up
+domains and IPs, and lists your addresses and the devices on your network:
+
+![portcheck Network Tools in VS Code: port 3000 is in use by node in shop-app and is stopped; royston.in ports 80 and 443 are open; a lookup of royston.in lists its A, AAAA and NS records](docs/assets/portcheck-vscode-network-tools.gif)
+
 Install **Portcheck - Port in Use Fixer** from the
 [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=portcheck-vscode.portcheck-vscode) (search "portcheck" in VS Code) or
 [Open VSX](https://open-vsx.org/extension/portcheck-vscode/portcheck-vscode) (VSCodium, Cursor, Windsurf). portcheck is built in.

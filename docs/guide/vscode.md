@@ -148,6 +148,8 @@ command palette.
 **portcheck: Open Network Tools** (the antenna button in the **Listening ports** title
 bar, or the Command Palette) opens a tab where you type and see results in tables:
 
+![portcheck Network Tools in VS Code: port 3000 is in use by node in shop-app and is stopped; royston.in ports 80 and 443 are open; a lookup of royston.in lists its A, AAAA and NS records](../assets/portcheck-vscode-network-tools.gif)
+
 | Section | What you enter | What you see |
 |---|---|---|
 | **Check ports** | a host (default `localhost`) and ports: `3000`, `80,443` or `8000-8100` | On this machine: **free**, or **in use** with the process, its PID and project, and a **Stop** button (it asks first, and portcheck's safety guards apply). On another host: **open**, **closed** or **filtered** for each port, with the service name and latency |
@@ -158,6 +160,11 @@ bar, or the Command Palette) opens a tab where you type and see results in table
 Every row has a **Copy** button. Checking another host connects to each port like
 [`portcheck scan`](../commands/portcheck_scan.md), up to 1,024 ports at a time: only check
 hosts you own or are allowed to test.
+
+Other extensions, tasks and keybindings can open the panel with a check or lookup to run,
+for example `{ "type": "check", "host": "db.internal", "ports": "5432" }` or
+`{ "type": "lookup", "text": "example.com" }` as the argument of
+`portcheck.networkTools`.
 
 ## Commands
 
