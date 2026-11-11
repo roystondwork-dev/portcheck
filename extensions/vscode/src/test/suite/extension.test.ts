@@ -461,6 +461,40 @@ describe("portcheck extension", () => {
       );
     });
 
+    it("watches a port and says when it changes", async () => {
+      const server = await listen();
+      const port = portOf(server);
+      const ui = new ScriptedUI();
+      api.setUI(ui);
+      const first = await api.netTools.handle({
+        type: "watch",
+        host: "localhost",
+        ports: String(port),
+      });
+      try {
+        assert.equal(first?.watching, true);
+        assert.match(first.summary ?? "", /^Watching: checks every 2 s\. /);
+        assert.equal(first.rows[0]?.cells[1], "in use");
+        assert.ok(api.netTools.watching);
+        // Free the port; the next check (2 s later) notices.
+        const next = new Promise<Result>((resolve) => {
+          const sub = api.netTools.onDidReply((r) => {
+            sub.dispose();
+            resolve(r);
+          });
+        });
+        await close(server);
+        const r = await next;
+        assert.equal(r.rows[0]?.cells[1], "free");
+        assert.equal(r.rows[0].changed, true);
+        assert.ok(ui.has(`${port}/tcp is now free`), ui.messages.join("\n"));
+      } finally {
+        const stopped = await api.netTools.handle({ type: "unwatch" });
+        assert.equal(stopped?.watching, false);
+        assert.equal(api.netTools.watching, false);
+      }
+    });
+
     it("copies a value", async () => {
       api.setUI(new ScriptedUI());
       await api.netTools.handle({ type: "copy", text: "192.0.2.1" });

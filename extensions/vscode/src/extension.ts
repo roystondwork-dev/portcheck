@@ -100,7 +100,7 @@ export function activate(ctx: vscode.ExtensionContext): PortcheckApi {
   const project = new ProjectPorts(deps, (ports) => {
     view.setFilter(settings().get<boolean>("showUdp", false), ports);
   });
-  const netTools = new NetPanel(deps, ctx.extensionUri);
+  const netTools = new NetPanel(deps, ctx.extensionUri, project);
   ctx.subscriptions.push(
     netTools,
     // Optionally with a request to run, e.g. { type: "check", host, ports }.

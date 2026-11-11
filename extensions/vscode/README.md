@@ -18,7 +18,8 @@ See what's using your ports, and free them safely, without leaving the editor.
   the proxy.
 - **Check a port** and **find a free port** from the command palette.
 - **Network Tools** panel: type a host and ports to see what holds them on this machine,
-  or which accept connections on another host; look up domains and IPs; see your
+  or which accept connections on another host, and **Watch** them to hear when they
+  change; see your project's `.portcheck.yaml` ports; look up domains and IPs; see your
   addresses and the devices on your network. Every result has a Copy button.
 
   ![portcheck Network Tools in VS Code: port 3000 is in use by node in shop-app and is stopped; royston.in ports 80 and 443 are open; a lookup of royston.in lists its A, AAAA and NS records](https://raw.githubusercontent.com/roystondwork-dev/portcheck/main/docs/assets/portcheck-vscode-network-tools.gif)

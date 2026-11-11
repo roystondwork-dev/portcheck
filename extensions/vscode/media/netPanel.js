@@ -7,6 +7,9 @@
   const vscode = acquireVsCodeApi();
   const state = vscode.getState() || {};
 
+  /** Which column of each section gets a coloured status pill. @type {Record<string, number>} */
+  const PILL_COLUMN = { ports: 1, project: 2 };
+
   /** @param {string} section */
   function out(section) {
     return /** @type {HTMLElement} */ (
@@ -67,7 +70,36 @@
     });
   }
 
-  // Buttons: My addresses and Devices.
+  // Watch: check again every few seconds until stopped.
+  const checkForm = /** @type {HTMLFormElement} */ (
+    document.querySelector('form[data-request="check"]')
+  );
+  const watchButton = /** @type {HTMLButtonElement} */ (
+    document.querySelector("button[data-watch]")
+  );
+  let watching = false;
+  /** @param {boolean} on */
+  function setWatching(on) {
+    watching = on;
+    watchButton.textContent = on ? "Stop watching" : "Watch";
+    watchButton.classList.toggle("active", on);
+  }
+  watchButton.addEventListener("click", () => {
+    if (watching) {
+      send({ type: "unwatch" });
+      return;
+    }
+    if (!checkForm.reportValidity()) {
+      return;
+    }
+    const data = Object.fromEntries(new FormData(checkForm));
+    Object.assign(state, data);
+    vscode.setState(state);
+    setBusy(checkForm, true);
+    send({ type: "watch", ...data });
+  });
+
+  // Buttons: Project ports, My addresses and Devices.
   for (const button of document.querySelectorAll("button[data-request]")) {
     const b = /** @type {HTMLButtonElement} */ (button);
     b.addEventListener("click", () => {
@@ -104,10 +136,15 @@
    */
   async function fill(req) {
     const form = /** @type {HTMLFormElement | null} */ (
-      document.querySelector(`form[data-request="${req.type}"]`)
+      document.querySelector(
+        `form[data-request="${req.type === "watch" ? "check" : req.type}"]`,
+      )
     );
     if (!form) {
-      if (req.type !== "stop" && !(req.type === "devices" && req.probe)) {
+      // Sections show "Working…"; a probe asks first, and stop/unwatch
+      // have no section of their own.
+      const section = document.getElementById(req.type);
+      if (section && !(req.type === "devices" && req.probe)) {
         setBusy(out(req.type), true);
       }
       send(req);
@@ -122,11 +159,18 @@
       }
     }
     await new Promise((r) => setTimeout(r, 250));
+    if (req.type === "watch") {
+      if (watching) {
+        setWatching(false);
+      }
+      watchButton.click();
+      return;
+    }
     form.requestSubmit();
   }
 
   window.addEventListener("message", (event) => {
-    /** @type {{type: string, section: string, columns: string[], rows: {cells: string[], tone?: string, copy?: string, stopPort?: number}[], summary?: string, error?: string, request?: any}} */
+    /** @type {{type: string, section: string, columns: string[], rows: {cells: string[], tone?: string, copy?: string, stopPort?: number, changed?: boolean}[], summary?: string, error?: string, watching?: boolean, request?: any}} */
     const r = event.data;
     if (r.type === "fill") {
       void fill(r.request);
@@ -137,6 +181,9 @@
     }
     const o = out(r.section);
     setBusy(o, false);
+    if (r.section === "ports") {
+      setWatching(r.watching === true);
+    }
     requestAnimationFrame(() =>
       o
         .closest("section")
@@ -163,10 +210,13 @@
     const body = table.createTBody();
     for (const row of r.rows) {
       const tr = body.insertRow();
+      if (row.changed) {
+        tr.className = "changed";
+      }
       row.cells.forEach((cell, i) => {
         const td = tr.insertCell();
         // The Status column of Check ports gets a coloured pill.
-        if (i === 1 && row.tone && r.section === "ports") {
+        if (i === PILL_COLUMN[r.section] && row.tone) {
           td.append(text("span", cell, `pill ${row.tone}`));
         } else {
           td.textContent = cell;
@@ -199,4 +249,7 @@
   });
 
   send({ type: "ready" });
+  // Project ports load on their own; the section says if there's no file.
+  setBusy(out("project"), true);
+  send({ type: "project" });
 })();

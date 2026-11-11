@@ -143,6 +143,7 @@ td.row-actions {
 }
 .pill {
   display: inline-block;
+  white-space: nowrap;
   padding: 0 8px;
   border-radius: 10px;
   font-size: 0.85em;
@@ -159,4 +160,22 @@ td.row-actions {
 }
 .pill.info {
   color: var(--vscode-charts-blue);
+}
+button.active {
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background);
+}
+@keyframes changed {
+  from {
+    background: var(
+      --vscode-editor-findMatchHighlightBackground,
+      rgba(255, 200, 0, 0.3)
+    );
+  }
+  to {
+    background: transparent;
+  }
+}
+tr.changed td {
+  animation: changed 2.5s ease-out;
 }

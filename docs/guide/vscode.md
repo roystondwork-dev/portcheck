@@ -153,9 +153,15 @@ bar, or the Command Palette) opens a tab where you type and see results in table
 | Section | What you enter | What you see |
 |---|---|---|
 | **Check ports** | a host (default `localhost`) and ports: `3000`, `80,443` or `8000-8100` | On this machine: **free**, or **in use** with the process, its PID and project, and a **Stop** button (it asks first, and portcheck's safety guards apply). On another host: **open**, **closed** or **filtered** for each port, with the service name and latency |
+| **Project ports** | (loads by itself) | each port your [`.portcheck.yaml`](doctor.md) names: **ok** or **needs attention**, with the fix; **Stop** frees a port that should be free. Without a file, it says how to add one |
 | **Look up a domain or IP** | `example.com 192.168.1.20` | DNS records for each domain; the name and class of each address |
 | **My addresses** | (a button) | your addresses, gateway and DNS servers; **Show public address too** asks ipify.org, the only part that contacts the internet |
 | **Devices on my network** | (a button) | devices your computer has seen; **Probe for more…** finds others, after a confirmation |
+
+**Watch** (next to **Check**) checks the same ports again every 2 seconds on this
+machine, or every 5 seconds on another host, until you click **Stop watching**. When a
+port changes (a server starts or stops, another process takes it), the row flashes and
+a notification says what changed, e.g. "3000/tcp is now free".
 
 Every row has a **Copy** button. Checking another host connects to each port like
 [`portcheck scan`](../commands/portcheck_scan.md), up to 1,024 ports at a time: only check

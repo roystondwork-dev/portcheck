@@ -12,16 +12,22 @@ import {
   errorResult,
   isLocal,
   lookupResult,
+  markChanges,
   parseHost,
   parseLookup,
   parsePorts,
   parseRequest,
   portSpec,
+  projectMissingResult,
+  projectResult,
   type Request,
   type Result,
+  rowStates,
   scanResult,
   type Section,
+  watchInterval,
 } from "./netPanelModel";
+import type { ProjectPorts } from "./project";
 
 const SECTION_OF: Record<Request["type"], Section | undefined> = {
   check: "ports",
@@ -30,7 +36,18 @@ const SECTION_OF: Record<Request["type"], Section | undefined> = {
   devices: "devices",
   copy: undefined,
   stop: undefined,
+  watch: "ports",
+  unwatch: undefined,
+  project: "project",
 };
+
+interface Watch {
+  host: string;
+  ports: number[];
+  timer?: ReturnType<typeof setTimeout>;
+  states?: Map<string, string>;
+  last?: Result;
+}
 
 export class NetPanel implements vscode.Disposable {
   private panel: vscode.WebviewPanel | undefined;
@@ -41,11 +58,18 @@ export class NetPanel implements vscode.Disposable {
   private readonly replied = new vscode.EventEmitter<Result>();
   /** Fires with each result the panel shows (tests wait on it). */
   readonly onDidReply = this.replied.event;
+  private watch: Watch | undefined;
 
   constructor(
     private readonly d: Deps,
     private readonly extensionUri: vscode.Uri,
+    private readonly project: ProjectPorts,
   ) {}
+
+  /** True while a check is being watched. */
+  get watching(): boolean {
+    return this.watch !== undefined;
+  }
 
   /** Opens the panel, or brings it to the front. */
   show(): void {
@@ -77,11 +101,11 @@ export class NetPanel implements vscode.Disposable {
       }
       const reply = await this.handle(msg);
       if (reply) {
-        void panel.webview.postMessage(reply);
-        this.replied.fire(reply);
+        this.post(reply);
       }
     });
     panel.onDidDispose(() => {
+      this.stopWatch();
       this.panel = undefined;
     });
     this.panel = panel;
@@ -130,7 +154,8 @@ export class NetPanel implements vscode.Disposable {
   private async answer(req: Request): Promise<Result | undefined> {
     const client = this.d.client();
     switch (req.type) {
-      case "check": {
+      case "check":
+      case "watch": {
         const host = parseHost(req.host);
         if (typeof host !== "string") {
           return errorResult("ports", host.error);
@@ -139,14 +164,22 @@ export class NetPanel implements vscode.Disposable {
         if (typeof ports === "string") {
           return errorResult("ports", ports);
         }
-        this.lastCheck = req;
-        if (isLocal(host)) {
-          // On this machine: who holds each port, not just whether it answers.
-          const data = await Promise.all(ports.map((p) => client.check(p)));
-          return checkResult({ ports: data.flatMap((x) => x.ports) });
+        // A new check or watch replaces the one being watched.
+        this.stopWatch();
+        this.lastCheck = { type: "check", host: req.host, ports: req.ports };
+        if (req.type === "check") {
+          return this.check(host, ports);
         }
-        return scanResult(await client.scan(host, portSpec(ports)));
+        this.watch = { host, ports };
+        return this.tick(this.watch);
       }
+      case "unwatch": {
+        const last = this.watch?.last;
+        this.stopWatch();
+        return last && { ...last, watching: false };
+      }
+      case "project":
+        return this.projectResult();
       case "lookup": {
         const queries = parseLookup(req.text);
         return typeof queries === "string"
@@ -177,12 +210,85 @@ export class NetPanel implements vscode.Disposable {
       case "stop": {
         // The same confirmation and safety guards as the Stop command.
         await vscode.commands.executeCommand("portcheck.stopPort", req.port);
+        if (this.project.config !== undefined) {
+          this.post(await this.projectResult());
+        }
+        if (this.watch) {
+          return undefined; // the next tick shows it
+        }
         return this.lastCheck ? this.answer(this.lastCheck) : undefined;
       }
     }
   }
 
+  /** Shows a result in the panel. */
+  private post(result: Result): void {
+    void this.panel?.webview.postMessage(result);
+    this.replied.fire(result);
+  }
+
+  private async check(host: string, ports: number[]): Promise<Result> {
+    const client = this.d.client();
+    if (isLocal(host)) {
+      // On this machine: who holds each port, not just whether it answers.
+      const data = await Promise.all(ports.map((p) => client.check(p)));
+      return checkResult({ ports: data.flatMap((x) => x.ports) });
+    }
+    return scanResult(await client.scan(host, portSpec(ports)));
+  }
+
+  /**
+   * Runs a watched check, notes what changed, and schedules the next run,
+   * whose result is posted to the panel.
+   */
+  private async tick(w: Watch): Promise<Result | undefined> {
+    let result: Result;
+    try {
+      result = await this.check(w.host, w.ports);
+    } catch (err) {
+      result = errorResult(
+        "ports",
+        err instanceof Error ? err.message : String(err),
+      );
+    }
+    if (this.watch !== w) {
+      return undefined; // stopped while this run was in flight
+    }
+    const changes = markChanges(w.states, result, w.host);
+    w.states = rowStates(result.rows, w.host);
+    const every = watchInterval(w.host) / 1000;
+    result.watching = true;
+    result.summary = `Watching: checks every ${every} s. ${result.summary ?? ""}`;
+    w.last = result;
+    if (changes.length > 0) {
+      void this.d.ui().info(`portcheck: ${changes.join("; ")}`);
+    }
+    w.timer = setTimeout(() => {
+      void this.tick(w).then((r) => {
+        if (r) {
+          this.post(r);
+        }
+      });
+    }, watchInterval(w.host));
+    return result;
+  }
+
+  private stopWatch(): void {
+    if (this.watch?.timer !== undefined) {
+      clearTimeout(this.watch.timer);
+    }
+    this.watch = undefined;
+  }
+
+  private async projectResult(): Promise<Result> {
+    await this.project.refresh();
+    return this.project.data
+      ? projectResult(this.project.data)
+      : projectMissingResult(this.project.config !== undefined);
+  }
+
   dispose(): void {
+    this.stopWatch();
     this.panel?.dispose();
     this.replied.dispose();
   }
@@ -216,7 +322,17 @@ function html(webview: vscode.Webview, media: vscode.Uri): string {
       <label>Host <input name="host" value="localhost" spellcheck="false" autocomplete="off"></label>
       <label>Ports <input name="ports" placeholder="3000, 80,443 or 8000-8100" spellcheck="false" autocomplete="off" required></label>
       <button type="submit">Check</button>
+      <button type="button" class="secondary" data-watch title="Check again every few seconds and say when something changes">Watch</button>
     </form>
+    <div class="out" aria-live="polite"></div>
+  </section>
+
+  <section id="project">
+    <h2>Project ports</h2>
+    <p class="hint">The ports your workspace's .portcheck.yaml names, and whether each is as expected.</p>
+    <div class="actions">
+      <button class="secondary" data-request="project">Check again</button>
+    </div>
     <div class="out" aria-live="polite"></div>
   </section>
 

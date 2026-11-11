@@ -6,13 +6,20 @@ import {
   errorResult,
   isLocal,
   lookupResult,
+  markChanges,
   MAX_PORTS,
   parseHost,
   parseLookup,
   parsePorts,
   parseRequest,
   portSpec,
+  projectMissingResult,
+  projectResult,
+  type Result,
+  type Row,
+  rowStates,
   scanResult,
+  watchInterval,
 } from "./netPanelModel";
 import type { CheckData, ScanData } from "./schema";
 
@@ -479,5 +486,196 @@ describe("errorResult and parseLookup", () => {
   it("splits lookups, or asks for input", () => {
     expect(parseLookup("a.com, 1.1.1.1")).toEqual(["a.com", "1.1.1.1"]);
     expect(parseLookup(" ")).toMatch(/Enter a domain/);
+  });
+});
+
+describe("watching", () => {
+  it("parses watch, unwatch and project requests", () => {
+    expect(parseRequest({ type: "watch", host: "h", ports: "1" })).toEqual({
+      type: "watch",
+      host: "h",
+      ports: "1",
+    });
+    expect(parseRequest({ type: "watch", host: "h" })).toBeUndefined();
+    expect(parseRequest({ type: "unwatch" })).toEqual({ type: "unwatch" });
+    expect(parseRequest({ type: "project" })).toEqual({ type: "project" });
+  });
+
+  it("checks this machine often and other hosts gently", () => {
+    expect(watchInterval("localhost")).toBe(2000);
+    expect(watchInterval("db.internal")).toBe(5000);
+  });
+
+  const local = (rows: Row[]): Result => ({
+    type: "result",
+    section: "ports",
+    columns: [],
+    rows,
+  });
+
+  it("notes nothing on the first check", () => {
+    const r = local([{ cells: ["3000/tcp", "free", "Nothing is listening"] }]);
+    expect(markChanges(undefined, r, "localhost")).toEqual([]);
+    expect(r.rows[0]?.changed).toBeUndefined();
+  });
+
+  it("marks and describes what changed", () => {
+    const before = rowStates(
+      [
+        { cells: ["3000/tcp", "in use", "node (pid 1)"] },
+        { cells: ["3000/tcp", "in use", "node (pid 2)"] },
+        { cells: ["4000/tcp", "free", "Nothing is listening"] },
+        { cells: ["5000/tcp", "in use", "python (pid 7)"] },
+      ],
+      "localhost",
+    );
+    expect(before.get("3000/tcp")).toBe("in use\tnode (pid 1)");
+    const now = local([
+      { cells: ["3000/tcp", "free", "Nothing is listening"] },
+      { cells: ["4000/tcp", "free", "Nothing is listening"] },
+      { cells: ["5000/tcp", "in use", "vite (pid 9)"] },
+      { cells: ["5000/tcp", "in use", "vite (pid 10)"] },
+      { cells: ["6000/tcp", "free", "Nothing is listening"] },
+    ]);
+    expect(markChanges(before, now, "localhost")).toEqual([
+      "3000/tcp is now free",
+      "5000/tcp is now held by vite (pid 9)",
+    ]);
+    expect(now.rows.map((r) => r.changed === true)).toEqual([
+      true,
+      false,
+      true,
+      true,
+      false,
+    ]);
+  });
+
+  it("names the host for other machines", () => {
+    const before = rowStates(
+      [
+        { cells: ["80", "open", "Accepts · 40.1 ms", "h"] },
+        { cells: ["443", "closed", "refused", "h"] },
+      ],
+      "db.internal",
+    );
+    // A new latency on 80 is not a change; 443 opening is.
+    const now = local([
+      { cells: ["80", "open", "Accepts · 52.7 ms", "h"] },
+      { cells: ["443", "open", "Accepts · 41.0 ms", "h"] },
+    ]);
+    expect(markChanges(before, now, "db.internal")).toEqual([
+      "db.internal 443 is now open",
+    ]);
+    expect(now.rows.map((r) => r.changed === true)).toEqual([false, true]);
+  });
+});
+
+describe("project ports", () => {
+  it("lists each check, with Stop and Copy where they help", () => {
+    const r = projectResult({
+      config: "/w/.portcheck.yaml",
+      ok: false,
+      checks: [
+        {
+          name: "web",
+          port: 3000,
+          proto: "tcp",
+          expect: "free",
+          ok: true,
+          status: "free",
+        },
+        {
+          name: "api",
+          port: 8080,
+          proto: "tcp",
+          expect: "free",
+          ok: false,
+          status: "in-use",
+          detail: "in use by node (pid 4)",
+          fix: "portcheck kill 8080",
+        },
+        {
+          name: "db",
+          port: 5432,
+          proto: "tcp",
+          expect: "open",
+          host: "db.internal",
+          ok: false,
+          status: "closed",
+        },
+        {
+          name: "cache",
+          port: 6379,
+          proto: "tcp",
+          expect: "open",
+          ok: true,
+          status: "open",
+          detail: "accepts connections",
+          fix: "unused",
+        },
+      ],
+    });
+    expect(r.section).toBe("project");
+    expect(r.summary).toBe("Project ports: 2 ok, 2 need attention.");
+    expect(r.rows).toEqual([
+      { cells: ["web", "3000/tcp", "ok", "should be free"], tone: "ok" },
+      {
+        cells: [
+          "api",
+          "8080/tcp",
+          "needs attention",
+          "should be free: in use by node (pid 4). portcheck kill 8080",
+        ],
+        tone: "bad",
+        stopPort: 8080,
+        copy: "portcheck kill 8080",
+      },
+      {
+        cells: [
+          "db",
+          "5432/tcp on db.internal",
+          "needs attention",
+          "should be open: closed",
+        ],
+        tone: "bad",
+      },
+      {
+        cells: [
+          "cache",
+          "6379/tcp",
+          "ok",
+          "should be open: accepts connections",
+        ],
+        tone: "ok",
+      },
+    ]);
+  });
+
+  it("says when everything is ok", () => {
+    expect(
+      projectResult({
+        config: "c",
+        ok: true,
+        checks: [
+          {
+            name: "web",
+            port: 1,
+            proto: "tcp",
+            expect: "free",
+            ok: true,
+            status: "free",
+          },
+        ],
+      }).summary,
+    ).toBe("Project ports: all 1 ok.");
+  });
+
+  it("explains a missing or broken file", () => {
+    expect(projectMissingResult(false)).toMatchObject({
+      section: "project",
+      rows: [],
+      summary: expect.stringMatching(/No .portcheck.yaml/) as unknown,
+    });
+    expect(projectMissingResult(true).error).toMatch(/Problems/);
   });
 });

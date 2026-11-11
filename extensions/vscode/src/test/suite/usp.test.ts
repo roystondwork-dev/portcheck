@@ -173,6 +173,25 @@ describe("project ports (.portcheck.yaml)", () => {
     assert.equal(api.project.config, undefined);
     assert.equal(vscode.languages.getDiagnostics(file).length, 0);
   });
+
+  it("lists project ports in Network Tools", async () => {
+    const server = await listen();
+    const port = portOf(server);
+    try {
+      await write(`version: 1\nports:\n  - name: api\n    port: ${port}\n`);
+      const r = await api.netTools.handle({ type: "project" });
+      assert.equal(r?.section, "project");
+      assert.equal(r.summary, "Project ports: 0 ok, 1 need attention.");
+      assert.deepEqual(r.rows[0]?.cells.slice(0, 3), ["api", `${port}/tcp`, "needs attention"]);
+      assert.equal(r.rows[0].stopPort, port);
+    } finally {
+      await close(server);
+    }
+    await write("version: 1\nports:\n  - name: api\n    prot: 3000\n");
+    assert.match((await api.netTools.handle({ type: "project" }))?.error ?? "", /Problems/);
+    await vscode.workspace.fs.delete(file);
+    assert.match((await api.netTools.handle({ type: "project" }))?.summary ?? "", /No .portcheck.yaml/);
+  });
 });
 
 describe("view filters", () => {

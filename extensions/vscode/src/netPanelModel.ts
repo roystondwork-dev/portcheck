@@ -6,13 +6,14 @@ import { deviceItems, ipItems, lookupQueries } from "./netModel";
 import type {
   CheckData,
   DevicesData,
+  DoctorData,
   LookupData,
   NetData,
   ScanData,
 } from "./schema";
 
 /** The panel's sections. */
-export type Section = "ports" | "lookup" | "addresses" | "devices";
+export type Section = "ports" | "project" | "lookup" | "addresses" | "devices";
 
 /** What the webview asks for. */
 export type Request =
@@ -21,7 +22,12 @@ export type Request =
   | { type: "addresses"; public: boolean }
   | { type: "devices"; probe: boolean }
   | { type: "copy"; text: string }
-  | { type: "stop"; port: number };
+  | { type: "stop"; port: number }
+  /** Re-check host and ports every few seconds until "unwatch". */
+  | { type: "watch"; host: string; ports: string }
+  | { type: "unwatch" }
+  /** The workspace's .portcheck.yaml checks. */
+  | { type: "project" };
 
 /** How a row is marked: a green, red, amber or neutral pill. */
 export type Tone = "ok" | "bad" | "warn" | "info";
@@ -33,6 +39,8 @@ export interface Row {
   copy?: string;
   /** A local port the row's Stop button frees. */
   stopPort?: number;
+  /** Its status changed since the previous check (while watching). */
+  changed?: boolean;
 }
 
 /** What the panel shows for a section. */
@@ -46,6 +54,8 @@ export interface Result {
   summary?: string;
   /** Shown instead of the table when the request failed. */
   error?: string;
+  /** The check runs again every few seconds. */
+  watching?: boolean;
 }
 
 /** Ports per check: the same ceiling as a reasonable `portcheck scan -p`. */
@@ -62,13 +72,18 @@ export function parseRequest(msg: unknown): Request | undefined {
   const m = msg as Record<string, unknown>;
   const str = (k: string) => (typeof m[k] === "string" ? m[k] : undefined);
   switch (m.type) {
-    case "check": {
+    case "check":
+    case "watch": {
       const host = str("host");
       const ports = str("ports");
       return host !== undefined && ports !== undefined
-        ? { type: "check", host, ports }
+        ? { type: m.type, host, ports }
         : undefined;
     }
+    case "unwatch":
+      return { type: "unwatch" };
+    case "project":
+      return { type: "project" };
     case "lookup": {
       const text = str("text");
       return text === undefined ? undefined : { type: "lookup", text };
@@ -378,6 +393,135 @@ export function errorResult(section: Section, message: string): Result {
 export function parseLookup(text: string): string[] | string {
   const q = lookupQueries(text);
   return q.length === 0 ? "Enter a domain name or an IP address." : q;
+}
+
+/** How often a watched check runs: often for this machine, gently for others. */
+export function watchInterval(host: string): number {
+  return isLocal(host) ? 2000 : 5000;
+}
+
+/**
+ * A row's state for spotting changes: its status, and on this machine also
+ * who holds the port. Another host's details carry the latency, which
+ * changes on every check, so only the status counts there.
+ */
+function stateOf(row: Row, local: boolean): string {
+  const status = row.cells[1] as string;
+  return local ? `${status}\t${row.cells[2] as string}` : status;
+}
+
+/** Each port's state (keyed by the first cell), for the next markChanges. */
+export function rowStates(rows: Row[], host: string): Map<string, string> {
+  const local = isLocal(host);
+  const states = new Map<string, string>();
+  for (const r of rows) {
+    const key = r.cells[0] as string;
+    // A port with several holders: the first one stands for the port.
+    if (!states.has(key)) {
+      states.set(key, stateOf(r, local));
+    }
+  }
+  return states;
+}
+
+/**
+ * Marks the rows whose state changed since the previous check and describes
+ * the changes, e.g. "3000/tcp is now free" or "db.internal 5432 is now open".
+ * The first check of a watch (no previous states) changes nothing.
+ */
+export function markChanges(
+  previous: ReadonlyMap<string, string> | undefined,
+  result: Result,
+  host: string,
+): string[] {
+  if (previous === undefined) {
+    return [];
+  }
+  const local = isLocal(host);
+  const where = local ? "" : `${host} `;
+  const messages: string[] = [];
+  const reported = new Set<string>();
+  for (const row of result.rows) {
+    const key = row.cells[0] as string;
+    const before = previous.get(key);
+    if (before === undefined || before === stateOf(row, local)) {
+      continue;
+    }
+    row.changed = true;
+    if (!reported.has(key)) {
+      reported.add(key);
+      const status = row.cells[1] as string;
+      messages.push(
+        before.startsWith(`${status}\t`)
+          ? `${key} is now held by ${row.cells[2] as string}`
+          : `${where}${key} is now ${status}`,
+      );
+    }
+  }
+  return messages;
+}
+
+const EXPECT_TEXT = { free: "should be free", open: "should be open" };
+
+/** The checks of the workspace's .portcheck.yaml. */
+export function projectResult(data: DoctorData): Result {
+  const rows = data.checks.map((c): Row => {
+    const where = c.host === undefined ? "" : ` on ${c.host}`;
+    // An ok check needs no explanation beyond what it expects.
+    const detail = [
+      c.detail ?? (c.ok ? "" : c.status),
+      c.ok ? "" : (c.fix ?? ""),
+    ]
+      .filter((x) => x !== "")
+      .join(". ");
+    const row: Row = {
+      cells: [
+        c.name,
+        `${c.port}/${c.proto}${where}`,
+        c.ok ? "ok" : "needs attention",
+        detail === ""
+          ? EXPECT_TEXT[c.expect]
+          : `${EXPECT_TEXT[c.expect]}: ${detail}`,
+      ],
+      tone: c.ok ? "ok" : "bad",
+    };
+    // A local port that should be free but isn't can be freed from here.
+    if (!c.ok && c.expect === "free" && c.host === undefined) {
+      row.stopPort = c.port;
+    }
+    if (!c.ok && c.fix !== undefined) {
+      row.copy = c.fix;
+    }
+    return row;
+  });
+  const bad = rows.filter((r) => r.tone === "bad").length;
+  return {
+    type: "result",
+    section: "project",
+    columns: ["Name", "Port", "Status", "Details"],
+    rows,
+    summary:
+      bad === 0
+        ? `Project ports: all ${rows.length} ok.`
+        : `Project ports: ${rows.length - bad} ok, ${bad} need attention.`,
+  };
+}
+
+/** The Project ports section when there's no file, or it can't be read. */
+export function projectMissingResult(invalid: boolean): Result {
+  return invalid
+    ? errorResult(
+        "project",
+        ".portcheck.yaml has errors: see the Problems panel.",
+      )
+    : {
+        type: "result",
+        section: "project",
+        columns: [],
+        rows: [],
+        summary:
+          "No .portcheck.yaml in this workspace. Add one to list your project's ports and check them here.",
+      };
 }
 
 function plural(n: number, word: string): string {
