@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.14.1](https://github.com/roystondwork-dev/portcheck/compare/v0.14.0...v0.14.1) (2026-11-20)
+
+
+### Build & Release
+
+* **deps:** bump the browser-npm-deps group ([9965d1a](https://github.com/roystondwork-dev/portcheck/commit/9965d1a9ffdfcb375195beddef59627e65bb1a9a))
+* **deps:** bump the go-deps group across 1 directory with 2 updates ([3cb63c1](https://github.com/roystondwork-dev/portcheck/commit/3cb63c1bcbc8f288564c7e13eaf6831307ba0572))
+* **deps:** bump the npm-deps group ([91db86b](https://github.com/roystondwork-dev/portcheck/commit/91db86b03fe75aa1cf409422fbee534f7b977adc))
+
 ## [0.14.0](https://github.com/roystondwork-dev/portcheck/compare/v0.13.0...v0.14.0) (2026-11-11)
 
 
