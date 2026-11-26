@@ -15,7 +15,9 @@ export class ProjectPorts implements vscode.Disposable {
   config: vscode.Uri | undefined;
   private readonly status: vscode.StatusBarItem;
   private readonly problems: vscode.DiagnosticCollection;
-  private readonly disposables: vscode.Disposable[] = [];
+  // Anything with dispose(): status bar items and diagnostic collections
+  // are interfaces, not instances of the Disposable class.
+  private readonly disposables: { dispose(): unknown }[] = [];
   private inFlight: Promise<void> | undefined;
   private queued: Promise<void> | undefined;
 

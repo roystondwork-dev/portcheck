@@ -42,7 +42,8 @@ export class TerminalFixes implements vscode.TerminalLinkProvider<PortLink>, vsc
     if (!m) {
       return [];
     }
-    return [{ startIndex: m.start, length: m.length, tooltip: `Fix port ${m.port} (portcheck)`, port: m.port, terminal: context.terminal }];
+    const link = new vscode.TerminalLink(m.start, m.length, `Fix port ${m.port} (portcheck)`);
+    return [Object.assign(link, { port: m.port, terminal: context.terminal })];
   }
 
   async handleTerminalLink(link: PortLink): Promise<void> {
