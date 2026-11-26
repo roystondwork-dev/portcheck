@@ -45,6 +45,16 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: "build(deps)"
+  # The Zed extension (Rust, compiled to WebAssembly).
+  - package-ecosystem: cargo
+    directory: /extensions/zed
+    schedule:
+      interval: weekly
+    groups:
+      zed-deps:
+        patterns: ["*"]
+    commit-message:
+      prefix: "build(deps)"
   - package-ecosystem: github-actions
     directory: /
     schedule:
