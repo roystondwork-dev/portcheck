@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.14.1](https://github.com/roystondwork-dev/portcheck/compare/v0.14.0...v0.14.1) (2026-11-27)
+
+
+### Bug Fixes
+
+* **vscode:** satisfy typescript-eslint 8.73's no-unsafe-class-instance-assignment ([b4324b1](https://github.com/roystondwork-dev/portcheck/commit/b4324b14c05595fac1db62985c34eb2c65f11c12))
+* **zed:** url 2.5.9 for RUSTSEC-2026-0592; Dependabot for the Zed extension; Glama badge ([90a5579](https://github.com/roystondwork-dev/portcheck/commit/90a5579c41ef31ef43945b5f6204295185845887))
+
+
+### Build & Release
+
+* **deps:** bump the browser-npm-deps group ([9965d1a](https://github.com/roystondwork-dev/portcheck/commit/9965d1a9ffdfcb375195beddef59627e65bb1a9a))
+* **deps:** bump the browser-npm-deps group across 1 directory with 4 updates ([af21ec3](https://github.com/roystondwork-dev/portcheck/commit/af21ec34ebb5f5213a852d801a81726c68cd5c48))
+* **deps:** bump the go-deps group across 1 directory with 2 updates ([3cb63c1](https://github.com/roystondwork-dev/portcheck/commit/3cb63c1bcbc8f288564c7e13eaf6831307ba0572))
+* **deps:** bump the go-deps group across 1 directory with 5 updates ([0a080f1](https://github.com/roystondwork-dev/portcheck/commit/0a080f102e1f14ccc91426b22d6ec2e20fd322f5))
+* **deps:** bump the npm-deps group ([91db86b](https://github.com/roystondwork-dev/portcheck/commit/91db86b03fe75aa1cf409422fbee534f7b977adc))
+* **deps:** bump the npm-deps group across 1 directory with 3 updates ([519fc20](https://github.com/roystondwork-dev/portcheck/commit/519fc2013b694faf47ca4d67c23a10f9ed5c2987))
+
 ## [0.14.0](https://github.com/roystondwork-dev/portcheck/compare/v0.13.0...v0.14.0) (2026-11-11)
 
 
